@@ -8,7 +8,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Student Disciplinary Committee Portal",
   description: "University Student Disciplinary Committee Portal",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
