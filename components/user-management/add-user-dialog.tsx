@@ -24,6 +24,7 @@ interface AddUserDialogProps {
 export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
   const [formValues, setFormValues] = useState({
     name: "",
+    username: "",
     email: "",
     phone: "",
     role: "",
@@ -47,6 +48,7 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
     // Reset form and close dialog
     setFormValues({
       name: "",
+      username: "",
       email: "",
       phone: "",
       role: "",
@@ -76,6 +78,15 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
                   required
                 />
               </div>
+               <div className="space-y-2">
+                <Label htmlFor="name">username</Label>
+                <Input
+                  id="name"
+                  value={formValues.username}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  required
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -101,10 +112,9 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="SDC Chairman">SDC Chairman</SelectItem>
-                    <SelectItem value="SDC Secretary">SDC Secretary</SelectItem>
-                    <SelectItem value="SDC Member">SDC Member</SelectItem>
-                    <SelectItem value="Administrator">Administrator</SelectItem>
+                    <SelectItem value="Chairman">Chairman</SelectItem>
+                    <SelectItem value="Secretary">SDC Secretary</SelectItem>
+                    <SelectItem value="Member">SDC Member</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

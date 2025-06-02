@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-
+import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -19,10 +19,12 @@ import {
   GraduationCap,
   Mail,
   Phone,
+  Gavel,
 } from "lucide-react"
+import { PassJudgmentDialog, type JudgmentData } from "./pass-judgment-dialog"
+import { format } from "date-fns"
 
-// Mock case details data
-const caseDetails = {
+const initialCaseDetails = {
   id: "SDC-2024-091",
   student: {
     name: "Robert Chen",
@@ -58,32 +60,12 @@ const caseDetails = {
     },
   ],
   documents: [
-    {
-      name: "Original Term Paper",
-      type: "PDF",
-      uploadedBy: "Dr. Sarah Johnson",
-      uploadDate: "2024-05-02",
-    },
-    {
-      name: "Plagiarism Report",
-      type: "PDF",
-      uploadedBy: "Dr. Sarah Johnson",
-      uploadDate: "2024-05-02",
-    },
-    {
-      name: "Student Statement",
-      type: "DOCX",
-      uploadedBy: "Robert Chen",
-      uploadDate: "2024-05-05",
-    },
-    {
-      name: "Hearing Minutes",
-      type: "PDF",
-      uploadedBy: "Admin Assistant",
-      uploadDate: "2024-05-10",
-    },
+    { name: "Original Term Paper", type: "PDF", uploadedBy: "Dr. Sarah Johnson", uploadDate: "2024-05-02" },
+    { name: "Plagiarism Report", type: "PDF", uploadedBy: "Dr. Sarah Johnson", uploadDate: "2024-05-02" },
+    { name: "Student Statement", type: "DOCX", uploadedBy: "Robert Chen", uploadDate: "2024-05-05" },
+    { name: "Hearing Minutes", type: "PDF", uploadedBy: "Admin Assistant", uploadDate: "2024-05-10" },
   ],
-  status: "pending",
+  status: "Pending",
   timeline: [
     {
       date: "2024-05-01",
@@ -141,9 +123,35 @@ interface CaseDetailsProps {
   caseId: string
 }
 
-export function CaseDetails({ caseId }: CaseDetailsProps) {
-  // In a real application, you would fetch the case details based on the caseId
-  // For this example, we'll use the mock data
+export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
+  const [caseDetails, setCaseDetails] = useState(initialCaseDetails)
+  const [showPassJudgmentDialog, setShowPassJudgmentDialog] = useState(false)
+
+  const handleSaveJudgment = (judgmentData: JudgmentData) => {
+    const today = new Date()
+    setCaseDetails((prevDetails) => ({
+      ...prevDetails,
+      status: "Resolved",
+      punishment: {
+        type: judgmentData.punishmentType,
+        duration: judgmentData.duration,
+        startDate: judgmentData.startDate ? format(judgmentData.startDate, "yyyy-MM-dd") : "",
+        endDate: judgmentData.endDate ? format(judgmentData.endDate, "yyyy-MM-dd") : "",
+        additionalRequirements: judgmentData.additionalRequirements,
+      },
+      timeline: [
+        ...prevDetails.timeline,
+        {
+          date: format(today, "yyyy-MM-dd"),
+          time: format(today, "p"),
+          action: "Judgment Passed",
+          description: `Punishment: ${judgmentData.punishmentType}. Duration: ${judgmentData.duration}. Notes: ${judgmentData.judgmentNotes}`,
+          user: "SDC Committee",
+        },
+      ],
+    }))
+    setShowPassJudgmentDialog(false)
+  }
 
   return (
     <div className="space-y-6">
@@ -182,14 +190,17 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
           </div>
           <Badge
             className={cn(
-              "px-3 py-1",
-              caseDetails.status === "pending" && "bg-amber-500",
-              caseDetails.status === "scheduled" && "bg-blue-500",
-              caseDetails.status === "in-progress" && "bg-indigo-500",
-              caseDetails.status === "resolved" && "bg-emerald-500",
+              "px-3 py-1 text-white",
+              caseDetails.status === "Pending" && "bg-amber-500",
+              caseDetails.status === "Scheduled" && "bg-blue-500",
+              caseDetails.status === "In-Progress" && "bg-indigo-500",
+              caseDetails.status === "Resolved" && "bg-emerald-500",
+              caseDetails.status === "Closed" && "bg-slate-500",
+              !["Pending", "Scheduled", "In-Progress", "Resolved", "Closed"].includes(caseDetails.status) &&
+                "bg-gray-400",
             )}
           >
-            {caseDetails.status.charAt(0).toUpperCase() + caseDetails.status.slice(1)}
+            {caseDetails.status ? caseDetails.status.charAt(0).toUpperCase() + caseDetails.status.slice(1) : "Unknown"}
           </Badge>
         </div>
       </div>
@@ -205,7 +216,6 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Card>
@@ -244,30 +254,42 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
                 <CardTitle className="text-lg font-medium">Disciplinary Action</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-500" />
-                  <div>
-                    <p className="font-medium text-sdc-navy">{caseDetails.punishment.type}</p>
-                    <p className="text-sm text-sdc-gray">Duration: {caseDetails.punishment.duration}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Calendar className="h-5 w-5 text-sdc-gray" />
-                  <div>
-                    <p className="text-sm text-sdc-gray">Effective Period</p>
-                    <p className="font-medium text-sdc-navy">
-                      {new Date(caseDetails.punishment.startDate).toLocaleDateString()} -{" "}
-                      {new Date(caseDetails.punishment.endDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <FileText className="mt-0.5 h-5 w-5 text-sdc-gray" />
-                  <div>
-                    <p className="text-sm text-sdc-gray">Additional Requirements</p>
-                    <p className="font-medium text-sdc-navy">{caseDetails.punishment.additionalRequirements}</p>
-                  </div>
-                </div>
+                {caseDetails.punishment && caseDetails.punishment.type ? (
+                  <>
+                    <div className="flex items-start space-x-3">
+                      <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-500" />
+                      <div>
+                        <p className="font-medium text-sdc-navy">{caseDetails.punishment.type}</p>
+                        {caseDetails.punishment.duration && (
+                          <p className="text-sm text-sdc-gray">Duration: {caseDetails.punishment.duration}</p>
+                        )}
+                      </div>
+                    </div>
+                    {caseDetails.punishment.startDate && caseDetails.punishment.endDate && (
+                      <div className="flex items-center space-x-3">
+                        <Calendar className="h-5 w-5 text-sdc-gray" />
+                        <div>
+                          <p className="text-sm text-sdc-gray">Effective Period</p>
+                          <p className="font-medium text-sdc-navy">
+                            {new Date(caseDetails.punishment.startDate).toLocaleDateString()} -{" "}
+                            {new Date(caseDetails.punishment.endDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    {caseDetails.punishment.additionalRequirements && (
+                      <div className="flex items-start space-x-3">
+                        <FileText className="mt-0.5 h-5 w-5 text-sdc-gray" />
+                        <div>
+                          <p className="text-sm text-sdc-gray">Additional Requirements</p>
+                          <p className="font-medium text-sdc-navy">{caseDetails.punishment.additionalRequirements}</p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm text-sdc-gray">No disciplinary action assigned yet.</p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -278,29 +300,31 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {caseDetails.timeline.slice(0, 3).map((event, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sdc-blue/10">
-                      <Clock className="h-4 w-4 text-sdc-blue" />
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <p className="font-medium text-sdc-navy">{event.action}</p>
-                        <span className="text-xs text-sdc-gray">
-                          {event.date} at {event.time}
-                        </span>
+                {caseDetails.timeline
+                  .slice(-3)
+                  .reverse()
+                  .map((event, index) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sdc-blue/10">
+                        <Clock className="h-4 w-4 text-sdc-blue" />
                       </div>
-                      <p className="text-sm text-sdc-gray">{event.description}</p>
-                      <p className="text-xs text-sdc-gray">By: {event.user}</p>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <p className="font-medium text-sdc-navy">{event.action}</p>
+                          <span className="text-xs text-sdc-gray">
+                            {event.date} at {event.time}
+                          </span>
+                        </div>
+                        <p className="text-sm text-sdc-gray">{event.description}</p>
+                        <p className="text-xs text-sdc-gray">By: {event.user}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Student Info Tab */}
         <TabsContent value="student">
           <Card>
             <CardHeader>
@@ -330,9 +354,7 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
                   <p className="font-medium text-sdc-navy">{caseDetails.student.level}</p>
                 </div>
               </div>
-
               <Separator />
-
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-sdc-navy">Contact Information</h3>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -356,7 +378,6 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
           </Card>
         </TabsContent>
 
-        {/* Hearings Tab */}
         <TabsContent value="hearings">
           <Card>
             <CardHeader>
@@ -392,9 +413,7 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
                           View Minutes
                         </Button>
                       </div>
-
                       <Separator className="my-4" />
-
                       <div className="space-y-4">
                         <div>
                           <p className="text-sm font-medium text-sdc-gray">Attendees</p>
@@ -406,7 +425,6 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
                             ))}
                           </div>
                         </div>
-
                         <div>
                           <p className="text-sm font-medium text-sdc-gray">Notes</p>
                           <p className="mt-1 text-sm text-sdc-navy">{hearing.notes}</p>
@@ -420,7 +438,6 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
           </Card>
         </TabsContent>
 
-        {/* Documents Tab */}
         <TabsContent value="documents">
           <Card>
             <CardHeader>
@@ -456,7 +473,6 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
           </Card>
         </TabsContent>
 
-        {/* Timeline Tab */}
         <TabsContent value="timeline">
           <Card>
             <CardHeader>
@@ -466,7 +482,6 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
             <CardContent>
               <div className="relative space-y-6 pl-6 pt-2">
                 <div className="absolute bottom-0 left-2.5 top-0 w-px bg-border" />
-
                 {caseDetails.timeline.map((event, index) => (
                   <div key={index} className="relative">
                     <div className="absolute -left-6 flex h-5 w-5 items-center justify-center rounded-full border border-background bg-sdc-blue">
@@ -476,11 +491,8 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
                       <div className="flex items-center justify-between">
                         <h3 className="font-medium text-sdc-navy">{event.action}</h3>
                         <div className="flex items-center space-x-1 text-xs text-sdc-gray">
-                          <Calendar className="h-3.5 w-3.5" />
-                          <span>{event.date}</span>
-                          <span>•</span>
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>{event.time}</span>
+                          <Calendar className="h-3.5 w-3.5" /> <span>{event.date}</span> <span>•</span>
+                          <Clock className="h-3.5 w-3.5" /> <span>{event.time}</span>
                         </div>
                       </div>
                       <p className="mt-1 text-sm text-sdc-gray">{event.description}</p>
@@ -494,10 +506,30 @@ export function CaseDetails({ caseId }: CaseDetailsProps) {
         </TabsContent>
       </Tabs>
 
-      <div className="flex justify-end space-x-2">
+      <div className="flex justify-end space-x-2 pt-4">
+        {" "}
+        {/* Added pt-4 for spacing */}
         <Button variant="outline">Edit Case</Button>
+        {caseDetails.status !== "Resolved" && (
+          <Button
+            onClick={() => setShowPassJudgmentDialog(true)}
+            className="bg-green-500 hover:bg-green-600 text-white"
+          >
+            <Gavel className="mr-2 h-4 w-4" /> Pass Judgment
+          </Button>
+        )}
         <Button className="bg-sdc-blue hover:bg-sdc-blue/90 text-white">Update Status</Button>
       </div>
+
+      <PassJudgmentDialog
+        open={showPassJudgmentDialog}
+        onOpenChange={setShowPassJudgmentDialog}
+        caseId={caseDetails.id}
+        studentName={caseDetails.student.name}
+        currentOffenceType={caseDetails.offence.type}
+        // currentPunishment={caseDetails.punishment}
+        onSaveJudgment={handleSaveJudgment}
+      />
     </div>
   )
 }
