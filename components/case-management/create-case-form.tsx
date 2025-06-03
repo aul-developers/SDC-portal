@@ -34,26 +34,32 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
   }
 
   return (
-    <div className="flex flex-col">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-sdc-navy">Student Information</h3>
+    <div className="max-w-4xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="bg-white rounded-lg border shadow-sm p-6 space-y-6">
+          <h3 className="text-lg font-semibold text-sdc-navy border-b pb-3">Student Information</h3>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="student-id">Student Matric Number</Label>
-              <Input id="student-id" placeholder="Enter matric number" required />
+              <Label htmlFor="student-id" className="text-sm font-medium">
+                Student Matric Number
+              </Label>
+              <Input id="student-id" placeholder="Enter matric number" className="h-11" required />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="student-name">Student Name</Label>
-              <Input id="student-name" placeholder="Enter student name" required />
+              <Label htmlFor="student-name" className="text-sm font-medium">
+                Student Name
+              </Label>
+              <Input id="student-name" placeholder="Enter student name" className="h-11" required />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
+              <Label htmlFor="department" className="text-sm font-medium">
+                Department
+              </Label>
               <Select required>
-                <SelectTrigger id="department">
+                <SelectTrigger id="department" className="h-11">
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
                 <SelectContent>
@@ -68,9 +74,11 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="level">Level</Label>
+              <Label htmlFor="level" className="text-sm font-medium">
+                Level
+              </Label>
               <Select required>
-                <SelectTrigger id="level">
+                <SelectTrigger id="level" className="h-11">
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -86,14 +94,16 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-sdc-navy">Offence Details</h3>
+        <div className="bg-white rounded-lg border shadow-sm p-6 space-y-6">
+          <h3 className="text-lg font-semibold text-sdc-navy border-b pb-3">Offence Details</h3>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="offence-type">Offence Type</Label>
+              <Label htmlFor="offence-type" className="text-sm font-medium">
+                Offence Type
+              </Label>
               <Select required>
-                <SelectTrigger id="offence-type">
+                <SelectTrigger id="offence-type" className="h-11">
                   <SelectValue placeholder="Select offence type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -107,12 +117,14 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="incident-date">Incident Date</Label>
+              <Label htmlFor="incident-date" className="text-sm font-medium">
+                Incident Date
+              </Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
+                    className={cn("w-full justify-start text-left font-normal h-11", !date && "text-muted-foreground")}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {date ? format(date, "PPP") : "Select date"}
@@ -126,7 +138,9 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-sm font-medium">
+              Description
+            </Label>
             <Textarea
               id="description"
               placeholder="Provide a detailed description of the offence"
@@ -136,19 +150,23 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reported-by">Reported By</Label>
-            <Input id="reported-by" placeholder="Name of the person reporting the offence" required />
+            <Label htmlFor="reported-by" className="text-sm font-medium">
+              Reported By
+            </Label>
+            <Input id="reported-by" placeholder="Name of the person reporting the offence" className="h-11" required />
           </div>
         </div>
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-sdc-navy">Initial Assessment</h3>
+        <div className="bg-white rounded-lg border shadow-sm p-6 space-y-6">
+          <h3 className="text-lg font-semibold text-sdc-navy border-b pb-3">Initial Assessment</h3>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="severity">Severity</Label>
+              <Label htmlFor="severity" className="text-sm font-medium">
+                Severity
+              </Label>
               <Select required>
-                <SelectTrigger id="severity">
+                <SelectTrigger id="severity" className="h-11">
                   <SelectValue placeholder="Select severity level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -160,9 +178,11 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="priority" className="text-sm font-medium">
+                Priority
+              </Label>
               <Select required>
-                <SelectTrigger id="priority">
+                <SelectTrigger id="priority" className="h-11">
                   <SelectValue placeholder="Select priority level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -175,7 +195,9 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="initial-notes">Initial Notes</Label>
+            <Label htmlFor="initial-notes" className="text-sm font-medium">
+              Initial Notes
+            </Label>
             <Textarea
               id="initial-notes"
               placeholder="Any initial notes or observations about the case"
@@ -184,11 +206,11 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
           </div>
         </div>
 
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="outline" onClick={onSuccess}>
+        <div className="flex justify-end space-x-3 pt-6 border-t">
+          <Button type="button" variant="outline" onClick={onSuccess} className="px-6">
             Cancel
           </Button>
-          <Button type="submit" className="bg-sdc-blue hover:bg-sdc-blue/90 text-white" disabled={isSubmitting}>
+          <Button type="submit" className="bg-sdc-blue hover:bg-sdc-blue/90 text-white px-6" disabled={isSubmitting}>
             {isSubmitting ? "Creating..." : "Create Case"}
           </Button>
         </div>

@@ -5,102 +5,95 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Search, MoreHorizontal, Eye, Edit, Trash2, Filter } from "lucide-react"
+import { Search, MoreHorizontal, Eye, Edit, Trash2, Filter, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// Mock data for cases
-const mockCases = [
+// Mock data for grouped cases
+const mockGroupedCases = [
   {
-    id: "SDC-2024-091",
-    student: "Robert Chen",
-    matricNumber: "STU-45789",
+    id: "GRP-2024-001",
+    title: "Academic Dishonesty - Group Assignment",
+    description: "Collaborative cheating in CSC301 final project",
+    students: [
+      { name: "Robert Chen", matricNumber: "STU-45789", image: "/monogram-mb.png" },
+      { name: "Jessica Lee", matricNumber: "STU-45123", image: "/stylized-jl-logo.png" },
+      { name: "Michael Brown", matricNumber: "STU-45678", image: "/monogram-mb.png" },
+    ],
     offence: "Academic Dishonesty",
-    punishment: "Academic Probation",
     status: "pending",
     date: "2024-05-10",
+    reportedBy: "Dr. Sarah Johnson",
+    priority: "high",
   },
   {
-    id: "SDC-2024-090",
-    student: "James Wilson",
-    matricNumber: "STU-43456",
+    id: "GRP-2024-002",
+    title: "Dormitory Disturbance",
+    description: "Noise complaints and property damage in Block A",
+    students: [
+      { name: "David Wilson", matricNumber: "STU-42456", image: "/abstract-dw.png" },
+      { name: "Emily Parker", matricNumber: "STU-45789", image: "/abstract-geometric-ep.png" },
+    ],
     offence: "Behavioral Misconduct",
-    punishment: "Community Service",
-    status: "scheduled",
-    date: "2024-05-09",
-  },
-  {
-    id: "SDC-2024-089",
-    student: "Michael Brown",
-    matricNumber: "STU-45678",
-    offence: "Academic Dishonesty",
-    punishment: "Written Warning",
-    status: "pending",
+    status: "in-progress",
     date: "2024-05-08",
+    reportedBy: "Residence Hall Manager",
+    priority: "medium",
   },
   {
-    id: "SDC-2024-088",
-    student: "Jessica Lee",
-    matricNumber: "STU-45123",
-    offence: "Behavioral Misconduct",
-    punishment: "Academic Probation",
-    status: "in-progress",
-    date: "2024-05-07",
-  },
-  {
-    id: "SDC-2024-087",
-    student: "David Wilson",
-    matricNumber: "STU-42456",
-    offence: "Property Damage",
-    punishment: "Restitution",
-    status: "in-progress",
-    date: "2024-05-06",
-  },
-  {
-    id: "SDC-2024-086",
-    student: "Sarah Johnson",
-    matricNumber: "STU-41234",
-    offence: "Substance Violation",
-    punishment: "Suspension",
-    status: "resolved",
-    date: "2024-05-05",
-  },
-  {
-    id: "SDC-2024-085",
-    student: "Emily Parker",
-    matricNumber: "STU-45789",
+    id: "GRP-2024-003",
+    title: "Examination Misconduct",
+    description: "Coordinated cheating during midterm examination",
+    students: [
+      { name: "James Wilson", matricNumber: "STU-43456", image: "/intertwined-letters.png" },
+      { name: "Sophia Martinez", matricNumber: "STU-47890", image: "/stylized-sm-logo.png" },
+      { name: "Sarah Johnson", matricNumber: "STU-41234", image: "/stylized-letters-sj.png" },
+      { name: "Emily Parker", matricNumber: "STU-45789", image: "/abstract-geometric-ep.png" },
+    ],
     offence: "Academic Dishonesty",
-    punishment: "Grade Reduction",
-    status: "resolved",
-    date: "2024-05-04",
+    status: "scheduled",
+    date: "2024-05-06",
+    reportedBy: "Prof. Michael Brown",
+    priority: "high",
   },
   {
-    id: "SDC-2024-084",
-    student: "Sophia Martinez",
-    matricNumber: "STU-47890",
+    id: "GRP-2024-004",
+    title: "Campus Event Disruption",
+    description: "Unauthorized protest during university ceremony",
+    students: [
+      { name: "Robert Chen", matricNumber: "STU-45789", image: "/monogram-mb.png" },
+      { name: "David Wilson", matricNumber: "STU-42456", image: "/abstract-dw.png" },
+    ],
     offence: "Behavioral Misconduct",
-    punishment: "Disciplinary Probation",
     status: "resolved",
     date: "2024-05-03",
+    reportedBy: "Campus Security",
+    priority: "medium",
   },
 ]
 
-interface CaseListProps {
-  onViewDetails: (caseId: string) => void
+interface GroupedCaseListProps {
+  onViewDetails: (groupedCaseId: string) => void
 }
 
-export function CaseList({ onViewDetails }: CaseListProps) {
+export function GroupedCaseList({ onViewDetails }: GroupedCaseListProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
   // Filter cases based on search term and status filter
-  const filteredCases = mockCases.filter((caseItem) => {
+  const filteredCases = mockGroupedCases.filter((caseItem) => {
     const matchesSearch =
       searchTerm === "" ||
       caseItem.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caseItem.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caseItem.matricNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caseItem.offence.toLowerCase().includes(searchTerm.toLowerCase())
+      caseItem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseItem.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseItem.offence.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseItem.students.some(
+        (student) =>
+          student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.matricNumber.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
 
     const matchesStatus = statusFilter === null || caseItem.status === statusFilter
 
@@ -108,13 +101,11 @@ export function CaseList({ onViewDetails }: CaseListProps) {
   })
 
   const handleDelete = (caseId: string) => {
-    // In a real application, this would call an API to delete the case
-    alert(`Delete case ${caseId}`)
+    alert(`Delete grouped case ${caseId}`)
   }
 
   const handleEdit = (caseId: string) => {
-    // In a real application, this would open an edit form
-    alert(`Edit case ${caseId}`)
+    alert(`Edit grouped case ${caseId}`)
   }
 
   return (
@@ -124,7 +115,7 @@ export function CaseList({ onViewDetails }: CaseListProps) {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search by case ID, student name, matric number, or offence..."
+            placeholder="Search by case ID, title, student name, or offence..."
             className="pl-10 h-11"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -152,12 +143,12 @@ export function CaseList({ onViewDetails }: CaseListProps) {
           <TableHeader>
             <TableRow className="border-b">
               <TableHead className="h-12 px-6 font-medium">Case ID</TableHead>
-              <TableHead className="h-12 px-6 font-medium">Student</TableHead>
-              <TableHead className="h-12 px-6 font-medium">Matric Number</TableHead>
+              <TableHead className="h-12 px-6 font-medium">Title & Description</TableHead>
+              <TableHead className="h-12 px-6 font-medium">Students Involved</TableHead>
               <TableHead className="h-12 px-6 font-medium">Offence</TableHead>
-              <TableHead className="h-12 px-6 font-medium">Punishment</TableHead>
               <TableHead className="h-12 px-6 font-medium">Status</TableHead>
               <TableHead className="h-12 px-6 font-medium">Date</TableHead>
+              <TableHead className="h-12 px-6 font-medium">Priority</TableHead>
               <TableHead className="h-12 px-6 text-right font-medium">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -165,17 +156,46 @@ export function CaseList({ onViewDetails }: CaseListProps) {
             {filteredCases.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
-                  No cases found.
+                  No grouped cases found.
                 </TableCell>
               </TableRow>
             ) : (
               filteredCases.map((caseItem) => (
                 <TableRow key={caseItem.id} className="hover:bg-gray-50/50">
                   <TableCell className="px-6 py-4 font-medium">{caseItem.id}</TableCell>
-                  <TableCell className="px-6 py-4">{caseItem.student}</TableCell>
-                  <TableCell className="px-6 py-4">{caseItem.matricNumber}</TableCell>
+                  <TableCell className="px-6 py-4 max-w-xs">
+                    <div>
+                      <p className="font-medium text-sm">{caseItem.title}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{caseItem.description}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex -space-x-2">
+                        {caseItem.students.slice(0, 3).map((student, index) => (
+                          <Avatar key={index} className="h-8 w-8 border-2 border-background">
+                            <AvatarImage src={student.image || "/placeholder.svg"} alt={student.name} />
+                            <AvatarFallback className="text-xs">
+                              {student.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs font-medium">{caseItem.students.length}</span>
+                        </div>
+                        {caseItem.students.length > 3 && (
+                          <span className="text-xs text-muted-foreground">+{caseItem.students.length - 3} more</span>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell className="px-6 py-4">{caseItem.offence}</TableCell>
-                  <TableCell className="px-6 py-4">{caseItem.punishment}</TableCell>
                   <TableCell className="px-6 py-4">
                     <Badge
                       className={cn(
@@ -190,6 +210,19 @@ export function CaseList({ onViewDetails }: CaseListProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="px-6 py-4">{new Date(caseItem.date).toLocaleDateString()}</TableCell>
+                  <TableCell className="px-6 py-4">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "px-3 py-1",
+                        caseItem.priority === "high" && "border-red-200 text-red-700 bg-red-50",
+                        caseItem.priority === "medium" && "border-amber-200 text-amber-700 bg-amber-50",
+                        caseItem.priority === "low" && "border-green-200 text-green-700 bg-green-50",
+                      )}
+                    >
+                      {caseItem.priority.charAt(0).toUpperCase() + caseItem.priority.slice(1)}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="px-6 py-4 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

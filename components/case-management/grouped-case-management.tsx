@@ -1,22 +1,22 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { CaseList } from "./case-list"
-import { CaseDetails } from "./case-details"
-import { CreateCaseForm } from "./create-case-form"
+import { GroupedCaseList } from "./grouped-case-list"
+import { GroupedCaseDetails } from "./grouped-case-details"
+import { CreateGroupedCaseForm } from "./create-grouped-case-form"
 import { Button } from "@/components/ui/button"
 import { PlusCircle, X } from "lucide-react"
 
-export function CaseManagement() {
-  const [selectedCase, setSelectedCase] = useState<string | null>(null)
+export function GroupedCaseManagement() {
+  const [selectedGroupedCase, setSelectedGroupedCase] = useState<string | null>(null)
   const [activeView, setActiveView] = useState<"list" | "details" | "create">("list")
 
-  const handleViewDetails = useCallback((caseId: string) => {
-    setSelectedCase(caseId)
+  const handleViewDetails = useCallback((groupedCaseId: string) => {
+    setSelectedGroupedCase(groupedCaseId)
     setActiveView("details")
   }, [])
 
-  const handleCreateCase = useCallback(() => {
+  const handleCreateGroupedCase = useCallback(() => {
     setActiveView("create")
   }, [])
 
@@ -34,24 +34,24 @@ export function CaseManagement() {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-sdc-navy">Case Details</h2>
+              <h2 className="text-2xl font-semibold text-sdc-navy">Grouped Case Details</h2>
               <Button variant="ghost" size="sm" onClick={handleBack} className="gap-2">
                 <X className="h-4 w-4" /> Close
               </Button>
             </div>
-            {selectedCase && <CaseDetails caseId={selectedCase} />}
+            {selectedGroupedCase && <GroupedCaseDetails groupedCaseId={selectedGroupedCase} />}
           </div>
         )
       case "create":
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-sdc-navy">Create New Case</h2>
+              <h2 className="text-2xl font-semibold text-sdc-navy">Create New Grouped Case</h2>
               <Button variant="ghost" size="sm" onClick={handleBack} className="gap-2">
                 <X className="h-4 w-4" /> Cancel
               </Button>
             </div>
-            <CreateCaseForm onSuccess={handleCreateSuccess} />
+            <CreateGroupedCaseForm onSuccess={handleCreateSuccess} />
           </div>
         )
       default:
@@ -59,17 +59,17 @@ export function CaseManagement() {
           <div className="space-y-6">
             <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <div>
-                <h1 className="text-2xl font-semibold text-sdc-navy">Case Management</h1>
+                <h1 className="text-2xl font-semibold text-sdc-navy">Grouped Case Management</h1>
                 <p className="mt-2 text-sm text-sdc-gray">
-                  View, search, and manage all disciplinary cases in the system.
+                  View and manage cases involving multiple students or related incidents.
                 </p>
               </div>
-              <Button onClick={handleCreateCase} className="bg-sdc-blue hover:bg-sdc-blue/90 text-white">
+              <Button onClick={handleCreateGroupedCase} className="bg-sdc-blue hover:bg-sdc-blue/90 text-white">
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Create New Case
+                Create Grouped Case
               </Button>
             </div>
-            <CaseList onViewDetails={handleViewDetails} />
+            <GroupedCaseList onViewDetails={handleViewDetails} />
           </div>
         )
     }

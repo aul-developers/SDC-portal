@@ -1,6 +1,5 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,46 +7,63 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
-import {
-  Calendar,
-  Clock,
-  FileText,
-  User,
-  BookOpen,
-  AlertTriangle,
-  Building,
-  GraduationCap,
-  Mail,
-  Phone,
-  Gavel,
-} from "lucide-react"
-import { PassJudgmentDialog, type JudgmentData } from "./pass-judgment-dialog"
-import { format } from "date-fns"
+import { Calendar, Clock, FileText, User, BookOpen, AlertTriangle, Users, Gavel } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-const initialCaseDetails = {
-  id: "SDC-091",
-  student: {
-    name: "Robert Chen",
-    matricNumber: "STU-45789",
-    department: "Computer Science",
-    faculty: "Science and Technology",
-    level: "300 Level",
-    email: "robert.chen@university.edu",
-    phone: "+1234567890",
-    image: "/monogram-mb.png",
-  },
+// Mock grouped case details data
+const mockGroupedCaseDetails = {
+  id: "GRP-2024-001",
+  title: "Academic Dishonesty - Group Assignment",
+  description:
+    "Collaborative cheating in CSC301 final project involving multiple students submitting identical work with minor variations.",
   offence: {
     type: "Academic Dishonesty",
-    description: "Plagiarism detected in final term paper for CSC301 - Software Engineering.",
+    description: "Students collaborated inappropriately on individual assignments, sharing code and solutions.",
     date: "2024-05-01",
     reportedBy: "Dr. Sarah Johnson",
+    location: "Computer Science Lab",
   },
+  students: [
+    {
+      name: "Robert Chen",
+      matricNumber: "STU-45789",
+      department: "Computer Science",
+      faculty: "Science and Technology",
+      level: "300 Level",
+      email: "robert.chen@university.edu",
+      phone: "+1234567890",
+      image: "/monogram-mb.png",
+      role: "Primary Offender",
+    },
+    {
+      name: "Jessica Lee",
+      matricNumber: "STU-45123",
+      department: "Computer Science",
+      faculty: "Science and Technology",
+      level: "300 Level",
+      email: "jessica.lee@university.edu",
+      phone: "+1234567891",
+      image: "/stylized-jl-logo.png",
+      role: "Collaborator",
+    },
+    {
+      name: "Michael Brown",
+      matricNumber: "STU-45678",
+      department: "Computer Science",
+      faculty: "Science and Technology",
+      level: "300 Level",
+      email: "michael.brown@university.edu",
+      phone: "+1234567892",
+      image: "/monogram-mb.png",
+      role: "Collaborator",
+    },
+  ],
   punishment: {
     type: "Academic Probation",
     duration: "1 Semester",
     startDate: "2024-05-15",
     endDate: "2024-09-15",
-    additionalRequirements: "Must attend academic integrity workshop and resubmit the paper.",
+    additionalRequirements: "All students must attend academic integrity workshop and resubmit individual assignments.",
   },
   hearings: [
     {
@@ -55,131 +71,97 @@ const initialCaseDetails = {
       time: "10:00 AM",
       location: "Admin Building, Room 203",
       status: "Completed",
-      attendees: ["Dr. Sarah Johnson", "Prof. David Wilson", "Robert Chen"],
-      notes: "Student admitted to plagiarism and expressed remorse. Committee decided on academic probation.",
+      attendees: ["Dr. Sarah Johnson", "Prof. David Wilson", "All involved students"],
+      notes:
+        "All students admitted to collaboration and expressed remorse. Committee decided on uniform academic probation.",
     },
   ],
   documents: [
-    { name: "Original Term Paper", type: "PDF", uploadedBy: "Dr. Sarah Johnson", uploadDate: "2024-05-02" },
-    { name: "Plagiarism Report", type: "PDF", uploadedBy: "Dr. Sarah Johnson", uploadDate: "2024-05-02" },
-    { name: "Student Statement", type: "DOCX", uploadedBy: "Robert Chen", uploadDate: "2024-05-05" },
+    { name: "Original Assignment Submissions", type: "ZIP", uploadedBy: "Dr. Sarah Johnson", uploadDate: "2024-05-02" },
+    { name: "Plagiarism Analysis Report", type: "PDF", uploadedBy: "Dr. Sarah Johnson", uploadDate: "2024-05-02" },
+    { name: "Student Statements", type: "PDF", uploadedBy: "Admin Assistant", uploadDate: "2024-05-05" },
     { name: "Hearing Minutes", type: "PDF", uploadedBy: "Admin Assistant", uploadDate: "2024-05-10" },
   ],
   status: "Pending",
+  priority: "high",
   timeline: [
     {
       date: "2024-05-01",
       time: "2:30 PM",
       action: "Case Initiated",
-      description: "Academic dishonesty case opened for Robert Chen",
+      description: "Academic dishonesty case opened for multiple students",
       user: "Dr. Sarah Johnson",
     },
     {
       date: "2024-05-02",
       time: "10:15 AM",
-      action: "Documents Uploaded",
-      description: "Original term paper and plagiarism report uploaded",
+      action: "Evidence Collected",
+      description: "Assignment submissions and plagiarism analysis completed",
       user: "Dr. Sarah Johnson",
     },
     {
       date: "2024-05-03",
       time: "3:45 PM",
-      action: "Student Notified",
-      description: "Formal notification sent to student",
+      action: "Students Notified",
+      description: "Formal notification sent to all involved students",
       user: "Admin Assistant",
     },
     {
       date: "2024-05-05",
       time: "11:20 AM",
-      action: "Student Response",
-      description: "Student statement received",
-      user: "Robert Chen",
+      action: "Student Responses",
+      description: "All student statements received",
+      user: "Admin Assistant",
     },
     {
       date: "2024-05-08",
       time: "9:30 AM",
       action: "Hearing Scheduled",
-      description: "Disciplinary hearing scheduled for May 10, 2024",
+      description: "Group disciplinary hearing scheduled for May 10, 2024",
       user: "Admin Assistant",
     },
     {
       date: "2024-05-10",
       time: "10:00 AM",
       action: "Hearing Conducted",
-      description: "Disciplinary hearing held with committee and student",
-      user: "Dr. Sarah Johnson",
-    },
-    {
-      date: "2024-05-10",
-      time: "11:30 AM",
-      action: "Decision Made",
-      description: "Committee decided on academic probation",
+      description: "Group disciplinary hearing held with committee and all students",
       user: "Dr. Sarah Johnson",
     },
   ],
 }
 
-interface CaseDetailsProps {
-  caseId: string
+interface GroupedCaseDetailsProps {
+  groupedCaseId: string
 }
 
-export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
-  const [caseDetails, setCaseDetails] = useState(initialCaseDetails)
-  const [showPassJudgmentDialog, setShowPassJudgmentDialog] = useState(false)
-
-  const handleSaveJudgment = (judgmentData: JudgmentData) => {
-    const today = new Date()
-    setCaseDetails((prevDetails) => ({
-      ...prevDetails,
-      status: "Resolved",
-      punishment: {
-        type: judgmentData.punishmentType,
-        duration: judgmentData.duration,
-        startDate: judgmentData.startDate ? format(judgmentData.startDate, "yyyy-MM-dd") : "",
-        endDate: judgmentData.endDate ? format(judgmentData.endDate, "yyyy-MM-dd") : "",
-        additionalRequirements: judgmentData.additionalRequirements,
-      },
-      timeline: [
-        ...prevDetails.timeline,
-        {
-          date: format(today, "yyyy-MM-dd"),
-          time: format(today, "p"),
-          action: "Judgment Passed",
-          description: `Punishment: ${judgmentData.punishmentType}. Duration: ${judgmentData.duration}. Notes: ${judgmentData.judgmentNotes}`,
-          user: "SDC Committee",
-        },
-      ],
-    }))
-    setShowPassJudgmentDialog(false)
-  }
+export function GroupedCaseDetails({ groupedCaseId }: GroupedCaseDetailsProps) {
+  const [caseDetails] = useState(mockGroupedCaseDetails)
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-4 md:flex-row md:items-start md:justify-between md:space-y-0">
-        <div className="flex items-center space-x-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={caseDetails.student.image || "/placeholder.svg"} alt={caseDetails.student.name} />
-            <AvatarFallback>
-              {caseDetails.student.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-            </AvatarFallback>
-          </Avatar>
+        <div className="flex items-start space-x-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sdc-blue/10">
+            <Users className="h-8 w-8 text-sdc-blue" />
+          </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-xl font-semibold text-sdc-navy">{caseDetails.student.name}</h2>
-              <Badge>{caseDetails.student.matricNumber}</Badge>
+              <h2 className="text-xl font-semibold text-sdc-navy">{caseDetails.title}</h2>
+              <Badge
+                className={cn(
+                  "px-2 py-1",
+                  caseDetails.priority === "high" && "bg-red-500 text-white",
+                  caseDetails.priority === "medium" && "bg-amber-500 text-white",
+                  caseDetails.priority === "low" && "bg-green-500 text-white",
+                )}
+              >
+                {caseDetails.priority.charAt(0).toUpperCase() + caseDetails.priority.slice(1)} Priority
+              </Badge>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-sdc-gray">
-              <GraduationCap className="h-4 w-4" />
-              <span>
-                {caseDetails.student.department}, {caseDetails.student.level}
-              </span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm text-sdc-gray">
-              <Building className="h-4 w-4" />
-              <span>{caseDetails.student.faculty}</span>
+            <p className="mt-1 text-sm text-sdc-gray max-w-2xl">{caseDetails.description}</p>
+            <div className="mt-2 flex items-center space-x-2 text-sm text-sdc-gray">
+              <Users className="h-4 w-4" />
+              <span>{caseDetails.students.length} students involved</span>
             </div>
           </div>
         </div>
@@ -195,12 +177,9 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
               caseDetails.status === "Scheduled" && "bg-blue-500",
               caseDetails.status === "In-Progress" && "bg-indigo-500",
               caseDetails.status === "Resolved" && "bg-emerald-500",
-              caseDetails.status === "Closed" && "bg-slate-500",
-              !["Pending", "Scheduled", "In-Progress", "Resolved", "Closed"].includes(caseDetails.status) &&
-                "bg-gray-400",
             )}
           >
-            {caseDetails.status ? caseDetails.status.charAt(0).toUpperCase() + caseDetails.status.slice(1) : "Unknown"}
+            {caseDetails.status}
           </Badge>
         </div>
       </div>
@@ -210,7 +189,7 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="student">Student Info</TabsTrigger>
+          <TabsTrigger value="students">Students</TabsTrigger>
           <TabsTrigger value="hearings">Hearings</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
@@ -254,38 +233,32 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                 <CardTitle className="text-lg font-medium">Disciplinary Action</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {caseDetails.punishment && caseDetails.punishment.type ? (
+                {caseDetails.punishment ? (
                   <>
                     <div className="flex items-start space-x-3">
                       <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-500" />
                       <div>
                         <p className="font-medium text-sdc-navy">{caseDetails.punishment.type}</p>
-                        {caseDetails.punishment.duration && (
-                          <p className="text-sm text-sdc-gray">Duration: {caseDetails.punishment.duration}</p>
-                        )}
+                        <p className="text-sm text-sdc-gray">Duration: {caseDetails.punishment.duration}</p>
                       </div>
                     </div>
-                    {caseDetails.punishment.startDate && caseDetails.punishment.endDate && (
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="h-5 w-5 text-sdc-gray" />
-                        <div>
-                          <p className="text-sm text-sdc-gray">Effective Period</p>
-                          <p className="font-medium text-sdc-navy">
-                            {new Date(caseDetails.punishment.startDate).toLocaleDateString()} -{" "}
-                            {new Date(caseDetails.punishment.endDate).toLocaleDateString()}
-                          </p>
-                        </div>
+                    <div className="flex items-center space-x-3">
+                      <Calendar className="h-5 w-5 text-sdc-gray" />
+                      <div>
+                        <p className="text-sm text-sdc-gray">Effective Period</p>
+                        <p className="font-medium text-sdc-navy">
+                          {new Date(caseDetails.punishment.startDate).toLocaleDateString()} -{" "}
+                          {new Date(caseDetails.punishment.endDate).toLocaleDateString()}
+                        </p>
                       </div>
-                    )}
-                    {caseDetails.punishment.additionalRequirements && (
-                      <div className="flex items-start space-x-3">
-                        <FileText className="mt-0.5 h-5 w-5 text-sdc-gray" />
-                        <div>
-                          <p className="text-sm text-sdc-gray">Additional Requirements</p>
-                          <p className="font-medium text-sdc-navy">{caseDetails.punishment.additionalRequirements}</p>
-                        </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <FileText className="mt-0.5 h-5 w-5 text-sdc-gray" />
+                      <div>
+                        <p className="text-sm text-sdc-gray">Additional Requirements</p>
+                        <p className="font-medium text-sdc-navy">{caseDetails.punishment.additionalRequirements}</p>
                       </div>
-                    )}
+                    </div>
                   </>
                 ) : (
                   <p className="text-sm text-sdc-gray">No disciplinary action assigned yet.</p>
@@ -296,83 +269,85 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium">Recent Activity</CardTitle>
+              <CardTitle className="text-lg font-medium">Students Involved</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {caseDetails.timeline
-                  .slice(-3)
-                  .reverse()
-                  .map((event, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sdc-blue/10">
-                        <Clock className="h-4 w-4 text-sdc-blue" />
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <p className="font-medium text-sdc-navy">{event.action}</p>
-                          <span className="text-xs text-sdc-gray">
-                            {event.date} at {event.time}
-                          </span>
-                        </div>
-                        <p className="text-sm text-sdc-gray">{event.description}</p>
-                        <p className="text-xs text-sdc-gray">By: {event.user}</p>
-                      </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {caseDetails.students.map((student, index) => (
+                  <div key={index} className="flex items-center space-x-3 rounded-lg border p-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={student.image || "/placeholder.svg"} alt={student.name} />
+                      <AvatarFallback>
+                        {student.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{student.name}</p>
+                      <p className="text-xs text-muted-foreground">{student.matricNumber}</p>
+                      <Badge variant="outline" className="mt-1 text-xs">
+                        {student.role}
+                      </Badge>
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="student">
+        <TabsContent value="students">
           <Card>
             <CardHeader>
               <CardTitle>Student Information</CardTitle>
-              <CardDescription>Detailed information about the student involved in this case.</CardDescription>
+              <CardDescription>Detailed information about all students involved in this case.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-sdc-gray">Full Name</p>
-                  <p className="font-medium text-sdc-navy">{caseDetails.student.name}</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-sdc-gray">Matric Number</p>
-                  <p className="font-medium text-sdc-navy">{caseDetails.student.matricNumber}</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-sdc-gray">Department</p>
-                  <p className="font-medium text-sdc-navy">{caseDetails.student.department}</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-sdc-gray">Faculty</p>
-                  <p className="font-medium text-sdc-navy">{caseDetails.student.faculty}</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-sdc-gray">Level</p>
-                  <p className="font-medium text-sdc-navy">{caseDetails.student.level}</p>
-                </div>
-              </div>
-              <Separator />
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-sdc-navy">Contact Information</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-5 w-5 text-sdc-gray" />
-                    <div>
-                      <p className="text-sm text-sdc-gray">Email Address</p>
-                      <p className="font-medium text-sdc-navy">{caseDetails.student.email}</p>
+            <CardContent>
+              <div className="space-y-6">
+                {caseDetails.students.map((student, index) => (
+                  <div key={index} className="rounded-lg border p-4">
+                    <div className="flex items-start space-x-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={student.image || "/placeholder.svg"} alt={student.name} />
+                        <AvatarFallback>
+                          {student.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-lg font-semibold text-sdc-navy">{student.name}</h3>
+                            <p className="text-sm text-sdc-gray">{student.matricNumber}</p>
+                          </div>
+                          <Badge variant="outline">{student.role}</Badge>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div>
+                            <p className="text-sm font-medium text-sdc-gray">Department</p>
+                            <p className="font-medium text-sdc-navy">{student.department}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-sdc-gray">Faculty</p>
+                            <p className="font-medium text-sdc-navy">{student.faculty}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-sdc-gray">Level</p>
+                            <p className="font-medium text-sdc-navy">{student.level}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-sdc-gray">Email</p>
+                            <p className="font-medium text-sdc-navy">{student.email}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-sdc-gray" />
-                    <div>
-                      <p className="text-sm text-sdc-gray">Phone Number</p>
-                      <p className="font-medium text-sdc-navy">{caseDetails.student.phone}</p>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -381,8 +356,8 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
         <TabsContent value="hearings">
           <Card>
             <CardHeader>
-              <CardTitle>Disciplinary Hearings</CardTitle>
-              <CardDescription>Records of all hearings related to this case.</CardDescription>
+              <CardTitle>Group Hearings</CardTitle>
+              <CardDescription>Records of all hearings related to this grouped case.</CardDescription>
             </CardHeader>
             <CardContent>
               {caseDetails.hearings.length === 0 ? (
@@ -394,7 +369,7 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                       <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-start sm:space-y-0">
                         <div>
                           <div className="flex items-center space-x-2">
-                            <h3 className="font-medium text-sdc-navy">Hearing #{index + 1}</h3>
+                            <h3 className="font-medium text-sdc-navy">Group Hearing #{index + 1}</h3>
                             <Badge>{hearing.status}</Badge>
                           </div>
                           <div className="mt-2 flex items-center space-x-4">
@@ -442,7 +417,7 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
           <Card>
             <CardHeader>
               <CardTitle>Case Documents</CardTitle>
-              <CardDescription>All documents related to this disciplinary case.</CardDescription>
+              <CardDescription>All documents related to this grouped disciplinary case.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -477,7 +452,7 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
           <Card>
             <CardHeader>
               <CardTitle>Case Timeline</CardTitle>
-              <CardDescription>Chronological history of all events related to this case.</CardDescription>
+              <CardDescription>Chronological history of all events related to this grouped case.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="relative space-y-6 pl-6 pt-2">
@@ -507,29 +482,14 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
       </Tabs>
 
       <div className="flex justify-end space-x-2 pt-4">
-        {" "}
-        {/* Added pt-4 for spacing */}
         <Button variant="outline">Edit Case</Button>
         {caseDetails.status !== "Resolved" && (
-          <Button
-            onClick={() => setShowPassJudgmentDialog(true)}
-            className="bg-green-500 hover:bg-green-600 text-white"
-          >
-            <Gavel className="mr-2 h-4 w-4" /> Pass Judgment
+          <Button className="bg-green-500 hover:bg-green-600 text-white">
+            <Gavel className="mr-2 h-4 w-4" /> Pass Group Judgment
           </Button>
         )}
         <Button className="bg-sdc-blue hover:bg-sdc-blue/90 text-white">Update Status</Button>
       </div>
-
-      <PassJudgmentDialog
-        open={showPassJudgmentDialog}
-        onOpenChange={setShowPassJudgmentDialog}
-        caseId={caseDetails.id}
-        studentName={caseDetails.student.name}
-        currentOffenceType={caseDetails.offence.type}
-        // currentPunishment={caseDetails.punishment}
-        onSaveJudgment={handleSaveJudgment}
-      />
     </div>
   )
 }
