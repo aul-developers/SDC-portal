@@ -1,96 +1,185 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useCallback, useState } from "react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import LoadingButton from "../LoadingButton";
+import { postRequest } from "@/lib/utils";
 
 interface AddOffenceDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
 }
 
-export function AddOffenceDialog({ open, onOpenChange }: AddOffenceDialogProps) {
-  const [offenceName, setOffenceName] = useState("")
-  const [severity, setSeverity] = useState("")
-  const [punishment, setPunishment] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+interface offenceFormProps {
+    offenceName: string;
+    offenceSeverity: string;
+    offencePunishment: string;
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+interface submitOffenceProps {
+    offence: string;
+    severity: string;
+    punishment: string;
+}
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+export function AddOffenceDialog({
+    open,
+    onOpenChange,
+}: AddOffenceDialogProps) {
+    const [offenceForm, setOffenceForm] = useState<offenceFormProps>({
+        offenceName: "",
+        offenceSeverity: "",
+        offencePunishment: "",
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Reset form and close dialog
-    setOffenceName("")
-    setSeverity("")
-    setPunishment("")
-    setIsSubmitting(false)
-    onOpenChange(false)
-  }
+    // console.log(offenceForm);
+    const handleUpdateOffenceFormField = useCallback(
+        (offenceValues: Partial<offenceFormProps>) => {
+            setOffenceForm((prevData) => {
+                return { ...prevData, ...offenceValues };
+            });
+        },
+        [offenceForm]
+    );
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Add New Offence</DialogTitle>
-        </DialogHeader>
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="offence-name">Offence Name</Label>
-            <Input
-              id="offence-name"
-              value={offenceName}
-              onChange={(e) => setOffenceName(e.target.value)}
-              placeholder="Enter offence name"
-              required
-            />
-          </div>
+        // Simulate API call
 
-          <div className="space-y-2">
-            <Label htmlFor="severity">Severity</Label>
-            <Select value={severity} onValueChange={setSeverity} required>
-              <SelectTrigger id="severity">
-                <SelectValue placeholder="Select severity level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        const SubmittedOffenceForm = {
+            offence: offenceForm.offenceName,
+            severity: offenceForm.offenceSeverity,
+            punishment: offenceForm.offencePunishment,
+        };
 
-          <div className="space-y-2">
-            <Label htmlFor="punishment">Standard Punishment</Label>
-            <Textarea
-              id="punishment"
-              value={punishment}
-              onChange={(e) => setPunishment(e.target.value)}
-              placeholder="Enter standard punishment"
-              required
-              rows={3}
-            />
-          </div>
+        try {
+            const response = await postRequest<submitOffenceProps>(
+                "/offences/",
+                SubmittedOffenceForm
+            );
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Adding..." : "Add Offence"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  )
+            console.log(response);
+
+            setIsSubmitting(false);
+        } catch (error) {
+            console.log(error);
+            setIsSubmitting(false);
+        }
+
+        // Reset form and close dialog
+
+        setOffenceForm({
+            offenceName: "",
+            offencePunishment: "",
+            offenceSeverity: "",
+        });
+
+        setIsSubmitting(false);
+        onOpenChange(false);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                    <DialogTitle>Add New Offence</DialogTitle>
+                </DialogHeader>
+
+                <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="offence-name">Offence Name</Label>
+                        <Input
+                            id="offence-name"
+                            value={offenceForm.offenceName}
+                            onChange={(e) =>
+                                handleUpdateOffenceFormField({
+                                    offenceName: e.target.value,
+                                })
+                            }
+                            placeholder="Enter offence name"
+                            required
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="severity">Severity</Label>
+                        <Select
+                            value={offenceForm.offenceSeverity}
+                            onValueChange={(e) =>
+                                handleUpdateOffenceFormField({
+                                    offenceSeverity: e,
+                                })
+                            }
+                            required
+                        >
+                            <SelectTrigger id="severity">
+                                <SelectValue placeholder="Select severity level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="punishment">Standard Punishment</Label>
+                        <Textarea
+                            id="punishment"
+                            value={offenceForm.offencePunishment}
+                            onChange={(e) =>
+                                handleUpdateOffenceFormField({
+                                    offencePunishment: e.target.value,
+                                })
+                            }
+                            placeholder="Enter standard punishment"
+                            required
+                            rows={3}
+                        />
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                        >
+                            Cancel
+                        </Button>
+
+                        {!isSubmitting ? (
+                            <Button type="submit" disabled={isSubmitting}>
+                                Add Offence
+                            </Button>
+                        ) : (
+                            <LoadingButton text="Adding..." />
+                        )}
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
 }
