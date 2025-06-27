@@ -1,15 +1,17 @@
-import type React from "react"
-import { Sidebar } from "@/components/sidebar"
+import type React from "react";
+import { Sidebar } from "@/components/sidebar";
+import { Toaster } from "sonner";
 
 export default function DashboardLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode
+    children: React.ReactNode;
 }) {
-  return (
-    <div className="flex h-screen bg-gray-50 font-sans">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">{children}</div>
-    </div>
-  )
+    return (
+        <div className="flex h-screen bg-gray-50 font-sans">
+            <Sidebar />
+            <div className="flex-1 overflow-auto">{children}</div>
+            <Toaster />
+        </div>
+    );
 }

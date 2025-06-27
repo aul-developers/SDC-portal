@@ -23,17 +23,19 @@ import {
 } from "@/components/ui/select";
 import LoadingButton from "../LoadingButton";
 import { postRequest } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface AddOffenceDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
 
-interface offenceFormProps {
+export interface offenceFormProps {
     offenceName: string;
-    offenceSeverity: string;
+    offenceSeverity: "Low" | "Medium" | "High" | string;
     offencePunishment: string;
 }
+export type offenceSeverity = "Low" | "Medium" | "High" | string;
 
 interface submitOffenceProps {
     offence: string;
@@ -59,20 +61,21 @@ export function AddOffenceDialog({
                 return { ...prevData, ...offenceValues };
             });
         },
-        [offenceForm]
+        []
     );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        // Simulate API call
+        // API call
 
         const SubmittedOffenceForm = {
             offence: offenceForm.offenceName,
             severity: offenceForm.offenceSeverity,
             punishment: offenceForm.offencePunishment,
         };
+        console.log(SubmittedOffenceForm);
 
         try {
             const response = await postRequest<submitOffenceProps>(
@@ -80,10 +83,18 @@ export function AddOffenceDialog({
                 SubmittedOffenceForm
             );
 
+            if (response) {
+                toast.success(response.message);
+                console.log(response);
+            }
             console.log(response);
 
             setIsSubmitting(false);
         } catch (error) {
+            const errorMessage =
+                error instanceof Error ? error.message : "Unexpected error";
+
+            toast.error(errorMessage);
             console.log(error);
             setIsSubmitting(false);
         }
@@ -138,9 +149,9 @@ export function AddOffenceDialog({
                                 <SelectValue placeholder="Select severity level" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="low">Low</SelectItem>
-                                <SelectItem value="medium">Medium</SelectItem>
-                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="Low">Low</SelectItem>
+                                <SelectItem value="Medium">Medium</SelectItem>
+                                <SelectItem value="High">High</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

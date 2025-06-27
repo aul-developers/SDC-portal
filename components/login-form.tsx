@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import LoadingButton from "./LoadingButton";
 
-import { postRequest } from "@/lib/utils";
+import { generateErrorMessage, postRequest } from "@/lib/utils";
 // import { Toast } from "./ui/toast";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 // import { useToast } from "./ui/use-toast";
 
 interface loginInfo {
@@ -56,13 +57,9 @@ export function LoginForm() {
                 router.push("/dashboard");
             } catch (error: unknown) {
                 console.log(error);
-
-                const errorMessage =
-                    error instanceof Error
-                        ? error.message
-                        : "an Unexpected Error occured";
+                const errorExpectedMessage = generateErrorMessage(error);
+                toast.error(errorExpectedMessage);
                 setIsLoading(false);
-                toast.error(errorMessage);
             }
         }
     }

@@ -1,5 +1,5 @@
 import { DataApiClient } from "@/service/apiClient";
-import { CanceledError } from "axios";
+import { AxiosError, CanceledError } from "axios";
 import { clsx, type ClassValue } from "clsx";
 import { AxiosResponse } from "axios";
 import { twMerge } from "tailwind-merge";
@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-interface PostResponse {
+interface Response {
     message: string;
     status: number;
 }
@@ -16,9 +16,9 @@ interface PostResponse {
 export const postRequest = async <T>(
     endpoint: string,
     receivedData?: T
-): Promise<PostResponse | null> => {
+): Promise<Response | null> => {
     try {
-        const request = await DataApiClient.post<PostResponse>(
+        const request = await DataApiClient.post<Response>(
             endpoint,
             receivedData
         );
@@ -30,3 +30,53 @@ export const postRequest = async <T>(
         throw error;
     }
 };
+
+export const patchRequest = async <T>(
+    endpoint: string,
+    editiedData: T
+): Promise<Response> => {
+    try {
+        const editRequest = await DataApiClient.patch<Response>(
+            endpoint,
+            editiedData
+        );
+
+        return editRequest.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteRequest = async <T>(
+    endpoint: string,
+    OffenceTobeDeleted: T
+) => {
+    try {
+        const deleteRequest = await DataApiClient.delete<Response>(endpoint, {
+            data: OffenceTobeDeleted,
+        });
+
+        return deleteRequest.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export function generateErrorMessage(error: unknown) {
+    let errorMessage = "";
+    if (error instanceof AxiosError) {
+        if (error.response) {
+            if (error.response) {
+                errorMessage =
+                    error.response.data.message ||
+                    error.response.data.error.map((error: unknown) => error);
+            }
+        } else {
+            errorMessage = error.message;
+        }
+    } else {
+        errorMessage = "an unexpected error occured!";
+    }
+
+    return errorMessage;
+}
