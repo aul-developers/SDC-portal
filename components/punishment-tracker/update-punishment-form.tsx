@@ -117,18 +117,6 @@ export function UpdatePunishmentForm({ punishmentId, onSuccess, onCancel }: Upda
       <Card>
         <CardContent className="p-6">
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="progress">Progress (%)</Label>
-              <Input
-                id="progress"
-                type="number"
-                min="0"
-                max="100"
-                value={progress}
-                onChange={(e) => setProgress(e.target.value)}
-                required
-              />
-            </div>
 
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
@@ -144,29 +132,6 @@ export function UpdatePunishmentForm({ punishmentId, onSuccess, onCancel }: Upda
               </Select>
             </div>
 
-            {status === "completed" && (
-              <div className="space-y-2">
-                <Label htmlFor="completed-date">Completion Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !completedDate && "text-muted-foreground",
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {completedDate ? format(completedDate, "PPP") : "Select date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={completedDate} onSelect={setCompletedDate} initialFocus />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="notes">Update Notes</Label>
               <Textarea
@@ -181,40 +146,6 @@ export function UpdatePunishmentForm({ punishmentId, onSuccess, onCancel }: Upda
           </div>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-medium text-sdc-navy mb-4">Update Milestones</h3>
-          <div className="space-y-4">
-            {punishment.milestones
-              .filter((milestone) => milestone.status !== "completed")
-              .map((milestone) => (
-                <div key={milestone.id} className="flex items-start space-x-3 pb-4 border-b last:border-0 last:pb-0">
-                  <Checkbox
-                    id={milestone.id}
-                    checked={selectedMilestones.includes(milestone.id)}
-                    onCheckedChange={() => handleMilestoneToggle(milestone.id)}
-                  />
-                  <div className="space-y-1">
-                    <Label
-                      htmlFor={milestone.id}
-                      className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {milestone.title}
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Due: {new Date(milestone.dueDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            {punishment.milestones.filter((milestone) => milestone.status !== "completed").length === 0 && (
-              <p className="text-sm text-muted-foreground">All milestones have been completed.</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancel

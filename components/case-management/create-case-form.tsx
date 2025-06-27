@@ -18,13 +18,68 @@ interface CreateCaseFormProps {
   onSuccess: () => void
 }
 
+interface Student {
+  name: string
+  matricNumber: string
+  faculty: string
+  department: string
+  level: string
+  email: string
+  phone: string
+  role: string // For individual cases, this will always be "Primary Offender"
+}
+
 export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
   const [date, setDate] = useState<Date>()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Student data as an array (even though it's just one student)
+  const [student, setStudent] = useState<Student>({
+    name: "",
+    matricNumber: "",
+    faculty: "",
+    department: "",
+    level: "",
+    email: "",
+    phone: "",
+    role: "Primary Offender", // Default role for individual cases
+  })
+
+  const handleStudentChange = (field: keyof Student, value: string) => {
+    setStudent((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsSubmitting(true)
+
+    const formData = new FormData(event.currentTarget)
+
+    // Create the case data with students as an array (consistent with grouped cases)
+    const caseData = {
+      title: formData.get("case-title"),
+      description: formData.get("description"),
+      offenceType: formData.get("offence-type"),
+      incidentDate: date ? format(date, "yyyy-MM-dd") : "",
+      incidentTime: formData.get("incident-time"),
+      location: formData.get("location"),
+      priority: formData.get("priority"),
+      // Send student as an array with one element - CONSISTENT WITH GROUPED CASES
+      students: [student],
+      reportedBy: formData.get("reported-by"),
+      reporterTitle: formData.get("reporter-title"),
+      reporterEmail: formData.get("reporter-email"),
+      reporterPhone: formData.get("reporter-phone"),
+      caseOfficer: formData.get("assigned-officer"),
+      severity: formData.get("severity"),
+      initialNotes: formData.get("initial-notes"),
+      caseType: "individual", // Add case type for backend identification
+    }
+
+    console.log("Creating individual case with students array:", caseData)
 
     // Simulate API call
     setTimeout(() => {
@@ -55,6 +110,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Input
                 id="case-title"
+                name="case-title"
                 placeholder="e.g., Academic Dishonesty - Examination Malpractice"
                 className="h-11"
                 required
@@ -65,7 +121,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="offence-type" className="text-sm font-medium">
                 Offence Type <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select name="offence-type" required>
                 <SelectTrigger id="offence-type" className="h-11">
                   <SelectValue placeholder="Select offence type" />
                 </SelectTrigger>
@@ -87,6 +143,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             </Label>
             <Textarea
               id="description"
+              name="description"
               placeholder="Provide a detailed description of the case and incident"
               className="min-h-[100px]"
               required
@@ -126,14 +183,14 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="incident-time" className="text-sm font-medium">
                 Incident Time <span className="text-red-500">*</span>
               </Label>
-              <Input id="incident-time" type="time" className="h-11" required />
+              <Input id="incident-time" name="incident-time" type="time" className="h-11" required />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="priority" className="text-sm font-medium">
                 Priority Level <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select name="priority" required>
                 <SelectTrigger id="priority" className="h-11">
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
@@ -151,7 +208,13 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             <Label htmlFor="location" className="text-sm font-medium">
               Location of Incident <span className="text-red-500">*</span>
             </Label>
-            <Input id="location" placeholder="e.g., Main Library, Room 204, Computer Lab A" className="h-11" required />
+            <Input
+              id="location"
+              name="location"
+              placeholder="e.g., Main Library, Room 204, Computer Lab A"
+              className="h-11"
+              required
+            />
           </div>
         </div>
 
@@ -167,21 +230,35 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="student-name" className="text-sm font-medium">
                 Student Full Name <span className="text-red-500">*</span>
               </Label>
-              <Input id="student-name" placeholder="Enter student's full name" className="h-11" required />
+              <Input
+                id="student-name"
+                placeholder="Enter student's full name"
+                className="h-11"
+                value={student.name}
+                onChange={(e) => handleStudentChange("name", e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="student-id" className="text-sm font-medium">
                 Matric Number <span className="text-red-500">*</span>
               </Label>
-              <Input id="student-id" placeholder="Enter matric number" className="h-11" required />
+              <Input
+                id="student-id"
+                placeholder="Enter matric number"
+                className="h-11"
+                value={student.matricNumber}
+                onChange={(e) => handleStudentChange("matricNumber", e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="faculty" className="text-sm font-medium">
                 Faculty <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select value={student.faculty} onValueChange={(value) => handleStudentChange("faculty", value)} required>
                 <SelectTrigger id="faculty" className="h-11">
                   <SelectValue placeholder="Select faculty" />
                 </SelectTrigger>
@@ -201,7 +278,11 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="department" className="text-sm font-medium">
                 Department <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select
+                value={student.department}
+                onValueChange={(value) => handleStudentChange("department", value)}
+                required
+              >
                 <SelectTrigger id="department" className="h-11">
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
@@ -222,7 +303,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="level" className="text-sm font-medium">
                 Academic Level <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select value={student.level} onValueChange={(value) => handleStudentChange("level", value)} required>
                 <SelectTrigger id="level" className="h-11">
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>
@@ -241,14 +322,29 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="student-email" className="text-sm font-medium">
                 Student Email <span className="text-red-500">*</span>
               </Label>
-              <Input id="student-email" type="email" placeholder="student@university.edu" className="h-11" required />
+              <Input
+                id="student-email"
+                type="email"
+                placeholder="student@university.edu"
+                className="h-11"
+                value={student.email}
+                onChange={(e) => handleStudentChange("email", e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="student-phone" className="text-sm font-medium">
                 Phone Number
               </Label>
-              <Input id="student-phone" type="tel" placeholder="+234 xxx xxx xxxx" className="h-11" />
+              <Input
+                id="student-phone"
+                type="tel"
+                placeholder="+234 xxx xxx xxxx"
+                className="h-11"
+                value={student.phone}
+                onChange={(e) => handleStudentChange("phone", e.target.value)}
+              />
             </div>
           </div>
         </div>
@@ -265,7 +361,13 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="reported-by" className="text-sm font-medium">
                 Reporter Name <span className="text-red-500">*</span>
               </Label>
-              <Input id="reported-by" placeholder="Name of person reporting" className="h-11" required />
+              <Input
+                id="reported-by"
+                name="reported-by"
+                placeholder="Name of person reporting"
+                className="h-11"
+                required
+              />
             </div>
 
             <div className="space-y-2">
@@ -274,6 +376,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Input
                 id="reporter-title"
+                name="reporter-title"
                 placeholder="e.g., Professor, Security Officer, Student"
                 className="h-11"
                 required
@@ -284,14 +387,27 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="reporter-email" className="text-sm font-medium">
                 Reporter Email <span className="text-red-500">*</span>
               </Label>
-              <Input id="reporter-email" type="email" placeholder="reporter@university.edu" className="h-11" required />
+              <Input
+                id="reporter-email"
+                name="reporter-email"
+                type="email"
+                placeholder="reporter@university.edu"
+                className="h-11"
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="reporter-phone" className="text-sm font-medium">
                 Reporter Phone
               </Label>
-              <Input id="reporter-phone" type="tel" placeholder="+234 xxx xxx xxxx" className="h-11" />
+              <Input
+                id="reporter-phone"
+                name="reporter-phone"
+                type="tel"
+                placeholder="+234 xxx xxx xxxx"
+                className="h-11"
+              />
             </div>
           </div>
         </div>
@@ -308,7 +424,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="assigned-officer" className="text-sm font-medium">
                 Assigned Case Officer <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select name="assigned-officer" required>
                 <SelectTrigger id="assigned-officer" className="h-11">
                   <SelectValue placeholder="Select case officer" />
                 </SelectTrigger>
@@ -326,7 +442,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Label htmlFor="severity" className="text-sm font-medium">
                 Severity Assessment <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select name="severity" required>
                 <SelectTrigger id="severity" className="h-11">
                   <SelectValue placeholder="Select severity level" />
                 </SelectTrigger>
@@ -346,6 +462,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             </Label>
             <Textarea
               id="initial-notes"
+              name="initial-notes"
               placeholder="Any initial observations, evidence collected, or preliminary assessment notes"
               className="min-h-[100px]"
             />
