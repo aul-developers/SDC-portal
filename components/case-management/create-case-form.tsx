@@ -104,6 +104,17 @@ function updateFieldReducer(
     }
 }
 
+interface Student {
+    name: string;
+    matricNumber: string;
+    faculty: string;
+    department: string;
+    level: string;
+    email: string;
+    phone: string;
+    role: string; // For individual cases, this will always be "Primary Offender"
+}
+
 export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
     const initialFieldState: caseFormSchema = useMemo(
         () => ({
@@ -183,7 +194,6 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
                 "/create/case/",
                 newIndividualCase
             );
-
             if (response) {
                 setIsSubmitting(false);
                 toast.success(response.message);

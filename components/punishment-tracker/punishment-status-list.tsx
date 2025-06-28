@@ -190,11 +190,11 @@ export function PunishmentStatusList({ status, searchTerm, onViewDetails }: Puni
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
                 <TableHead>Student</TableHead>
-                <TableHead>Punishment ID</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Progress</TableHead>
-                {status !== "completed" && <TableHead>Time Remaining</TableHead>}
+                <TableHead>Matric No</TableHead>
+                <TableHead>Full Name</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Punishment Type</TableHead>
+                <TableHead>Severity Level</TableHead>
                 {status === "completed" && <TableHead>Completion Date</TableHead>}
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>

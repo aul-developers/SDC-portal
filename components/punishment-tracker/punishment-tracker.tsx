@@ -4,13 +4,16 @@ import { useState, useCallback } from "react"
 import { PunishmentDetails } from "./punishment-details"
 import { PunishmentMetrics } from "./punishment-metrics"
 import { UpdatePunishmentForm } from "./update-punishment-form"
+import { AddPunishmentDialog } from "./add-punishment-dialog"
 import { Button } from "@/components/ui/button"
-import { X } from "lucide-react"
+import { X, Plus, Scale } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PunishmentStatusTabs } from "./punishment-status-tabs"
 
 export function PunishmentTracker() {
   const [selectedPunishment, setSelectedPunishment] = useState<string | null>(null)
   const [activeView, setActiveView] = useState<"list" | "details" | "update">("list")
+  const [showAddDialog, setShowAddDialog] = useState(false)
 
   const handleViewDetails = useCallback((punishmentId: string) => {
     setSelectedPunishment(punishmentId)
@@ -30,7 +33,17 @@ export function PunishmentTracker() {
     setActiveView("details")
   }, [])
 
-  // Update the renderContent function to include tabs for the different punishment statuses
+  const handleAddPunishmentSuccess = useCallback(() => {
+    // Refresh the punishment list or show success message
+    console.log("Punishment added successfully!")
+    // You could trigger a refresh of the punishment data here
+  }, [])
+
+  const handlePunishmentAdded = () => {
+    // Refresh the punishment list or update state
+    console.log("Punishment added successfully!")
+  }
+
   const renderContent = () => {
     switch (activeView) {
       case "details":
@@ -68,18 +81,51 @@ export function PunishmentTracker() {
       default:
         return (
           <>
-            <div>
-              <h1 className="text-2xl font-semibold text-sdc-navy">Punishment Tracker</h1>
-              <p className="mt-1 text-sm text-sdc-gray">
-                Monitor and manage all disciplinary actions across the institution.
-              </p>
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Scale className="h-8 w-8 text-sdc-blue" />
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Punishment Tracker</h1>
+                  <p className="text-gray-600">Monitor and manage disciplinary actions</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowAddDialog(true)}
+                className="bg-sdc-blue hover:bg-sdc-blue/90 text-white gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Punishment
+              </Button>
             </div>
+
+            {/* Metrics */}
             <PunishmentMetrics />
-            <PunishmentStatusTabs onViewDetails={handleViewDetails} />
+
+            {/* Status Tabs */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Punishment Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PunishmentStatusTabs onViewDetails={handleViewDetails} />
+              </CardContent>
+            </Card>
           </>
         )
     }
   }
 
-  return <div className="flex flex-col space-y-6 p-8">{renderContent()}</div>
+  return (
+    <div className="flex flex-col space-y-6 p-8">
+      {renderContent()}
+
+      {/* Add Punishment Dialog */}
+      <AddPunishmentDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onSuccess={handleAddPunishmentSuccess}
+      />
+    </div>
+  )
 }
