@@ -17,15 +17,15 @@ import { PlusCircle, X, ChevronDown } from "lucide-react";
 
 export function UnifiedCaseManagement() {
     const [selectedCase, setSelectedCase] = useState<{
-        id: string;
-        type: "individual" | "grouped";
+        id: number;
+        type: "Individual" | "Grouped";
     } | null>(null);
     const [activeView, setActiveView] = useState<
         "list" | "details" | "create-individual" | "create-grouped"
     >("list");
 
     const handleViewDetails = useCallback(
-        (caseId: string, type: "individual" | "grouped") => {
+        (caseId: number, type: "Individual" | "Grouped") => {
             setSelectedCase({ id: caseId, type });
             setActiveView("details");
         },
@@ -67,10 +67,10 @@ export function UnifiedCaseManagement() {
                                 <X className="h-4 w-4" /> Close
                             </Button>
                         </div>
-                        {selectedCase?.type === "individual" ? (
+                        {selectedCase?.type === "Individual" ? (
                             <CaseDetails caseId={selectedCase.id} />
-                        ) : selectedCase?.type === "grouped" ? (
-                            <GroupedCaseDetails caseId={selectedCase.id} />
+                        ) : selectedCase?.type === "Grouped" ? (
+                            <GroupedCaseDetails groupedCaseId={selectedCase.id} />
                         ) : null}
                     </div>
                 );

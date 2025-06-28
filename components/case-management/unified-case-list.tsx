@@ -38,35 +38,45 @@ interface UnifiedCaseListProps {
 }
 
 export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
-    const { data: UnifiedCases, isLoading, isError } = useFetch("/get/case/");
+    const {
+        data: UnifiedCases,
+        isLoading,
+        isError,
+    } = useFetch<caseFormSchema>("/get/case/");
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState<string | null>(null);
     console.log(UnifiedCases);
 
     // Filter cases based on search term, status filter, and type filter
-    const filteredCases: caseFormSchema[] = (
-        UnifiedCases as caseFormSchema[]
-    ).filter((caseItem: caseFormSchema) => {
-        const matchesSearch =
-            searchTerm === "" ||
-            caseItem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            caseItem.offence_type
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            (caseItem.students as involvedStudentSchema[]).some(
-                (student) =>
-                    student.full_name
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                    student.matric_number
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
-            );
-        const matchesType =
-            typeFilter === null || caseItem.offence_type === typeFilter;
+    const filteredCases: caseFormSchema[] =
+        UnifiedCases === null
+            ? []
+            : Array.isArray(UnifiedCases)
+            ? UnifiedCases.filter((caseItem: caseFormSchema) => {
+                  const matchesSearch =
+                      searchTerm === "" ||
+                      caseItem.title
+                          .toLowerCase()
+                          .includes(searchTerm.toLowerCase()) ||
+                      caseItem.offence_type
+                          .toLowerCase()
+                          .includes(searchTerm.toLowerCase()) ||
+                      (caseItem.students as involvedStudentSchema[]).some(
+                          (student) =>
+                              student.full_name
+                                  .toLowerCase()
+                                  .includes(searchTerm.toLowerCase()) ||
+                              student.matric_number
+                                  .toLowerCase()
+                                  .includes(searchTerm.toLowerCase())
+                      );
+                  const matchesType =
+                      typeFilter === null ||
+                      caseItem.offence_type === typeFilter;
 
-        return matchesSearch && matchesType;
-    });
+                  return matchesSearch && matchesType;
+              })
+            : [];
 
     const handleDelete = (caseId: number, type: string) => {
         alert(`Delete ${type} case ${caseId}`);
@@ -230,7 +240,9 @@ export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
                                                                     className="h-8 w-8 border-2 border-background"
                                                                 >
                                                                     <AvatarFallback className="text-xs">
-                                                                        {student.full_name
+                                                                        {(
+                                                                            student as involvedStudentSchema
+                                                                        ).full_name
                                                                             .split(
                                                                                 " "
                                                                             )
@@ -318,7 +330,7 @@ export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
                                                         onClick={() =>
                                                             onViewDetails(
                                                                 caseItem.id as number,
-                                                                caseItem.offence_type as
+                                                                caseItem.case_type as
                                                                     | "Individual"
                                                                     | "Grouped"
                                                             )
@@ -334,7 +346,7 @@ export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
                                                         onClick={() =>
                                                             handleEdit(
                                                                 caseItem.id as number,
-                                                                caseItem.offence_type as
+                                                                caseItem.case_type as
                                                                     | "Individual"
                                                                     | "Grouped"
                                                             )
@@ -353,7 +365,7 @@ export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
                                                         onClick={() =>
                                                             handleDelete(
                                                                 caseItem.id as number,
-                                                                caseItem.offence_type as
+                                                                caseItem.case_type as
                                                                     | "Individual"
                                                                     | "Grouped"
                                                             )

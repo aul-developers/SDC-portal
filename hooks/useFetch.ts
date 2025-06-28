@@ -6,7 +6,7 @@ import { useEffect, useReducer } from "react";
 import { DataApiClient } from "@/service/apiClient";
 
 type fetchStateReducer<T> = {
-    data: T[];
+    data: T[] | T | null;
     isError: string;
     isLoading: boolean;
 };
@@ -17,7 +17,6 @@ type ActionPayloadTypes<T> = {
     type: ACTION_TYPES;
     payload: fetchStateReducer<T>;
 };
-
 
 //if configured
 // type FetchResponse<T> = {
@@ -32,7 +31,7 @@ function fetchReducer<T>(
     switch (type) {
         case "FETCH_START":
             return {
-                data: [],
+                data: null,
                 isLoading: true,
                 isError: "",
             };
@@ -44,7 +43,7 @@ function fetchReducer<T>(
             };
         case "FETCH_ERROR":
             return {
-                data: [],
+                data: null,
                 isLoading: false,
                 isError: payload.isError,
             };
@@ -72,7 +71,7 @@ export const useFetch = <T>(
             dispatch({
                 type: "FETCH_START",
                 payload: {
-                    data: [],
+                    data: null,
                     isLoading: true,
                     isError: "",
                 },
@@ -98,7 +97,7 @@ export const useFetch = <T>(
                 dispatch({
                     type: "FETCH_ERROR",
                     payload: {
-                        data: [],
+                        data: null,
                         isLoading: false,
                         isError: axiosError.message as string,
                     },

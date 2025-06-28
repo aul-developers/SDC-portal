@@ -108,17 +108,25 @@ export function OffenceList({ searchQuery, severityFilter }: OffenceListProps) {
         setDeletingOffence(null);
     };
 
-    const filteredOffences = currentOffences.filter((offence) => {
-        const matchesSearch =
-            searchQuery === "" ||
-            offence.offence.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            offence.punishment
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase());
-        const matchesSeverity =
-            severityFilter === "all" || offence.severity === severityFilter;
-        return matchesSearch && matchesSeverity;
-    });
+    const filteredOffences =
+        currentOffences === null
+            ? []
+            : Array.isArray(currentOffences)
+            ? currentOffences.filter((offence) => {
+                  const matchesSearch =
+                      searchQuery === "" ||
+                      offence.offence
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase()) ||
+                      offence.punishment
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase());
+                  const matchesSeverity =
+                      severityFilter === "all" ||
+                      offence.severity === severityFilter;
+                  return matchesSearch && matchesSeverity;
+              })
+            : [];
 
     const sortedOffences = [...filteredOffences].sort((a, b) => {
         if (!sortColumn) return 0;

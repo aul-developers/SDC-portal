@@ -65,14 +65,14 @@ export function UserList({ onUserSelect, searchQuery }: UserListProps) {
     } = useFetch<getUserProps>("/get/user/");
     console.log(users);
     // Filter users based on search query
-    const filteredUsers = users.filter((user) =>
+    const filteredUsers = users === null ? [] : Array.isArray(users) ? users.filter((user) =>
         user.full_name !== null
             ? user.full_name
             : "".toLowerCase().includes(searchQuery.toLowerCase()) ||
               user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
               user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
               user.faculty.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    ): [];
 
     async function handleDeleteUser(selectedId: number) {
         try {
