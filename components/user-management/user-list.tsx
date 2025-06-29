@@ -62,17 +62,28 @@ export function UserList({ onUserSelect, searchQuery }: UserListProps) {
         data: users,
         isLoading,
         isError,
-    } = useFetch<getUserProps>("/get/user/");
+    } = useFetch<getUserProps[]>("/get/user/");
     console.log(users);
     // Filter users based on search query
-    const filteredUsers = users === null ? [] : Array.isArray(users) ? users.filter((user) =>
-        user.full_name !== null
-            ? user.full_name
-            : "".toLowerCase().includes(searchQuery.toLowerCase()) ||
-              user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              user.faculty.toLowerCase().includes(searchQuery.toLowerCase())
-    ): [];
+    const filteredUsers =
+        users === null
+            ? []
+            : Array.isArray(users)
+            ? users.filter((user) =>
+                  user.full_name !== null
+                      ? user.full_name
+                      : "".toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        user.email
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase()) ||
+                        user.role
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase()) ||
+                        user.faculty
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase())
+              )
+            : [];
 
     async function handleDeleteUser(selectedId: number) {
         try {
@@ -106,10 +117,16 @@ export function UserList({ onUserSelect, searchQuery }: UserListProps) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredUsers.length === 0 ? (
+                    {isLoading ? (
                         <TableRow>
                             <TableCell colSpan={6} className="h-24 text-center">
-                                No users found.
+                                Loading user's...
+                            </TableCell>
+                        </TableRow>
+                    ) : filteredUsers.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={6} className="h-24 text-center">
+                                NO user found.
                             </TableCell>
                         </TableRow>
                     ) : (

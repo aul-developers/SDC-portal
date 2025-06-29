@@ -616,11 +616,11 @@ export function CreateGroupedCaseForm({
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
                                                     <div>
                                                         <p className="font-medium text-gray-900">
-                                                            {student.name}
+                                                            {student?.full_name}
                                                         </p>
                                                         <p className="text-sm text-gray-600">
                                                             {
-                                                                student.matricNumber
+                                                                student?.matric_number
                                                             }
                                                         </p>
                                                     </div>

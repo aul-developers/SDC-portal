@@ -46,7 +46,7 @@ export function OffenceList({ searchQuery, severityFilter }: OffenceListProps) {
         data: currentOffences,
         isLoading,
         isError,
-    } = useFetch<Offence>("/offences/");
+    } = useFetch<Offence[]>("/offences/");
     console.log(currentOffences);
     const [sortColumn, setSortColumn] = useState<keyof Offence | null>(
         "offence"
@@ -192,7 +192,16 @@ export function OffenceList({ searchQuery, severityFilter }: OffenceListProps) {
                                         colSpan={4}
                                         className="h-24 text-center"
                                     >
-                                        No offences found.
+                                        Loading Offence.....
+                                    </TableCell>
+                                </TableRow>
+                            ) : sortedOffences.length === 0 ? (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={4}
+                                        className="h-24 text-center"
+                                    >
+                                        No Offence found.
                                     </TableCell>
                                 </TableRow>
                             ) : (

@@ -42,7 +42,7 @@ export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
         data: UnifiedCases,
         isLoading,
         isError,
-    } = useFetch<caseFormSchema>("/get/case/");
+    } = useFetch<caseFormSchema[]>("/get/case/");
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState<string | null>(null);
     console.log(UnifiedCases);
@@ -159,16 +159,6 @@ export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredCases.length === 0 && (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={9}
-                                    className="h-32 text-center text-muted-foreground"
-                                >
-                                    No cases found.
-                                </TableCell>
-                            </TableRow>
-                        )}
                         {isLoading ? (
                             <TableRow>
                                 <TableCell

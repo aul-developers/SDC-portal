@@ -6,7 +6,7 @@ import { useEffect, useReducer } from "react";
 import { DataApiClient } from "@/service/apiClient";
 
 type fetchStateReducer<T> = {
-    data: T[] | T | null;
+    data: T|null;
     isError: string;
     isLoading: boolean;
 };
@@ -58,7 +58,7 @@ export const useFetch = <T>(
     requestConfig?: AxiosRequestConfig
 ): fetchStateReducer<T> => {
     const initialState = {
-        data: [],
+        data: null,
         isError: "",
         isLoading: true,
     };
