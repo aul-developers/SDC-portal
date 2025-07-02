@@ -18,13 +18,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Eye, Edit, CheckCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn, generateErrorMessage, postRequest } from "@/lib/utils";
+import { postRequest } from "@/lib/utils";
 import { useFetch } from "@/hooks/useFetch";
 import { toast } from "sonner";
+import { useState } from "react";
 
-
-// Mock data for punishments
-
+// Interfaces
 interface PunishmentStatusListProps {
     status: "active" | "pending" | "completed";
     searchTerm: string;
@@ -49,8 +48,11 @@ interface PunishmentDataProps {
     created_by: number;
 }
 
-interface PunishmentListProps {
-    message: PunishmentDataProps[];
+interface PaginatedPunishmentList {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: PunishmentDataProps[];
 }
 
 export function PunishmentStatusList({
@@ -58,28 +60,25 @@ export function PunishmentStatusList({
     searchTerm,
     onViewDetails,
 }: PunishmentStatusListProps) {
-    // Filter punishments based on status and search term
-    const { data, isLoading, isError } =
-        useFetch<PunishmentListProps>("/get/punishments/")
-    const filteredPunishments = data?.message?.filter((punishment) => {
-        const matchesStatus = punishment.status.toLowerCase() === status;
-        const matchesSearch =
-            searchTerm === "" ||
-            punishment.id
-                .toString()
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            punishment.punishment_title
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            punishment.matric_no
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            punishment.punishment_type
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase());
+    const [page, setPage] = useState(1);
 
-        return matchesStatus && matchesSearch;
+    // Pass status to backend so pagination respects filtering
+    const { data, isLoading, isError } =
+        useFetch<PaginatedPunishmentList>(
+            `/get/punishments/?page=${page}&status=${status}`
+        );
+
+    // Filter only by searchTerm on frontend (backend filters status)
+    const filteredPunishments = data?.results?.filter((punishment) => {
+        if (searchTerm === "") return true;
+        const lowerSearch = searchTerm.toLowerCase();
+
+        return (
+            punishment.id.toString().toLowerCase().includes(lowerSearch) ||
+            punishment.punishment_title.toLowerCase().includes(lowerSearch) ||
+            punishment.matric_no.toLowerCase().includes(lowerSearch) ||
+            punishment.punishment_type.toLowerCase().includes(lowerSearch)
+        );
     });
 
     const handleMarkActive = async (punishmentId: string) => {
@@ -87,42 +86,39 @@ export function PunishmentStatusList({
             const response = await postRequest("update/punishment/", {
                 punishment_id: punishmentId,
                 status: "Active",
+            });
+
+            if (response) {
+                toast.success(response.message);
             }
-
-        )
-
-        if (response) {
-            console.log(response.message)
-           toast.success(response.message);
-        }
-        }catch (error:any){
-           const errorMessage = error?.response?.data?.error ||
-           error?.response?.data?.message || "Failed to mark punishment as completed";
-           toast.error(errorMessage);
+        } catch (error: any) {
+            const errorMessage =
+                error?.response?.data?.error ||
+                error?.response?.data?.message ||
+                "Failed to mark punishment as active";
+            toast.error(errorMessage);
         }
     };
 
-        const handleMarkComplete = async (punishmentId: string) => {
+    const handleMarkComplete = async (punishmentId: string) => {
         try {
             const response = await postRequest("update/punishment/", {
                 punishment_id: punishmentId,
                 status: "Completed",
+            });
+
+            if (response) {
+                toast.success(response.message);
             }
-
-        )
-
-        if (response) {
-            console.log(response.message)
-           toast.success(response.message);
-        }
-        }catch (error:any){
-           const errorMessage = error?.response?.data?.error ||
-           error?.response?.data?.message || "Failed to mark punishment as completed";
-           toast.error(errorMessage);
+        } catch (error: any) {
+            const errorMessage =
+                error?.response?.data?.error ||
+                error?.response?.data?.message ||
+                "Failed to mark punishment as completed";
+            toast.error(errorMessage);
         }
     };
 
-    // Custom title and empty state message based on status
     const getStatusTitle = () => {
         switch (status) {
             case "active":
@@ -186,7 +182,7 @@ export function PunishmentStatusList({
                                         colSpan={7}
                                         className="h-24 text-center"
                                     >
-                                        Cases not found
+                                        {getEmptyStateMessage()}
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -263,7 +259,7 @@ export function PunishmentStatusList({
                                                             className="flex w-full items-center cursor-pointer"
                                                             onClick={() =>
                                                                 onViewDetails(
-                                                                    punishment?.id.toString()
+                                                                    punishment.id.toString()
                                                                 )
                                                             }
                                                         >
@@ -273,26 +269,28 @@ export function PunishmentStatusList({
                                                     </DropdownMenuItem>
                                                     {status !== "completed" && (
                                                         <>
-                                                            <DropdownMenuItem
-                                                                asChild
-                                                            >
+                                                            <DropdownMenuItem asChild>
                                                                 <button
                                                                     className="flex w-full items-center cursor-pointer"
-                                                                    onClick={() =>
-                                                                    {status == "pending" ? handleMarkActive(
-                                                                            punishment?.id.toString()
-                                                                        ) : handleMarkComplete(
-                                                                            punishment?.id.toString()
-                                                                        )}
-                                                                    }
+                                                                    onClick={() => {
+                                                                        status ===
+                                                                        "pending"
+                                                                            ? handleMarkActive(
+                                                                                  punishment.id.toString()
+                                                                              )
+                                                                            : handleMarkComplete(
+                                                                                  punishment.id.toString()
+                                                                              );
+                                                                    }}
                                                                 >
                                                                     <CheckCircle className="mr-2 h-4 w-4" />
-                                                                    {status == "pending" ? "Mark as Active" : "Mark as Completed" }
+                                                                    {status ===
+                                                                    "pending"
+                                                                        ? "Mark as Active"
+                                                                        : "Mark as Completed"}
                                                                 </button>
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                asChild
-                                                            >
+                                                            <DropdownMenuItem asChild>
                                                                 <button
                                                                     className="flex w-full items-center cursor-pointer"
                                                                     onClick={() =>
@@ -302,8 +300,7 @@ export function PunishmentStatusList({
                                                                     }
                                                                 >
                                                                     <Edit className="mr-2 h-4 w-4" />
-                                                                    Update
-                                                                    Progress
+                                                                    Update Progress
                                                                 </button>
                                                             </DropdownMenuItem>
                                                         </>
@@ -321,7 +318,28 @@ export function PunishmentStatusList({
 
             <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div>
-                    Showing {filteredPunishments?.length} {status} punishments
+                    Showing {filteredPunishments?.length ?? 0} {status} punishments
+                </div>
+                <div className="flex items-center gap-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={!data?.previous}
+                    >
+                        Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                        Page {page}
+                    </span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage((prev) => prev + 1)}
+                        disabled={!data?.next}
+                    >
+                        Next
+                    </Button>
                 </div>
             </div>
         </div>
