@@ -149,7 +149,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             email: "",
         });
     const [date, setDate] = useState<Date>();
-    const [isSubmitting, setIsSubmitting] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleInputChange = useCallback(
         (field: keyof caseFormSchema, value: string) => {
@@ -772,7 +772,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
                     <Button
                         type="submit"
                         className="bg-sdc-blue hover:bg-sdc-blue/90 text-white px-6"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting ? true : false}
                     >
                         {isSubmitting
                             ? "Creating Case..."

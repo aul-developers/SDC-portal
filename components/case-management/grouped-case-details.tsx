@@ -63,10 +63,9 @@ export function GroupedCaseDetails({ groupedCaseId }: GroupedCaseDetailsProps) {
                                         "bg-green-500 text-white"
                                 )}
                             >
-                                {(caseDetails?.priority as string)
-                                    .charAt(0)
-                                    .toUpperCase() +
-                                    caseDetails?.priority.slice(1)}{" "}
+                                  {(caseDetails?.priority && caseDetails.priority.length > 0)
+    ? caseDetails.priority.charAt(0).toUpperCase() + caseDetails.priority.slice(1)
+    : "Unknown"} Priority
                                 Priority
                             </Badge>
                         </div>

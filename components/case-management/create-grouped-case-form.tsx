@@ -1,339 +1,337 @@
-"use client";
+    "use client";
 
-import type React from "react";
+    import type React from "react";
 
-import { useCallback, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { X, Plus, MapPin, User } from "lucide-react";
-import { caseFormSchema } from "./create-case-form";
-import { generateErrorMessage, postRequest } from "@/lib/utils";
-import { toast } from "sonner";
-import { format } from "date-fns";
+    import { useCallback, useState } from "react";
+    import { Button } from "@/components/ui/button";
+    import { Input } from "@/components/ui/input";
+    import { Label } from "@/components/ui/label";
+    import { Textarea } from "@/components/ui/textarea";
+    import {
+        Select,
+        SelectContent,
+        SelectItem,
+        SelectTrigger,
+        SelectValue,
+    } from "@/components/ui/select";
+    import {
+        Card,
+        CardContent,
+        CardDescription,
+        CardHeader,
+        CardTitle,
+    } from "@/components/ui/card";
+    import { Badge } from "@/components/ui/badge";
+    import { X, Plus, MapPin, User } from "lucide-react";
+    import { caseFormSchema } from "./create-case-form";
+    import { generateErrorMessage, postRequest } from "@/lib/utils";
+    import { toast } from "sonner";
+    import { format } from "date-fns";
 
-interface CreateGroupedCaseFormProps {
-    onSuccess: () => void;
-}
+    interface CreateGroupedCaseFormProps {
+        onSuccess: () => void;
+    }
 
-interface Student {
-    full_name: string;
-    matric_number: string;
-    role: string;
-    department: string;
-    faculty: string;
-    level: string;
-    email: string;
-    phone: string;
-}
+    interface Student {
+        full_name: string;
+        matric_number: string;
+        role: string;
+        department: string;
+        faculty: string;
+        level: string;
+        email: string;
+        phone: string;
+    }
 
-export function CreateGroupedCaseForm({
-    onSuccess,
-}: CreateGroupedCaseFormProps) {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [offence_type, setOffenceType] = useState("");
-    const [incident_date, setIncidentDate] = useState("");
-    const [incident_time, setIncidentTime] = useState("");
-    const [position, setPosition] = useState("");
-    const [location, setLocation] = useState("");
-    const [reported_by, setReportedBy] = useState("");
-    const [reporter_mail, setReporterEmail] = useState("");
-    const [reporters_phone, setReporterPhone] = useState("");
-    const [priority, setPriority] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [students, setStudents] = useState<Student[]>([]);
-    const [newStudent, setNewStudent] = useState<Student>({
-        full_name: "",
-        matric_number: "",
-        role: "Collaborator",
-        department: "",
-        faculty: "",
-        level: "",
-        email: "",
-        phone: "",
-    });
-
-    const handleAddStudent = () => {
-        if (
-            newStudent.full_name &&
-            newStudent.matric_number &&
-            newStudent.department &&
-            newStudent.faculty
-        ) {
-            setStudents([...students, newStudent]);
-            setNewStudent({
-                full_name: "",
-                matric_number: "",
-                role: "Collaborator",
-                department: "",
-                faculty: "",
-                level: "",
-                email: "",
-                phone: "",
-            });
-        }
-    };
-
-    const handleRemoveStudent = (index: number) => {
-        setStudents(students.filter((_, i) => i !== index));
-    };
-    const handleUpdateStudentField = useCallback((values: Partial<Student>) => {
-        setNewStudent((prevStudent) => {
-            return { ...prevStudent, values };
+    export function CreateGroupedCaseForm({
+        onSuccess,
+    }: CreateGroupedCaseFormProps) {
+        const [title, setTitle] = useState("");
+        const [description, setDescription] = useState("");
+        const [offence_type, setOffenceType] = useState("");
+        const [incident_date, setIncidentDate] = useState("");
+        const [incident_time, setIncidentTime] = useState("");
+        const [position, setPosition] = useState("");
+        const [location, setLocation] = useState("");
+        const [reported_by, setReportedBy] = useState("");
+        const [reporter_mail, setReporterEmail] = useState("");
+        const [reporters_phone, setReporterPhone] = useState("");
+        const [priority, setPriority] = useState("");
+        const [isSubmitting, setIsSubmitting] = useState(false);
+        const [students, setStudents] = useState<Student[]>([]);
+        const [newStudent, setNewStudent] = useState<Student>({
+            full_name: "",
+            matric_number: "",
+            role: "Collaborator",
+            department: "",
+            faculty: "",
+            level: "",
+            email: "",
+            phone: "",
         });
-    }, []);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-
-        const formattedDate =
-            incident_date && format(incident_date, "yyyy-MM-dd");
-        const groupedCase: caseFormSchema = {
-            title,
-            description,
-            case_type: "Grouped",
-            offence_type,
-            incident_date: formattedDate,
-            incident_time,
-            location,
-            position,
-            reported_by,
-            reporter_mail,
-            reporters_phone,
-            priority,
-            students,
-        };
-        try {
-            const response = await postRequest<caseFormSchema>(
-                "/create/case/",
-                groupedCase
-            );
-
-            if (response) {
-                setIsSubmitting(false);
-                toast.success(response.message);
+        const handleAddStudent = () => {
+            if (
+                newStudent.full_name &&
+                newStudent.matric_number &&
+                newStudent.department &&
+                newStudent.faculty
+            ) {
+                setStudents([...students, newStudent]);
+                setNewStudent({
+                    full_name: "",
+                    matric_number: "",
+                    role: "Collaborator",
+                    department: "",
+                    faculty: "",
+                    level: "",
+                    email: "",
+                    phone: "",
+                });
             }
-        } catch (error) {
-            const errorMessage = generateErrorMessage(error);
-            toast.error(errorMessage);
-            setIsSubmitting(false);
-        }
-    
-        onSuccess();
-    };
+        };
 
-    return (
-        <div className="max-w-6xl mx-auto p-6 space-y-8">
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">
-                    Create Grouped Case
-                </h1>
-                <p className="text-gray-600 mt-1">
-                    Create a new case involving multiple students
-                </p>
-            </div>
+        const handleRemoveStudent = (index: number) => {
+            setStudents(students.filter((_, i) => i !== index));
+        };
+        const handleUpdateStudentField = useCallback((values: Partial<Student>) => {
+    setNewStudent((prevStudent) => ({ ...prevStudent, ...values }));
+}, []);
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Basic Case Information */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <User className="h-5 w-5" />
-                            Case Information
-                        </CardTitle>
-                        <CardDescription>
-                            Basic information about the grouped case
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        const handleSubmit = async (e: React.FormEvent) => {
+            e.preventDefault();
+            setIsSubmitting(true);
+
+            const formattedDate =
+                incident_date && format(incident_date, "yyyy-MM-dd");
+            const groupedCase: caseFormSchema = {
+                title,
+                description,
+                case_type: "Grouped",
+                offence_type,
+                incident_date: formattedDate,
+                incident_time,
+                location,
+                position,
+                reported_by,
+                reporter_mail,
+                reporters_phone,
+                priority,
+                students,
+            };
+            try {
+                const response = await postRequest<caseFormSchema>(
+                    "/create/case/",
+                    groupedCase
+                );
+
+                if (response) {
+                    setIsSubmitting(false);
+                    toast.success(response.message);
+                }
+            } catch (error) {
+                const errorMessage = generateErrorMessage(error);
+                toast.error(errorMessage);
+                setIsSubmitting(false);
+            }
+        
+            onSuccess();
+        };
+
+        return (
+            <div className="max-w-6xl mx-auto p-6 space-y-8">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-gray-900">
+                        Create Grouped Case
+                    </h1>
+                    <p className="text-gray-600 mt-1">
+                        Create a new case involving multiple students
+                    </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    {/* Basic Case Information */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <User className="h-5 w-5" />
+                                Case Information
+                            </CardTitle>
+                            <CardDescription>
+                                Basic information about the grouped case
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="title">Case Title *</Label>
+                                    <Input
+                                        id="title"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        placeholder="e.g., Academic Dishonesty - Group Assignment"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="offenceType">
+                                        Offence Type *
+                                    </Label>
+                                    <Select
+                                        value={offence_type}
+                                        onValueChange={setOffenceType}
+                                        required
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select offence type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Academic Dishonesty">
+                                                Academic Dishonesty
+                                            </SelectItem>
+                                            <SelectItem value="Behavioral Misconduct">
+                                                Behavioral Misconduct
+                                            </SelectItem>
+                                            <SelectItem value="Property Damage">
+                                                Property Damage
+                                            </SelectItem>
+                                            <SelectItem value="Substance Violation">
+                                                Substance Violation
+                                            </SelectItem>
+                                            <SelectItem value="Harassment">
+                                                Harassment
+                                            </SelectItem>
+                                            <SelectItem value="Examination Malpractice">
+                                                Examination Malpractice
+                                            </SelectItem>
+                                            <SelectItem value="Other">
+                                                Other
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="title">Case Title *</Label>
-                                <Input
-                                    id="title"
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="e.g., Academic Dishonesty - Group Assignment"
+                                <Label htmlFor="description">Description *</Label>
+                                <Textarea
+                                    id="description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="Detailed description of the incident..."
+                                    rows={4}
                                     required
                                 />
                             </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="offenceType">
-                                    Offence Type *
-                                </Label>
+                                <Label htmlFor="priority">Priority Level *</Label>
                                 <Select
-                                    value={offence_type}
-                                    onValueChange={setOffenceType}
+                                    value={priority}
+                                    onValueChange={setPriority}
                                     required
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select offence type" />
+                                        <SelectValue placeholder="Select priority level" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Academic Dishonesty">
-                                            Academic Dishonesty
+                                        <SelectItem value="Low">Low</SelectItem>
+                                        <SelectItem value="Medium">
+                                            Medium
                                         </SelectItem>
-                                        <SelectItem value="Behavioral Misconduct">
-                                            Behavioral Misconduct
-                                        </SelectItem>
-                                        <SelectItem value="Property Damage">
-                                            Property Damage
-                                        </SelectItem>
-                                        <SelectItem value="Substance Violation">
-                                            Substance Violation
-                                        </SelectItem>
-                                        <SelectItem value="Harassment">
-                                            Harassment
-                                        </SelectItem>
-                                        <SelectItem value="Examination Malpractice">
-                                            Examination Malpractice
-                                        </SelectItem>
-                                        <SelectItem value="Other">
-                                            Other
+                                        <SelectItem value="High">High</SelectItem>
+                                        <SelectItem value="Critical">
+                                            Critical
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
-                        </div>
+                        </CardContent>
+                    </Card>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description *</Label>
-                            <Textarea
-                                id="description"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Detailed description of the incident..."
-                                rows={4}
-                                required
-                            />
-                        </div>
+                    {/* Incident Details */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <MapPin className="h-5 w-5" />
+                                Incident Details
+                            </CardTitle>
+                            <CardDescription>
+                                When and where the incident occurred
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="incidentDate">
+                                        Incident Date *
+                                    </Label>
+                                    <Input
+                                        id="incidentDate"
+                                        type="date"
+                                        value={incident_date}
+                                        onChange={(e) =>
+                                            setIncidentDate(e.target.value)
+                                        }
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="incidentTime">
+                                        Incident Time
+                                    </Label>
+                                    <Input
+                                        id="incidentTime"
+                                        type="time"
+                                        value={incident_time}
+                                        onChange={(e) =>
+                                            setIncidentTime(e.target.value)
+                                        }
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="location">Location *</Label>
+                                    <Input
+                                        id="location"
+                                        value={location}
+                                        onChange={(e) =>
+                                            setLocation(e.target.value)
+                                        }
+                                        placeholder="e.g., Library, Lecture Hall A"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="priority">Priority Level *</Label>
-                            <Select
-                                value={priority}
-                                onValueChange={setPriority}
-                                required
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select priority level" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Low">Low</SelectItem>
-                                    <SelectItem value="Medium">
-                                        Medium
-                                    </SelectItem>
-                                    <SelectItem value="High">High</SelectItem>
-                                    <SelectItem value="Critical">
-                                        Critical
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Incident Details */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <MapPin className="h-5 w-5" />
-                            Incident Details
-                        </CardTitle>
-                        <CardDescription>
-                            When and where the incident occurred
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="incidentDate">
-                                    Incident Date *
-                                </Label>
-                                <Input
-                                    id="incidentDate"
-                                    type="date"
-                                    value={incident_date}
-                                    onChange={(e) =>
-                                        setIncidentDate(e.target.value)
-                                    }
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="incidentTime">
-                                    Incident Time
-                                </Label>
-                                <Input
-                                    id="incidentTime"
-                                    type="time"
-                                    value={incident_time}
-                                    onChange={(e) =>
-                                        setIncidentTime(e.target.value)
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="location">Location *</Label>
-                                <Input
-                                    id="location"
-                                    value={location}
-                                    onChange={(e) =>
-                                        setLocation(e.target.value)
-                                    }
-                                    placeholder="e.g., Library, Lecture Hall A"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Reporter Information */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <User className="h-5 w-5" />
-                            Reporter Information
-                        </CardTitle>
-                        <CardDescription>
-                            Details of the person who reported this incident
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="reportedBy">
-                                    Reported By *
-                                </Label>
-                                <Input
-                                    id="reportedBy"
-                                    value={reported_by}
-                                    onChange={(e) =>
-                                        setReportedBy(e.target.value)
-                                    }
-                                    placeholder="Full name of reporter"
-                                    required
-                                />
-                            </div>
+                    {/* Reporter Information */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <User className="h-5 w-5" />
+                                Reporter Information
+                            </CardTitle>
+                            <CardDescription>
+                                Details of the person who reported this incident
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="reportedBy">
+                                        Reported By *
+                                    </Label>
+                                    <Input
+                                        id="reportedBy"
+                                        value={reported_by}
+                                        onChange={(e) =>
+                                            setReportedBy(e.target.value)
+                                        }
+                                        placeholder="Full name of reporter"
+                                        required
+                                    />
+                                </div>
                             <div className="space-y-2">
                                 <Label htmlFor="reporter-title">
                                     Reporter Position
@@ -402,11 +400,7 @@ export function CreateGroupedCaseForm({
                                     <Input
                                         id="studentName"
                                         value={newStudent.full_name}
-                                        onChange={(e) =>
-                                            handleUpdateStudentField({
-                                                full_name: e.target.value,
-                                            })
-                                        }
+                                        onChange={(e) => handleUpdateStudentField({ full_name: e.target.value })}
                                         placeholder="Full name"
                                     />
                                 </div>
