@@ -12,7 +12,7 @@ export default function LoginPage() {
                         <div className="relative h-16 w-16 mb-6 overflow-hidden rounded-xl">
                             <div className="absolute inset-0 bg-sdc-navy"></div>
                             <Image
-                                src="/aul-abstract.png"
+                                src="/logo.png"
                                 alt="AULogo"
                                 fill
                                 className="mix-blend-overlay"
@@ -45,7 +45,7 @@ export default function LoginPage() {
             {/* Right side - Image */}
             <div className="hidden sm:block sm:w-1/2 relative">
                 <Image
-                    src="/university-campus.png"
+                    src="/anchor.jpg"
                     alt="University Campus"
                     fill
                     className="object-cover"

@@ -675,7 +675,7 @@ export function CreateGroupedCaseForm({
                     <Button
                         type="submit"
                         className="bg-sdc-blue hover:bg-sdc-blue/90 text-white"
-                        disabled={students.length === 0}
+                        disabled={isSubmitting ? true : false}
                     >
                         {isSubmitting
                             ? "Creating Group case..."

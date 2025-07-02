@@ -17,9 +17,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Eye, Edit, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn, generateErrorMessage, postRequest } from "@/lib/utils";
 import { useFetch } from "@/hooks/useFetch";
+import { toast } from "sonner";
+
 
 // Mock data for punishments
 
@@ -80,9 +82,44 @@ export function PunishmentStatusList({
         return matchesStatus && matchesSearch;
     });
 
-    const handleMarkComplete = (punishmentId: string) => {
-        // In a real application, this would call an API to update the punishment status
-        alert(`Mark punishment ${punishmentId} as complete`);
+    const handleMarkActive = async (punishmentId: string) => {
+        try {
+            const response = await postRequest("update/punishment/", {
+                punishment_id: punishmentId,
+                status: "Active",
+            }
+
+        )
+
+        if (response) {
+            console.log(response.message)
+           toast.success(response.message);
+        }
+        }catch (error:any){
+           const errorMessage = error?.response?.data?.error ||
+           error?.response?.data?.message || "Failed to mark punishment as completed";
+           toast.error(errorMessage);
+        }
+    };
+
+        const handleMarkComplete = async (punishmentId: string) => {
+        try {
+            const response = await postRequest("update/punishment/", {
+                punishment_id: punishmentId,
+                status: "Completed",
+            }
+
+        )
+
+        if (response) {
+            console.log(response.message)
+           toast.success(response.message);
+        }
+        }catch (error:any){
+           const errorMessage = error?.response?.data?.error ||
+           error?.response?.data?.message || "Failed to mark punishment as completed";
+           toast.error(errorMessage);
+        }
     };
 
     // Custom title and empty state message based on status
@@ -199,49 +236,6 @@ export function PunishmentStatusList({
                                         <TableCell>
                                             {punishment?.severity_level}
                                         </TableCell>
-                                        {/* <TableCell>
-                                            <div className="text-sm">
-                                                <div>
-                                                    {new Date(
-                                                        punishment?.start_time
-                                                    ).toLocaleDateString()}
-                                                </div>
-                                                <div className="text-muted-foreground">
-                                                    to{" "}
-                                                    {new Date(
-                                                        punishment.end_time
-                                                    ).toLocaleDateString()}
-                                                </div>
-                                            </div>
-                                        </TableCell> */}
-                                        {/* <TableCell>
-                          <div className="w-full">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium">{punishment.progress}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div
-                                className={cn(
-                                  "h-2 rounded-full",
-                                  punishment.status === "completed" ? "bg-emerald-500" : "bg-blue-500",
-                                )}
-                                style={{ width: `${punishment.progress}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </TableCell> */}
-                                        {/* {status !== "completed" && (
-                                            <TableCell>
-                                                {Math.ceil(
-                                                    (new Date(
-                                                        punishment.end_time
-                                                    ).getTime() -
-                                                        new Date().getTime()) /
-                                                        (1000 * 60 * 60 * 24)
-                                                )}{" "}
-                                                days
-                                            </TableCell>
-                                        )} */}
                                         {status === "completed" && (
                                             <TableCell>
                                                 {new Date(
@@ -285,14 +279,15 @@ export function PunishmentStatusList({
                                                                 <button
                                                                     className="flex w-full items-center cursor-pointer"
                                                                     onClick={() =>
-                                                                        handleMarkComplete(
+                                                                    {status == "pending" ? handleMarkActive(
                                                                             punishment?.id.toString()
-                                                                        )
+                                                                        ) : handleMarkComplete(
+                                                                            punishment?.id.toString()
+                                                                        )}
                                                                     }
                                                                 >
                                                                     <CheckCircle className="mr-2 h-4 w-4" />
-                                                                    Mark as
-                                                                    Complete
+                                                                    {status == "pending" ? "Mark as Active" : "Mark as Completed" }
                                                                 </button>
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem
