@@ -135,22 +135,8 @@ export function CreateGroupedCaseForm({
             const errorMessage = generateErrorMessage(error);
             toast.error(errorMessage);
             setIsSubmitting(false);
-            console.log(error);
         }
-        console.log(groupedCase);
-        console.log("Creating grouped case:", {
-            title,
-            description,
-            offence_type,
-            incident_date,
-            incident_time,
-            location,
-            reported_by,
-            reporter_mail,
-            reporters_phone,
-            priority,
-            students,
-        });
+    
         onSuccess();
     };
 

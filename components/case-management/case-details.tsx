@@ -37,7 +37,7 @@ interface CaseDetailsProps {
 }
 
 export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
-    console.log(propCaseId);
+    
     const { data, isLoading, isError } = useFetch<caseFormSchema>(
         `/get/specific/case/${propCaseId}/`
     );

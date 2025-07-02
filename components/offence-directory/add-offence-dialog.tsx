@@ -54,7 +54,6 @@ export function AddOffenceDialog({
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // console.log(offenceForm);
     const handleUpdateOffenceFormField = useCallback(
         (offenceValues: Partial<offenceFormProps>) => {
             setOffenceForm((prevData) => {
@@ -75,7 +74,6 @@ export function AddOffenceDialog({
             severity: offenceForm.offenceSeverity,
             punishment: offenceForm.offencePunishment,
         };
-        console.log(SubmittedOffenceForm);
 
         try {
             const response = await postRequest<submitOffenceProps>(
@@ -85,9 +83,7 @@ export function AddOffenceDialog({
 
             if (response) {
                 toast.success(response.message);
-                console.log(response);
             }
-            console.log(response);
 
             setIsSubmitting(false);
         } catch (error) {
@@ -95,7 +91,6 @@ export function AddOffenceDialog({
                 error instanceof Error ? error.message : "Unexpected error";
 
             toast.error(errorMessage);
-            console.log(error);
             setIsSubmitting(false);
         }
 

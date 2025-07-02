@@ -16,8 +16,6 @@ export function UserManagement() {
     const handleUserSelect = (userId: number) => {
         setSelectedUserId(userId);
     };
-
-    console.log(selectedUserId);
     // Handle closing user details
     const handleCloseDetails = () => {
         setSelectedUserId(null);

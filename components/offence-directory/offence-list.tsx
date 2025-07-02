@@ -47,7 +47,6 @@ export function OffenceList({ searchQuery, severityFilter }: OffenceListProps) {
         isLoading,
         isError,
     } = useFetch<Offence[]>("/offences/");
-    console.log(currentOffences);
     const [sortColumn, setSortColumn] = useState<keyof Offence | null>(
         "offence"
     );
@@ -77,7 +76,6 @@ export function OffenceList({ searchQuery, severityFilter }: OffenceListProps) {
 
             if (response) {
                 toast.success(response.message);
-                console.log(response);
             }
         } catch (error) {
             const errorMessage =
@@ -101,8 +99,6 @@ export function OffenceList({ searchQuery, severityFilter }: OffenceListProps) {
                 `/offences/${deletingOffence.id}/`,
                 deletingOffence
             );
-
-            console.log(response);
         }
         setShowDeleteDialog(false);
         setDeletingOffence(null);

@@ -188,7 +188,6 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             ...state,
             students: [studentInvolved],
         };
-        console.log(newIndividualCase);
         try {
             const response = await postRequest<caseFormSchema>(
                 "/create/case/",
@@ -202,7 +201,6 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             const errorMessage = generateErrorMessage(error);
             toast.error(errorMessage);
             setIsSubmitting(false);
-            console.log(error);
         }
     };
 

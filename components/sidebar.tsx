@@ -45,8 +45,6 @@ export function Sidebar() {
             toast.success(response.message);
         }
 
-        console.log(response);
-
         return router.push("/");
     }
 

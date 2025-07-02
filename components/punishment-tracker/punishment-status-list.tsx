@@ -58,8 +58,7 @@ export function PunishmentStatusList({
 }: PunishmentStatusListProps) {
     // Filter punishments based on status and search term
     const { data, isLoading, isError } =
-        useFetch<PunishmentListProps>("/get/punishments/");
-    console.log(data);
+        useFetch<PunishmentListProps>("/get/punishments/")
     const filteredPunishments = data?.message?.filter((punishment) => {
         const matchesStatus = punishment.status.toLowerCase() === status;
         const matchesSearch =

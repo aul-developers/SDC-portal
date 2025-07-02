@@ -58,7 +58,7 @@ export const deleteRequest = async <T>(
 
         return deleteRequest.data;
     } catch (error) {
-        console.log(error);
+        return error;
     }
 };
 

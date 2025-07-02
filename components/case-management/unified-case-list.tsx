@@ -45,7 +45,7 @@ export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
     } = useFetch<caseFormSchema[]>("/get/case/");
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState<string | null>(null);
-    console.log(UnifiedCases);
+  
 
     // Filter cases based on search term, status filter, and type filter
     const filteredCases: caseFormSchema[] =

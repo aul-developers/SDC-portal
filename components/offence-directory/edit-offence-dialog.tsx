@@ -66,7 +66,6 @@ export function EditOffenceDialog({
                 offenceSeverity: offence.severity,
                 offencePunishment: offence.punishment,
             });
-            console.log(offence.id);
         }
     }, [offence]);
 

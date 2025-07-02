@@ -35,13 +35,11 @@ export function PunishmentTracker() {
 
   const handleAddPunishmentSuccess = useCallback(() => {
     // Refresh the punishment list or show success message
-    console.log("Punishment added successfully!")
     // You could trigger a refresh of the punishment data here
   }, [])
 
   const handlePunishmentAdded = () => {
     // Refresh the punishment list or update state
-    console.log("Punishment added successfully!")
   }
 
   const renderContent = () => {

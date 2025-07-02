@@ -43,7 +43,7 @@ export function LoginForm() {
                     password: formPasswordInputRef.current.value,
                 };
 
-                console.log(loginInfo);
+
 
                 const response = await postRequest<loginInfo>(
                     "/sdc/login/",
@@ -56,7 +56,6 @@ export function LoginForm() {
                 setIsLoading(false);
                 router.push("/dashboard");
             } catch (error: unknown) {
-                console.log(error);
                 const errorExpectedMessage = generateErrorMessage(error);
                 toast.error(errorExpectedMessage);
                 setIsLoading(false);

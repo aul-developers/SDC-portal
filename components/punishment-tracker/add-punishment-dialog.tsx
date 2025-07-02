@@ -98,9 +98,6 @@ export function AddPunishmentDialog({
             setCurrentCaseId("");
         }
     };
-
-    console.log(startDate);
-    console.log(endDate);
     const removeCaseId = (caseId: string) => {
         setCaseIds(caseIds.filter((id) => id !== caseId));
     };
@@ -164,8 +161,6 @@ export function AddPunishmentDialog({
             related_cases: caseIDs,
         };
 
-        console.log("Creating punishment:", punishmentData);
-
         // Simulate API call
 
         try {
@@ -182,7 +177,6 @@ export function AddPunishmentDialog({
             const errorMessage = generateErrorMessage(error);
             toast.error(errorMessage);
             setIsSubmitting(false);
-            console.log(error);
         }
 
         onOpenChange(false);

@@ -253,7 +253,7 @@ export function UserDetails({ userId, onClose }: UserDetailsProps) {
   // Handle save
   const handleSave = () => {
     // In a real app, this would save to the database
-    console.log("Saving user:", formValues)
+ 
     onClose()
   }
 

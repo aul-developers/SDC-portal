@@ -63,7 +63,6 @@ export function UserList({ onUserSelect, searchQuery }: UserListProps) {
         isLoading,
         isError,
     } = useFetch<getUserProps[]>("/get/user/");
-    console.log(users);
     // Filter users based on search query
     const filteredUsers =
         users === null

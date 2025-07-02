@@ -81,7 +81,7 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
             faculty: formValues.faculty,
         };
         // In a real app, this would add the user to the database
-        console.log("Adding user:", formValues);
+
         try {
             const response = await postRequest<userSchema>(
                 "/create/user/",
@@ -94,7 +94,6 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
             }
         } catch (error) {
             setIsSubmiting(false);
-            console.log(error);
             const errorMessage =
                 error instanceof Error
                     ? error.message
