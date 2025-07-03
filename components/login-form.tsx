@@ -114,7 +114,7 @@ export function LoginForm() {
                 className="w-full h-11 bg-sdc-blue hover:bg-sdc-blue/90 transition-colors"
                 disabled={isLoading}
             >
-                {isLoading ? <LoadingButton text="Signing in" /> : "Sign up"}
+                {isLoading ? <LoadingButton text="Signing in" /> : "Sign In"}
             </Button>
         </form>
     );
