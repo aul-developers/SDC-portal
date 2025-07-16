@@ -68,6 +68,7 @@ export function AddPunishmentDialog({
     const [punishmentType, setPunishmentType] = useState("");
     const [matricNumber, setMatricNumber] = useState("");
     const [department, setDepartment] = useState("");
+    const [level, setLevel] = useState("");
     const [fullName, setFullName] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -109,24 +110,6 @@ export function AddPunishmentDialog({
         }
     };
 
-    // function handleDatePick(
-    //     selectedDate: Date | undefined,
-    //     type: "start" | "end"
-    // ) {
-    //     let formattedDate = "";
-    //     if (type === "start") {
-    //         setStartDate(selectedDate);
-    //         formattedDate = selectedDate
-    //             ? format(selectedDate, "yyyy-MM-dd")
-    //             : "";
-    //     } else {
-    //         setEndDate(selectedDate);
-    //         formattedDate = selectedDate
-    //             ? format(selectedDate, "yyyy-MM-dd")
-    //             : "";
-    //     }
-    //     return formattedDate;
-    // }
 
     function handleStartDate(Date: string) {
         setStartDate(Date);
@@ -152,6 +135,7 @@ export function AddPunishmentDialog({
             punishment_type: punishmentType,
             severity_level: severity,
             punishment_title: title,
+            level: level,
             description,
             start_time: formmattedStartDate,
             end_time: formmattedEndDate,
@@ -188,6 +172,7 @@ export function AddPunishmentDialog({
         setPunishmentType("");
         setTitle("");
         setDescription("");
+        setLevel("");
         setSeverity("");
         setPriority("");
         setStartDate(undefined);
@@ -295,6 +280,20 @@ export function AddPunishmentDialog({
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
+                                </div>
+                                    <div className="space-y-2">
+                                    <Label htmlFor="appeal-period">
+                                        Level
+                                    </Label>
+                                    <Input
+                                        id="level"
+                                        type="text"
+                                        value={level}
+                                        onChange={(e) =>
+                                            setLevel(e.target.value)
+                                        }
+                                        placeholder="Level when this punishment is being initited"
+                                    />
                                 </div>
 
                                 <div className="space-y-2">

@@ -140,7 +140,7 @@ export function UserList({ onUserSelect, searchQuery }: UserListProps) {
                                         <div className="relative h-10 w-10 overflow-hidden rounded-full">
                                             <Image
                                                 src={"/placeholder.svg"}
-                                                alt={user.full_name}
+                                                alt={user.full_name || "User avatar"}
                                                 fill
                                                 className="object-cover"
                                             />

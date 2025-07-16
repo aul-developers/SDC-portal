@@ -219,142 +219,111 @@ export function GroupedCaseDetails({ groupedCaseId }: GroupedCaseDetailsProps) {
                         </Card> */}
                     </div>
 
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-lg font-medium">
-                                Students Involved
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                {(
-                                    caseDetails?.students as involvedStudentSchema[]
-                                ).map((student, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center space-x-3 rounded-lg border p-3"
-                                    >
-                                        <Avatar className="h-10 w-10">
-                                            <AvatarImage
-                                                src={"/placeholder.svg"}
-                                                alt={student.full_name}
-                                            />
-                                            <AvatarFallback>
-                                                {student.full_name
-                                                    .split(" ")
-                                                    .map((n) => n[0])
-                                                    .join("")}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1">
-                                            <p className="font-medium text-sm">
-                                                {student?.full_name}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {student?.matric_number}
-                                            </p>
-                                            {/* <Badge
-                                                    variant="outline"
-                                                    className="mt-1 text-xs"
-                                                >
-                                                    {student.email}
-                                                </Badge> */}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
+         <Card>
+  <CardHeader className="pb-2">
+    <CardTitle className="text-lg font-medium">Students Involved</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {Array.isArray(caseDetails?.students) &&
+        caseDetails.students.map((student, index) => (
+          <div
+            key={index}
+            className="flex items-center space-x-3 rounded-lg border p-3"
+          >
+            <Avatar className="h-10 w-10">
+              <AvatarImage
+                src={"/placeholder.svg"}
+                alt={student.full_name || "Student Avatar"}
+              />
+              <AvatarFallback>
+                {student.full_name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <p className="font-medium text-sm">{student.full_name}</p>
+              <p className="text-xs text-muted-foreground">
+                {student.matric_number}
+              </p>
+              {/* <Badge variant="outline" className="mt-1 text-xs">
+                {student.email}
+              </Badge> */}
+            </div>
+          </div>
+        ))}
+    </div>
+  </CardContent>
+</Card>
+
                 </TabsContent>
 
                 <TabsContent value="students">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Student Information</CardTitle>
-                            <CardDescription>
-                                Detailed information about all students involved
-                                in this case.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-6">
-                                {(
-                                    caseDetails?.students as involvedStudentSchema[]
-                                ).map((student, index) => (
-                                    <div
-                                        key={index}
-                                        className="rounded-lg border p-4"
-                                    >
-                                        <div className="flex items-start space-x-4">
-                                            <Avatar className="h-16 w-16">
-                                                <AvatarImage
-                                                    src={"/placeholder.svg"}
-                                                    alt={student.full_name}
-                                                />
-                                                <AvatarFallback>
-                                                    {student.full_name
-                                                        .split(" ")
-                                                        .map((n) => n[0])
-                                                        .join("")}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1 space-y-4">
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <h3 className="text-lg font-semibold text-sdc-navy">
-                                                            {student.full_name}
-                                                        </h3>
-                                                        <p className="text-sm text-sdc-gray">
-                                                            {
-                                                                student.matric_number
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                    {/* <Badge variant="outline">
-                                                        {student.role}
-                                                    </Badge> */}
-                                                </div>
-                                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                                    <div>
-                                                        <p className="text-sm font-medium text-sdc-gray">
-                                                            Department
-                                                        </p>
-                                                        <p className="font-medium text-sdc-navy">
-                                                            {student.department}
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-sdc-gray">
-                                                            Faculty
-                                                        </p>
-                                                        <p className="font-medium text-sdc-navy">
-                                                            {student.faculty}
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-sdc-gray">
-                                                            Level
-                                                        </p>
-                                                        <p className="font-medium text-sdc-navy">
-                                                            {student.level}
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-sdc-gray">
-                                                            Email
-                                                        </p>
-                                                        <p className="font-medium text-sdc-navy">
-                                                            {student.email}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
+ <Card>
+  <CardHeader>
+    <CardTitle>Student Information</CardTitle>
+    <CardDescription>
+      Detailed information about all students involved in this case.
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div className="space-y-6">
+      {Array.isArray(caseDetails?.students) &&
+        caseDetails.students.map((student, index) => (
+          <div key={index} className="rounded-lg border p-4">
+            <div className="flex items-start space-x-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage
+                  src={"/placeholder.svg"}
+                  alt={student.full_name || "Student Avatar"}
+                />
+                <AvatarFallback>
+                  {student.full_name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-sdc-navy">
+                      {student.full_name}
+                    </h3>
+                    <p className="text-sm text-sdc-gray">
+                      {student.matric_number}
+                    </p>
+                  </div>
+                  {/* <Badge variant="outline">{student.role}</Badge> */}
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-medium text-sdc-gray">Department</p>
+                    <p className="font-medium text-sdc-navy">{student.department}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-sdc-gray">Faculty</p>
+                    <p className="font-medium text-sdc-navy">{student.faculty}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-sdc-gray">Level</p>
+                    <p className="font-medium text-sdc-navy">{student.level}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-sdc-gray">Email</p>
+                    <p className="font-medium text-sdc-navy">{student.email}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+    </div>
+  </CardContent>
+</Card>
+
                 </TabsContent>
 
                 {/* <TabsContent value="hearings">

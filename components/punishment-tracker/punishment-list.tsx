@@ -44,25 +44,6 @@ export function PunishmentList({ onViewDetails }: PunishmentListProps) {
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
-    // Get unique punishment types for filter
-    // const punishmentTypes = Array.from(
-    //     new Set(mockPunishments.map((punishment) => punishment.type))
-    // );
-
-    // Filter punishments based on search term and filters
-    // const filteredPunishments = mockPunishments.filter((punishment) => {
-    //   const matchesSearch =
-    //     searchTerm === "" ||
-    //     punishment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //     punishment.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //     punishment.student.matricNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //     punishment.type.toLowerCase().includes(searchTerm.toLowerCase())
-
-    //   const matchesStatus = statusFilter === null || punishment.status === statusFilter
-    //   const matchesType = typeFilter === null || punishment.type === typeFilter
-
-    //   return matchesSearch && matchesStatus && matchesType
-    // })
 
     const handleMarkComplete = (punishmentId: string) => {
         // In a real application, this would call an API to update the punishment status

@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DataApiClient } from "@/service/apiClient"
 import {
   Search,
   Filter,
@@ -22,109 +23,60 @@ import {
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-// Mock data for students
-const mockStudents = [
-  {
-    name: "Robert Chen",
-    matricNumber: "STU-45789",
-    department: "Computer Science",
-    faculty: "Science and Technology",
-    level: "300 Level",
-    caseCount: 2,
-    currentPunishment: "Academic Probation",
-    status: "active",
-    image: "/monogram-mb.png",
-  },
-  {
-    name: "Jessica Lee",
-    matricNumber: "STU-45123",
-    department: "Business Administration",
-    faculty: "Management Sciences",
-    level: "400 Level",
-    caseCount: 1,
-    currentPunishment: "Academic Probation",
-    status: "active",
-    image: "/stylized-jl-logo.png",
-  },
-  {
-    name: "Michael Brown",
-    matricNumber: "STU-45678",
-    department: "Electrical Engineering",
-    faculty: "Engineering",
-    level: "300 Level",
-    caseCount: 1,
-    currentPunishment: "Written Warning",
-    status: "pending",
-    image: "/monogram-mb.png",
-  },
-  {
-    name: "David Wilson",
-    matricNumber: "STU-42456",
-    department: "Architecture",
-    faculty: "Environmental Sciences",
-    level: "400 Level",
-    caseCount: 1,
-    currentPunishment: "Restitution",
-    status: "active",
-    image: "/abstract-dw.png",
-  },
-  {
-    name: "Sarah Johnson",
-    matricNumber: "STU-41234",
-    department: "Medicine",
-    faculty: "Health Sciences",
-    level: "500 Level",
-    caseCount: 1,
-    currentPunishment: null,
-    status: "closed",
-    image: "/stylized-letters-sj.png",
-  },
-  {
-    name: "Emily Parker",
-    matricNumber: "STU-45790",
-    department: "Law",
-    faculty: "Law",
-    level: "400 Level",
-    caseCount: 1,
-    currentPunishment: "Grade Reduction",
-    status: "pending",
-    image: "/abstract-geometric-ep.png",
-  },
-  {
-    name: "James Wilson",
-    matricNumber: "STU-43456",
-    department: "Psychology",
-    faculty: "Social Sciences",
-    level: "300 Level",
-    caseCount: 1,
-    currentPunishment: null,
-    status: "closed",
-    image: "/intertwined-letters.png",
-  },
-  {
-    name: "Sophia Martinez",
-    matricNumber: "STU-47890",
-    department: "English Literature",
-    faculty: "Arts and Humanities",
-    level: "200 Level",
-    caseCount: 1,
-    currentPunishment: "Disciplinary Probation",
-    status: "active",
-    image: "/stylized-sm-logo.png",
-  },
-]
 
 interface EnhancedStudentListProps {
   onViewProfile: (matricNumber: string) => void
   onViewCaseHistory: (matricNumber: string) => void
 }
 
+
+
 export function EnhancedStudentList({ onViewProfile, onViewCaseHistory }: EnhancedStudentListProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [departmentFilter, setDepartmentFilter] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<"table" | "grid">("table")
+  const [mockStudents, setMockStudents] = useState<Student[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
+  type Student = {
+  name: string;
+  matricNumber: string;
+  department: string;
+  faculty: string;
+  level: string;
+  caseCount: number;
+  image: string;
+};
+
+
+
+useEffect(() => {
+  const fetchStudents = async () => {
+    try {
+      const response = await DataApiClient.get(`/get/students/?page=${page}`);
+      const pageSize = 20; // Adjust if your backend uses a different size
+
+      const transformed = response.data.results.map((item: any): Student => ({
+        name: item.name,
+        matricNumber: item.matric_no,
+        department: item.department,
+        faculty: "Science and Technology",
+        level: `${item.level} Level`,
+        caseCount: item.no_cases,
+        image: "/monogram-mb.png",
+      }));
+
+      setMockStudents(transformed);
+      setTotalPages(Math.ceil(response.data.count / pageSize));
+    } catch (error) {
+      console.error("Failed to fetch students:", error);
+    }
+  };
+
+  fetchStudents();
+}, [page]);
   // Get unique departments for filter
   const departments = Array.from(new Set(mockStudents.map((student) => student.department)))
 
@@ -276,8 +228,8 @@ export function EnhancedStudentList({ onViewProfile, onViewCaseHistory }: Enhanc
                   <TableHead>Matric Number</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead className="text-center">Cases</TableHead>
-                  <TableHead>Current Punishment</TableHead>
-                  <TableHead>Status</TableHead>
+                  {/* <TableHead>Current Punishment</TableHead>
+                  <TableHead>Status</TableHead> */}
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -321,7 +273,7 @@ export function EnhancedStudentList({ onViewProfile, onViewCaseHistory }: Enhanc
                           {student.caseCount}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         {student.currentPunishment ? (
                           <span className="text-sdc-navy">{student.currentPunishment}</span>
                         ) : (
@@ -341,7 +293,7 @@ export function EnhancedStudentList({ onViewProfile, onViewCaseHistory }: Enhanc
                             {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
                           </Badge>
                         </div>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -462,19 +414,34 @@ export function EnhancedStudentList({ onViewProfile, onViewCaseHistory }: Enhanc
         </div>
       )}
 
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <div>
-          Showing {filteredStudents.length} of {mockStudents.length} students
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled>
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" disabled>
-            Next
-          </Button>
-        </div>
-      </div>
+  <div className="flex items-center justify-between text-sm text-muted-foreground mt-6">
+  <div>
+    Showing page {page} of {totalPages}
+  </div>
+  <div className="flex items-center gap-2">
+    <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
+      Previous
+    </Button>
+
+    {[...Array(totalPages)].map((_, i) => {
+      const pageNum = i + 1;
+      return (
+        <Button
+          key={pageNum}
+          variant={page === pageNum ? "default" : "outline"}
+          size="sm"
+          onClick={() => setPage(pageNum)}
+        >
+          {pageNum}
+        </Button>
+      );
+    })}
+
+    <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+      Next
+    </Button>
+  </div>
+</div>
     </div>
   )
 }
