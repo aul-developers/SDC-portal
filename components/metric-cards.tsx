@@ -8,62 +8,27 @@ import {
   CheckCheckIcon,
 } from "lucide-react";
 
-const metrics = [
-  {
-    title: "Total Cases",
-    value: "247",
-    description: "+12% from last semester",
-    icon: FileText,
-    iconColor: "text-sdc-blue",
-    bgColor: "bg-sdc-blue/10",
-  },
-  {
-    title: "Active Punishments",
-    value: "32",
-    description: "8 ending this month",
-    icon: AlertTriangle,
-    iconColor: "text-amber-500",
-    bgColor: "bg-amber-500/10",
-  },
-  {
-    title: "Cases This Month",
-    value: "18",
-    description: "-4% from last month",
-    icon: Calendar,
-    iconColor: "text-sdc-teal",
-    bgColor: "bg-sdc-teal/10",
-  },
-  {
-    title: "Pending Review",
-    value: "9",
-    description: "3 high priority",
-    icon: Clock,
-    iconColor: "text-rose-500",
-    bgColor: "bg-rose-500/10",
-  },
-];
-
 export async function MetricCards() {
   const response = await getDashboardMetrics("/punishment/dashboard/");
   console.log(response);
 
   const newMetrics = [
     {
-      title: "Active Punshiments",
+      title: "Active Punishments",
       value: response.active,
       icon: AlertTriangle,
       iconColor: "text-amber-500",
       bgColor: "bg-amber-500/10",
     },
     {
-      title: "Completed Punshiments",
+      title: "Completed Punishments",
       value: response.completed,
       icon: CheckCheckIcon,
       iconColor: "text-green-500",
       bgColor: "bg-green-500/10",
     },
     {
-      title: "Pending Punshiments",
+      title: "Pending Punishments",
       value: response.pending,
       icon: Clock,
       iconColor: "text-rose-500",
