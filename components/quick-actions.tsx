@@ -14,7 +14,7 @@ const action = {
 export function QuickActions() {
   return (
     <div className="grid grid-cols-1 gap-3">
-      <Link href="/dashboard/case-management" passHref legacyBehavior>
+      <Link href="/dashboard/cases" passHref legacyBehavior>
         <Button
           variant="ghost"
           className="flex h-auto w-full items-start justify-start gap-3 p-3 text-left hover:bg-gray-50"
