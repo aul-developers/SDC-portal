@@ -16,106 +16,102 @@ import { AxiosError } from "axios";
 // import { useToast } from "./ui/use-toast";
 
 interface loginInfo {
-    username: string;
-    password: string;
+  username: string;
+  password: string;
 }
 
 interface PostResponse {
-    result: {
-        message: string;
-    };
+  result: {
+    message: string;
+  };
 }
 
 export function LoginForm() {
-    const [isLoading, setIsLoading] = useState(false);
-    const formUserEmailInputRef = useRef<HTMLInputElement>(null);
-    const formPasswordInputRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const formUserEmailInputRef = useRef<HTMLInputElement>(null);
+  const formPasswordInputRef = useRef<HTMLInputElement>(null);
 
-    const router = useRouter();
+  const router = useRouter();
 
-    async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        setIsLoading(true);
-        if (formUserEmailInputRef.current && formPasswordInputRef.current) {
-            try {
-                const loginInfo: loginInfo = {
-                    username: formUserEmailInputRef.current.value,
-                    password: formPasswordInputRef.current.value,
-                };
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsLoading(true);
+    if (formUserEmailInputRef.current && formPasswordInputRef.current) {
+      try {
+        const loginInfo: loginInfo = {
+          username: formUserEmailInputRef.current.value,
+          password: formPasswordInputRef.current.value,
+        };
 
-
-
-                const response = await postRequest<loginInfo>(
-                    "/sdc/login/",
-                    loginInfo
-                );
-                if (response) {
-                    toast.success(response.message);
-                }
-
-                setIsLoading(false);
-                router.push("/dashboard");
-            } catch (error: unknown) {
-                const errorExpectedMessage = generateErrorMessage(error);
-                toast.error(errorExpectedMessage);
-                setIsLoading(false);
-            }
+        const response = await postRequest<loginInfo>("/sdc/login/", loginInfo);
+        if (response) {
+          toast.success(response.message);
         }
-    }
 
-    return (
-        <form onSubmit={onSubmit} className="space-y-6">
-            <div className="space-y-2">
-                <Label htmlFor="email" className="text-sdc-navy">
-                    Email
-                </Label>
-                <Input
-                    // id="email"
-                    placeholder="name@example.com"
-                    // type="email"
-                    ref={formUserEmailInputRef}
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    autoCorrect="off"
-                    disabled={isLoading}
-                    required
-                    className="h-11 border-gray-200 focus-visible:ring-sdc-blue"
-                />
-            </div>
-            <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-sdc-navy">
-                        Password
-                    </Label>
-                </div>
-                <Input
-                    id="password"
-                    placeholder="••••••••"
-                    ref={formPasswordInputRef}
-                    type="password"
-                    autoCapitalize="none"
-                    autoComplete="current-password"
-                    disabled={isLoading}
-                    required
-                    className="h-11 border-gray-200 focus-visible:ring-sdc-blue"
-                />
-            </div>
-            <div className="flex items-center space-x-2">
-                <Checkbox id="remember" />
-                <label
-                    htmlFor="remember"
-                    className="text-sm font-medium leading-none text-sdc-gray peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                    Remember me
-                </label>
-            </div>
-            <Button
-                type="submit"
-                className="w-full h-11 bg-sdc-blue hover:bg-sdc-blue/90 transition-colors"
-                disabled={isLoading}
-            >
-                {isLoading ? <LoadingButton text="Signing in" /> : "Sign In"}
-            </Button>
-        </form>
-    );
+        setIsLoading(false);
+        router.push("/dashboard");
+      } catch (error: unknown) {
+        console.log(error);
+        const errorExpectedMessage = generateErrorMessage(error);
+        toast.error(errorExpectedMessage);
+        setIsLoading(false);
+      }
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="email" className="text-sdc-navy">
+          Email
+        </Label>
+        <Input
+          // id="email"
+          placeholder="name@example.com"
+          // type="email"
+          ref={formUserEmailInputRef}
+          autoCapitalize="none"
+          autoComplete="email"
+          autoCorrect="off"
+          disabled={isLoading}
+          required
+          className="h-11 border-gray-200 focus-visible:ring-sdc-blue"
+        />
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password" className="text-sdc-navy">
+            Password
+          </Label>
+        </div>
+        <Input
+          id="password"
+          placeholder="••••••••"
+          ref={formPasswordInputRef}
+          type="password"
+          autoCapitalize="none"
+          autoComplete="current-password"
+          disabled={isLoading}
+          required
+          className="h-11 border-gray-200 focus-visible:ring-sdc-blue"
+        />
+      </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox id="remember" />
+        <label
+          htmlFor="remember"
+          className="text-sm font-medium leading-none text-sdc-gray peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Remember me
+        </label>
+      </div>
+      <Button
+        type="submit"
+        className="w-full h-11 bg-sdc-blue hover:bg-sdc-blue/90 transition-colors"
+        disabled={isLoading}
+      >
+        {isLoading ? <LoadingButton text="Signing in" /> : "Sign In"}
+      </Button>
+    </form>
+  );
 }
