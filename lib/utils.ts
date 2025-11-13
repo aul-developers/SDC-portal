@@ -87,3 +87,12 @@ export const getDashboardMetrics = async (endpoint: string) => {
     console.log(error);
   }
 };
+
+export const checkUser = async (endpoint: string) => {
+  try {
+    const response = await DataApiClient.get(endpoint);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
