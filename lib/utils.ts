@@ -18,7 +18,9 @@ export const postRequest = async <T>(
   receivedData?: T,
 ): Promise<Response | null> => {
   try {
-    const request = await DataApiClient.post<Response>(endpoint, receivedData);
+    const request = await DataApiClient.post<Response>(endpoint, receivedData, {
+      withCredentials: true,
+    });
 
     return request.data;
   } catch (error) {
