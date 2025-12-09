@@ -1,13 +1,25 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { DataApiClient } from "@/service/apiClient"
+import { useState, useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DataApiClient } from "@/service/apiClient";
 import {
   Search,
   Filter,
@@ -19,66 +31,80 @@ import {
   Clock,
   ChevronDown,
   MoreHorizontal,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
+} from "lucide-react";
+import { Student } from "@/app/_types";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface EnhancedStudentListProps {
-  onViewProfile: (matricNumber: string) => void
-  onViewCaseHistory: (matricNumber: string) => void
+  onViewProfile: (matricNumber: string) => void;
+  onViewCaseHistory: (matricNumber: string) => void;
 }
 
-
-
-export function EnhancedStudentList({ onViewProfile, onViewCaseHistory }: EnhancedStudentListProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [departmentFilter, setDepartmentFilter] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<"table" | "grid">("table")
-  const [mockStudents, setMockStudents] = useState<Student[]>([]);
+export function EnhancedStudentList({
+  onViewProfile,
+  onViewCaseHistory,
+}: EnhancedStudentListProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  // type Student removed to use imported type extended with component-specific props
+  const [mockStudents, setMockStudents] = useState<
+    (Student & {
+      caseCount: number;
+      image: string;
+      name: string;
+      faculty: string;
+    })[]
+  >([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  type Student = {
-  name: string;
-  matricNumber: string;
-  department: string;
-  faculty: string;
-  level: string;
-  caseCount: number;
-  image: string;
-};
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await DataApiClient.get(`/get/students/?page=${page}`);
+        const pageSize = 20; // Adjust if your backend uses a different size
 
+        const transformed = response.data.results.map(
+          (
+            item: any
+          ): Student & {
+            caseCount: number;
+            image: string;
+            name: string;
+            faculty: string;
+          } => ({
+            id: item.id || Date.now().toString(),
+            name: item.name,
+            firstName: item.name.split(" ")[0] || "",
+            lastName: item.name.split(" ").slice(1).join(" ") || "",
+            full_name: item.name,
+            matricNumber: item.matric_no,
+            matric_number: item.matric_no,
+            department: item.department,
+            faculty: "Science and Technology",
+            level: `${item.level} Level`,
+            caseCount: item.no_cases,
+            image: "/monogram-mb.png",
+            status: item.status || "active", // ensure status is present
+          })
+        );
 
+        setMockStudents(transformed);
+        setTotalPages(Math.ceil(response.data.count / pageSize));
+      } catch (error) {
+        console.error("Failed to fetch students:", error);
+      }
+    };
 
-useEffect(() => {
-  const fetchStudents = async () => {
-    try {
-      const response = await DataApiClient.get(`/get/students/?page=${page}`);
-      const pageSize = 20; // Adjust if your backend uses a different size
-
-      const transformed = response.data.results.map((item: any): Student => ({
-        name: item.name,
-        matricNumber: item.matric_no,
-        department: item.department,
-        faculty: "Science and Technology",
-        level: `${item.level} Level`,
-        caseCount: item.no_cases,
-        image: "/monogram-mb.png",
-      }));
-
-      setMockStudents(transformed);
-      setTotalPages(Math.ceil(response.data.count / pageSize));
-    } catch (error) {
-      console.error("Failed to fetch students:", error);
-    }
-  };
-
-  fetchStudents();
-}, [page]);
+    fetchStudents();
+  }, [page]);
   // Get unique departments for filter
-  const departments = Array.from(new Set(mockStudents.map((student) => student.department)))
+  const departments = Array.from(
+    new Set(mockStudents.map((student) => student.department))
+  );
 
   // Filter students based on search term and filters
   const filteredStudents = mockStudents.filter((student) => {
@@ -86,27 +112,30 @@ useEffect(() => {
       searchTerm === "" ||
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.matricNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.department.toLowerCase().includes(searchTerm.toLowerCase())
+      (student.department &&
+        student.department.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesDepartment = departmentFilter === null || student.department === departmentFilter
-    const matchesStatus = statusFilter === null || student.status === statusFilter
+    const matchesDepartment =
+      departmentFilter === null || student.department === departmentFilter;
+    const matchesStatus =
+      statusFilter === null || student.status === statusFilter;
 
-    return matchesSearch && matchesDepartment && matchesStatus
-  })
+    return matchesSearch && matchesDepartment && matchesStatus;
+  });
 
   // Status icon mapping
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "active":
-        return <AlertTriangle className="h-4 w-4 text-amber-500" />
+        return <AlertTriangle className="h-4 w-4 text-amber-500" />;
       case "pending":
-        return <Clock className="h-4 w-4 text-blue-500" />
+        return <Clock className="h-4 w-4 text-blue-500" />;
       case "closed":
-        return <CheckCircle className="h-4 w-4 text-emerald-500" />
+        return <CheckCircle className="h-4 w-4 text-emerald-500" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -136,10 +165,20 @@ useEffect(() => {
                     <ChevronDown className="h-3.5 w-3.5 opacity-50" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="max-h-[300px] overflow-y-auto">
-                  <DropdownMenuItem onClick={() => setDepartmentFilter(null)}>All Departments</DropdownMenuItem>
+                <DropdownMenuContent
+                  align="end"
+                  className="max-h-[300px] overflow-y-auto"
+                >
+                  <DropdownMenuItem onClick={() => setDepartmentFilter(null)}>
+                    All Departments
+                  </DropdownMenuItem>
                   {departments.map((department) => (
-                    <DropdownMenuItem key={department} onClick={() => setDepartmentFilter(department)}>
+                    <DropdownMenuItem
+                      key={department}
+                      onClick={() =>
+                        department && setDepartmentFilter(department)
+                      }
+                    >
                       {department}
                     </DropdownMenuItem>
                   ))}
@@ -151,16 +190,29 @@ useEffect(() => {
                   <Button variant="outline" className="h-10 gap-1 bg-white">
                     <Filter className="h-4 w-4" />
                     <span>
-                      {statusFilter ? `${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` : "Status"}
+                      {statusFilter
+                        ? `${
+                            statusFilter.charAt(0).toUpperCase() +
+                            statusFilter.slice(1)
+                          }`
+                        : "Status"}
                     </span>
                     <ChevronDown className="h-3.5 w-3.5 opacity-50" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setStatusFilter(null)}>All Statuses</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("active")}>Active</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("pending")}>Pending</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("closed")}>Closed</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter(null)}>
+                    All Statuses
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter("active")}>
+                    Active
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter("pending")}>
+                    Pending
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter("closed")}>
+                    Closed
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -219,122 +271,136 @@ useEffect(() => {
       </Card>
 
       {viewMode === "table" ? (
-        <Card className="border-none shadow-sm overflow-hidden">
-          <div className="rounded-md">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30 hover:bg-muted/30">
-                  <TableHead>Student</TableHead>
-                  <TableHead>Matric Number</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead className="text-center">Cases</TableHead>
-                  {/* <TableHead>Current Punishment</TableHead>
-                  <TableHead>Status</TableHead> */}
-                  <TableHead className="text-right">Actions</TableHead>
+        <div className="w-full overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-gray-100/50 hover:bg-transparent">
+                <TableHead className="w-[300px] text-xs font-bold text-gray-400 uppercase tracking-widest pl-4">
+                  Student
+                </TableHead>
+                <TableHead className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  Matric Number
+                </TableHead>
+                <TableHead className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  Department
+                </TableHead>
+                <TableHead className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  Cases
+                </TableHead>
+                <TableHead className="text-right text-xs font-bold text-gray-400 uppercase tracking-widest pr-4">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredStudents.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="h-24 text-center text-gray-500"
+                  >
+                    No students found.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredStudents.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
-                      No students found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredStudents.map((student) => (
-                    <TableRow key={student.matricNumber} className="group hover:bg-muted/20">
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-9 w-9 border border-border">
-                            <AvatarImage src={student.image || "/placeholder.svg"} alt={student.name} />
-                            <AvatarFallback>
-                              {student.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium text-sdc-navy">{student.name}</div>
-                            <div className="text-xs text-sdc-gray">{student.level}</div>
+              ) : (
+                filteredStudents.map((student) => (
+                  <TableRow
+                    key={student.matricNumber}
+                    className="border-none hover:bg-white hover:shadow-sm transition-all group cursor-pointer rounded-2xl mb-2"
+                  >
+                    <TableCell className="pl-4 py-4 rounded-l-2xl">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
+                          <AvatarImage
+                            src={student.image || "/placeholder.svg"}
+                            alt={student.name}
+                          />
+                          <AvatarFallback className="text-[10px] bg-sdc-blue/10 text-sdc-blue font-bold">
+                            {student.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-bold text-sdc-navy text-sm">
+                            {student.name}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {student.level}
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{student.matricNumber}</TableCell>
-                      <TableCell>{student.department}</TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "rounded-full px-2.5 py-0.5 font-medium",
-                            student.caseCount > 0 ? "bg-amber-50 text-amber-700" : "bg-gray-50 text-gray-500",
-                          )}
-                        >
-                          {student.caseCount}
-                        </Badge>
-                      </TableCell>
-                      {/* <TableCell>
-                        {student.currentPunishment ? (
-                          <span className="text-sdc-navy">{student.currentPunishment}</span>
-                        ) : (
-                          <span className="text-muted-foreground">None</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium text-sm text-gray-600">
+                      {student.matricNumber}
+                    </TableCell>
+                    <TableCell className="text-sm text-gray-600">
+                      {student.department}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "rounded-full px-2.5 py-0.5 font-bold border-0",
+                          student.caseCount > 0
+                            ? "bg-amber-50 text-amber-600"
+                            : "bg-green-50 text-green-600"
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1.5">
-                          {getStatusIcon(student.status)}
-                          <Badge
-                            className={cn(
-                              student.status === "active" && "bg-amber-500 hover:bg-amber-600",
-                              student.status === "pending" && "bg-blue-500 hover:bg-blue-600",
-                              student.status === "closed" && "bg-emerald-500 hover:bg-emerald-600",
-                            )}
+                      >
+                        {student.caseCount}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right pr-4 rounded-r-2xl">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-sdc-navy"
                           >
-                            {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
-                          </Badge>
-                        </div>
-                      </TableCell> */}
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <button
-                                className="flex w-full items-center cursor-pointer"
-                                onClick={() => onViewProfile(student.matricNumber)}
-                              >
-                                <UserCircle className="mr-2 h-4 w-4" />
-                                View Profile
-                              </button>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <button
-                                className="flex w-full items-center cursor-pointer"
-                                onClick={() => onViewCaseHistory(student.matricNumber)}
-                              >
-                                <History className="mr-2 h-4 w-4" />
-                                View Case History
-                              </button>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </Card>
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <button
+                              className="flex w-full items-center cursor-pointer"
+                              onClick={() =>
+                                onViewProfile(student.matricNumber)
+                              }
+                            >
+                              <UserCircle className="mr-2 h-4 w-4" />
+                              View Profile
+                            </button>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <button
+                              className="flex w-full items-center cursor-pointer"
+                              onClick={() =>
+                                onViewCaseHistory(student.matricNumber)
+                              }
+                            >
+                              <History className="mr-2 h-4 w-4" />
+                              View Case History
+                            </button>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredStudents.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-muted-foreground">No students found.</div>
+            <div className="col-span-full text-center py-12 text-muted-foreground">
+              No students found.
+            </div>
           ) : (
             filteredStudents.map((student) => (
               <Card
@@ -346,7 +412,10 @@ useEffect(() => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
-                          <AvatarImage src={student.image || "/placeholder.svg"} alt={student.name} />
+                          <AvatarImage
+                            src={student.image || "/placeholder.svg"}
+                            alt={student.name}
+                          />
                           <AvatarFallback>
                             {student.name
                               .split(" ")
@@ -355,22 +424,36 @@ useEffect(() => {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium text-sdc-navy">{student.name}</div>
-                          <div className="text-xs text-sdc-gray">{student.matricNumber}</div>
+                          <div className="font-medium text-sdc-navy">
+                            {student.name}
+                          </div>
+                          <div className="text-xs text-sdc-gray">
+                            {student.matricNumber}
+                          </div>
                         </div>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 p-0"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onViewProfile(student.matricNumber)}>
+                          <DropdownMenuItem
+                            onClick={() => onViewProfile(student.matricNumber)}
+                          >
                             <UserCircle className="mr-2 h-4 w-4" />
                             View Profile
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onViewCaseHistory(student.matricNumber)}>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              onViewCaseHistory(student.matricNumber)
+                            }
+                          >
                             <History className="mr-2 h-4 w-4" />
                             View Case History
                           </DropdownMenuItem>
@@ -380,32 +463,26 @@ useEffect(() => {
 
                     <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <p className="text-xs text-muted-foreground">Department</p>
-                        <p className="font-medium text-sdc-navy truncate">{student.department}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Department
+                        </p>
+                        <p className="font-medium text-sdc-navy truncate">
+                          {student.department}
+                        </p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Level</p>
-                        <p className="font-medium text-sdc-navy">{student.level}</p>
+                        <p className="font-medium text-sdc-navy">
+                          {student.level}
+                        </p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Cases</p>
-                        <p className="font-medium text-sdc-navy">{student.caseCount}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Status</p>
-                        <div className="flex items-center gap-1.5">
-                          {getStatusIcon(student.status)}
-                          <span className="font-medium text-sdc-navy capitalize">{student.status}</span>
-                        </div>
+                        <p className="font-medium text-sdc-navy">
+                          {student.caseCount}
+                        </p>
                       </div>
                     </div>
-
-                    {student.currentPunishment && (
-                      <div className="mt-3 rounded-md bg-amber-50 p-2 text-xs">
-                        <p className="font-medium text-amber-800">Current Punishment:</p>
-                        <p className="text-amber-700">{student.currentPunishment}</p>
-                      </div>
-                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -414,34 +491,44 @@ useEffect(() => {
         </div>
       )}
 
-  <div className="flex items-center justify-between text-sm text-muted-foreground mt-6">
-  <div>
-    Showing page {page} of {totalPages}
-  </div>
-  <div className="flex items-center gap-2">
-    <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
-      Previous
-    </Button>
+      <div className="flex items-center justify-between text-sm text-muted-foreground mt-6">
+        <div>
+          Showing page {page} of {totalPages}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+          >
+            Previous
+          </Button>
 
-    {[...Array(totalPages)].map((_, i) => {
-      const pageNum = i + 1;
-      return (
-        <Button
-          key={pageNum}
-          variant={page === pageNum ? "default" : "outline"}
-          size="sm"
-          onClick={() => setPage(pageNum)}
-        >
-          {pageNum}
-        </Button>
-      );
-    })}
+          {[...Array(totalPages)].map((_, i) => {
+            const pageNum = i + 1;
+            return (
+              <Button
+                key={pageNum}
+                variant={page === pageNum ? "default" : "outline"}
+                size="sm"
+                onClick={() => setPage(pageNum)}
+              >
+                {pageNum}
+              </Button>
+            );
+          })}
 
-    <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-      Next
-    </Button>
-  </div>
-</div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

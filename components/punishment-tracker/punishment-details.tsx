@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import {
   User,
   Calendar,
@@ -17,7 +17,7 @@ import {
   Edit,
   FileCheck,
   MessageSquare,
-} from "lucide-react"
+} from "lucide-react";
 
 // Mock punishment data
 const mockPunishmentDetails = {
@@ -32,18 +32,21 @@ const mockPunishmentDetails = {
   case: {
     id: "SDC-2024-091",
     offence: "Academic Dishonesty",
-    description: "Plagiarism detected in final term paper for CSC301 - Software Engineering.",
+    description:
+      "Plagiarism detected in final term paper for CSC301 - Software Engineering.",
   },
   type: "Academic Probation",
   duration: "1 Semester",
   startDate: "2024-05-15",
   endDate: "2024-09-15",
-  status: "active",
+  status: "Active",
   progress: 25,
-  requirements: "Must attend academic integrity workshop and resubmit the paper.",
+  requirements:
+    "Must attend academic integrity workshop and resubmit the paper.",
   verificationRequired: true,
   verificationStatus: "pending",
-  notes: "Student has shown remorse and willingness to comply with the requirements.",
+  notes:
+    "Student has shown remorse and willingness to comply with the requirements.",
   milestones: [
     {
       id: "MS-001",
@@ -98,17 +101,20 @@ const mockPunishmentDetails = {
       notes: "Progress updated to 25%.",
     },
   ],
-}
+};
 
 interface PunishmentDetailsProps {
-  punishmentId: string
-  onUpdatePunishment: (punishmentId: string) => void
+  punishmentId: string;
+  onUpdatePunishment: (punishmentId: string) => void;
 }
 
-export function PunishmentDetails({ punishmentId, onUpdatePunishment }: PunishmentDetailsProps) {
+export function PunishmentDetails({
+  punishmentId,
+  onUpdatePunishment,
+}: PunishmentDetailsProps) {
   // In a real application, you would fetch the punishment details based on the punishmentId
   // For this example, we'll use the mock data
-  const punishment = mockPunishmentDetails
+  const punishment = mockPunishmentDetails;
 
   return (
     <div className="space-y-6">
@@ -116,7 +122,10 @@ export function PunishmentDetails({ punishmentId, onUpdatePunishment }: Punishme
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16 border-2 border-border">
-            <AvatarImage src={punishment.student.image || "/placeholder.svg"} alt={punishment.student.name} />
+            <AvatarImage
+              src={punishment.student.image || "/placeholder.svg"}
+              alt={punishment.student.name}
+            />
             <AvatarFallback className="text-lg">
               {punishment.student.name
                 .split(" ")
@@ -126,7 +135,9 @@ export function PunishmentDetails({ punishmentId, onUpdatePunishment }: Punishme
           </Avatar>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold text-sdc-navy">{punishment.student.name}</h2>
+              <h2 className="text-xl font-semibold text-sdc-navy">
+                {punishment.student.name}
+              </h2>
               <Badge variant="outline" className="ml-2">
                 {punishment.student.matricNumber}
               </Badge>
@@ -150,18 +161,27 @@ export function PunishmentDetails({ punishmentId, onUpdatePunishment }: Punishme
           <div className="flex items-center gap-2">
             <Badge
               className={cn(
-                punishment.status === "active" && "bg-amber-500 hover:bg-amber-600",
-                punishment.status === "pending" && "bg-blue-500 hover:bg-blue-600",
-                punishment.status === "completed" && "bg-emerald-500 hover:bg-emerald-600",
+                punishment.status === "Active" &&
+                  "bg-amber-500 hover:bg-amber-600",
+                punishment.status === "Pending" &&
+                  "bg-blue-500 hover:bg-blue-600",
+                punishment.status === "Completed" &&
+                  "bg-emerald-500 hover:bg-emerald-600"
               )}
             >
-              {punishment.status.charAt(0).toUpperCase() + punishment.status.slice(1)}
+              {punishment.status.charAt(0).toUpperCase() +
+                punishment.status.slice(1)}
             </Badge>
             <Badge variant="outline" className="bg-blue-50 text-blue-700">
               {punishment.id}
             </Badge>
           </div>
-          <Button variant="outline" size="sm" className="gap-1" onClick={() => onUpdatePunishment(punishment.id)}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1"
+            onClick={() => onUpdatePunishment(punishment.id)}
+          >
             <Edit className="h-4 w-4" />
             Update Status
           </Button>
@@ -181,7 +201,9 @@ export function PunishmentDetails({ punishmentId, onUpdatePunishment }: Punishme
               <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-500" />
               <div>
                 <p className="font-medium text-sdc-navy">{punishment.type}</p>
-                <p className="text-sm text-sdc-gray">Duration: {punishment.duration}</p>
+                <p className="text-sm text-sdc-gray">
+                  Duration: {punishment.duration}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -198,7 +220,9 @@ export function PunishmentDetails({ punishmentId, onUpdatePunishment }: Punishme
               <FileText className="mt-0.5 h-5 w-5 text-sdc-gray" />
               <div>
                 <p className="text-sm text-sdc-gray">Requirements</p>
-                <p className="font-medium text-sdc-navy">{punishment.requirements}</p>
+                <p className="font-medium text-sdc-navy">
+                  {punishment.requirements}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -211,14 +235,20 @@ export function PunishmentDetails({ punishmentId, onUpdatePunishment }: Punishme
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-sdc-gray">Overall Progress</p>
-                <p className="text-sm font-medium text-sdc-navy">{punishment.progress}%</p>
+                <p className="text-sm font-medium text-sdc-gray">
+                  Overall Progress
+                </p>
+                <p className="text-sm font-medium text-sdc-navy">
+                  {punishment.progress}%
+                </p>
               </div>
               <div className="h-2.5 w-full rounded-full bg-gray-200">
                 <div
                   className={cn(
                     "h-2.5 rounded-full",
-                    punishment.status === "completed" ? "bg-emerald-500" : "bg-blue-500",
+                    punishment.status === "Completed"
+                      ? "bg-emerald-500"
+                      : "bg-blue-500"
                   )}
                   style={{ width: `${punishment.progress}%` }}
                 ></div>
@@ -230,7 +260,11 @@ export function PunishmentDetails({ punishmentId, onUpdatePunishment }: Punishme
               <div>
                 <p className="text-sm text-sdc-gray">Time Remaining</p>
                 <p className="font-medium text-sdc-navy">
-                  {Math.ceil((new Date(punishment.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}{" "}
+                  {Math.ceil(
+                    (new Date(punishment.endDate).getTime() -
+                      new Date().getTime()) /
+                      (1000 * 60 * 60 * 24)
+                  )}{" "}
                   days
                 </p>
               </div>
@@ -247,10 +281,11 @@ export function PunishmentDetails({ punishmentId, onUpdatePunishment }: Punishme
                       "rounded-full px-2.5 py-0.5 font-medium",
                       punishment.verificationStatus === "verified"
                         ? "bg-emerald-50 text-emerald-700"
-                        : "bg-amber-50 text-amber-700",
+                        : "bg-amber-50 text-amber-700"
                     )}
                   >
-                    {punishment.verificationStatus.charAt(0).toUpperCase() + punishment.verificationStatus.slice(1)}
+                    {punishment.verificationStatus.charAt(0).toUpperCase() +
+                      punishment.verificationStatus.slice(1)}
                   </Badge>
                 </div>
               </div>
@@ -259,18 +294,22 @@ export function PunishmentDetails({ punishmentId, onUpdatePunishment }: Punishme
         </Card>
       </div>
       <div className="flex justify-end space-x-2">
-        <Button variant="outline" className="gap-1" onClick={() => onUpdatePunishment(punishment.id)}>
+        <Button
+          variant="outline"
+          className="gap-1"
+          onClick={() => onUpdatePunishment(punishment.id)}
+        >
           <Edit className="h-4 w-4" />
           Update Status
         </Button>
         <Button
           className="bg-sdc-blue hover:bg-sdc-blue/90 text-white gap-1"
-          disabled={punishment.status === "completed"}
+          disabled={punishment.status === "Completed"}
         >
           <MessageSquare className="h-4 w-4" />
           Add Note
         </Button>
       </div>
     </div>
-  )
+  );
 }

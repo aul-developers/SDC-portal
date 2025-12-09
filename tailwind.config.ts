@@ -13,7 +13,7 @@ const config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Jost", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -49,13 +49,32 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Custom color scheme as specified
+        // Anchor University Design System - Visual Overhaul
         sdc: {
-          navy: "#1E293B", // Dark navy for sidebar
-          white: "#FFFFFF", // White for content area
-          gray: "#475569", // Cool gray for text
-          blue: "#2563EB", // Royal blue for accents
-          teal: "#0D9488", // Subtle teal for secondary accents
+          navy: {
+            DEFAULT: "#1e1b4b", // Keep as deep accent
+            light: "#312e81",
+            hover: "#0f172a",
+          },
+          blue: {
+            DEFAULT: "#3b82f6", // Brighter blue
+            light: "#60a5fa",
+            dim: "rgba(59, 130, 246, 0.1)",
+          },
+          pink: {
+            DEFAULT: "#db2777",
+            light: "#f472b6",
+            dim: "rgba(219, 39, 119, 0.1)",
+          },
+          gray: {
+            DEFAULT: "#64748b",
+            light: "#e2e8f0",
+            bg: "#F8FAFC", // Clean white-ish bg
+          },
+          white: "#FFFFFF",
+          success: "#10b981",
+          warning: "#f59e0b",
+          error: "#ef4444",
         },
       },
       borderRadius: {

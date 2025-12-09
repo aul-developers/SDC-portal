@@ -1,17 +1,29 @@
 import type React from "react";
-import { Sidebar } from "@/components/sidebar";
+import { DesktopSidebar } from "@/components/layout/app-sidebar";
+import { Header } from "@/components/layout/header";
 import { Toaster } from "sonner";
 
 export default function DashboardLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    return (
-        <div className="flex h-screen bg-gray-50 font-sans">
-            <Sidebar />
-            <div className="flex-1 overflow-auto">{children}</div>
-            <Toaster />
+  return (
+    <div className="h-full relative font-sans bg-sdc-slate-bg min-h-screen">
+      {/* Desktop Sidebar - Fixed */}
+      <DesktopSidebar />
+
+      {/* Main Content Area */}
+      <main className="md:pl-72 h-full flex flex-col">
+        <Header />
+        <div
+          id="dashboard-content"
+          className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8"
+        >
+          {children}
         </div>
-    );
+      </main>
+      <Toaster />
+    </div>
+  );
 }

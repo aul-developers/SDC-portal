@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   BarChart3,
   FileText,
@@ -30,37 +30,93 @@ import {
   LogOut,
   Settings,
   HelpCircle,
-} from "lucide-react"
+} from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Case Management", href: "/dashboard/cases", icon: FileText },
   { name: "Student Records", href: "/dashboard/students", icon: Users },
-  { name: "Punishment Tracker", href: "/dashboard/punishments", icon: AlertTriangle },
+  {
+    name: "Punishment Tracker",
+    href: "/dashboard/punishments",
+    icon: AlertTriangle,
+  },
   { name: "Offence Directory", href: "/dashboard/offences", icon: BookOpen },
   { name: "User Management", href: "/dashboard/users", icon: UserCog },
-]
+];
 
 export function TopNavigation() {
-  const pathname = usePathname()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const headerBg = isScrolled ? "bg-white shadow-md" : "bg-sdc-navy shadow-sm";
+  const textColor = isScrolled ? "text-sdc-navy" : "text-white";
+  const hoverColor = isScrolled
+    ? "hover:bg-gray-100 hover:text-sdc-navy"
+    : "hover:bg-white/10 hover:text-white";
+  const activeColor = isScrolled
+    ? "bg-sdc-navy/10 text-sdc-navy"
+    : "bg-white/20 text-white";
+  const logoBg = isScrolled
+    ? "bg-transparent h-8 w-8"
+    : "bg-white p-0.5 h-8 w-8";
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-sdc-surface shadow-sm">
+    <header
+      className={cn(
+        "sticky top-0 z-40 border-b transition-all duration-300",
+        headerBg
+      )}
+    >
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         {/* Logo and mobile menu button */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("md:hidden", textColor, hoverColor)}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle menu</span>
           </Button>
 
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="relative h-8 w-8 overflow-hidden rounded-md">
-              <div className="absolute inset-0 bg-gradient-to-br from-sdc-primary to-sdc-secondary opacity-90"></div>
-              <Image src="/aul-abstract.png" alt="AUL Logo" fill className="mix-blend-overlay" />
+            <div
+              className={cn(
+                "relative overflow-hidden rounded-md transition-all duration-300",
+                logoBg
+              )}
+            >
+              <Image
+                src="/logo.png"
+                alt="AUL Logo"
+                fill
+                className="object-contain"
+              />
             </div>
-            <span className="hidden text-lg font-semibold text-sdc-dark md:inline-block">SDC Portal</span>
+            <span
+              className={cn(
+                "hidden text-lg font-semibold md:inline-block transition-colors duration-300",
+                textColor
+              )}
+            >
+              SDC Portal
+            </span>
           </Link>
         </div>
 
@@ -68,35 +124,56 @@ export function TopNavigation() {
         <nav className="hidden md:flex md:flex-1 md:items-center md:justify-center">
           <ul className="flex space-x-1">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href;
               return (
                 <li key={item.name}>
                   <Link
                     href={item.href}
                     className={cn(
                       "group flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                      isActive ? "bg-sdc-primary text-white" : "text-sdc-dark hover:bg-sdc-surface-hover",
+                      isActive
+                        ? activeColor
+                        : cn(
+                            isScrolled ? "text-gray-600" : "text-blue-100",
+                            hoverColor
+                          )
                     )}
                   >
                     <item.icon className="h-4 w-4" />
                     <span>{item.name}</span>
                   </Link>
                 </li>
-              )
+              );
             })}
           </ul>
         </nav>
 
         {/* User actions */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="rounded-full text-sdc-dark hover:bg-sdc-surface-hover">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "rounded-full",
+              isScrolled ? "text-gray-500" : "text-blue-100",
+              hoverColor
+            )}
+          >
             <Search className="h-5 w-5" />
             <span className="sr-only">Search</span>
           </Button>
 
-          <Button variant="ghost" size="icon" className="rounded-full text-sdc-dark hover:bg-sdc-surface-hover">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "rounded-full",
+              isScrolled ? "text-gray-500" : "text-blue-100",
+              hoverColor
+            )}
+          >
             <Bell className="h-5 w-5" />
-            <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-sdc-danger text-[8px] font-bold text-white">
+            <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
               3
             </span>
             <span className="sr-only">Notifications</span>
@@ -106,7 +183,10 @@ export function TopNavigation() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/diverse-user-avatars.png" alt="User Avatar" />
+                  <AvatarImage
+                    src="/diverse-user-avatars.png"
+                    alt="User Avatar"
+                  />
                   <AvatarFallback>SJ</AvatarFallback>
                 </Avatar>
               </Button>
@@ -115,7 +195,9 @@ export function TopNavigation() {
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium">Dr. Sarah Johnson</p>
-                  <p className="text-xs text-muted-foreground">Committee Chair</p>
+                  <p className="text-xs text-muted-foreground">
+                    Committee Chair
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -145,18 +227,29 @@ export function TopNavigation() {
       <div
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-full transform bg-white p-6 transition-transform duration-300 ease-in-out md:hidden",
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full",
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="relative h-8 w-8 overflow-hidden rounded-md">
               <div className="absolute inset-0 bg-gradient-to-br from-sdc-primary to-sdc-secondary opacity-90"></div>
-              <Image src="/aul-abstract.png" alt="AUL Logo" fill className="mix-blend-overlay" />
+              <Image
+                src="/aul-abstract.png"
+                alt="AUL Logo"
+                fill
+                className="mix-blend-overlay"
+              />
             </div>
-            <span className="text-lg font-semibold text-sdc-dark">SDC Portal</span>
+            <span className="text-lg font-semibold text-sdc-dark">
+              SDC Portal
+            </span>
           </Link>
-          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(false)}
+          >
             <X className="h-5 w-5" />
             <span className="sr-only">Close menu</span>
           </Button>
@@ -165,14 +258,16 @@ export function TopNavigation() {
         <nav className="mt-6">
           <ul className="space-y-2">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href;
               return (
                 <li key={item.name}>
                   <Link
                     href={item.href}
                     className={cn(
                       "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                      isActive ? "bg-sdc-primary text-white" : "text-sdc-dark hover:bg-sdc-surface-hover",
+                      isActive
+                        ? "bg-sdc-primary text-white"
+                        : "text-sdc-dark hover:bg-sdc-surface-hover"
                     )}
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -180,7 +275,7 @@ export function TopNavigation() {
                     <span>{item.name}</span>
                   </Link>
                 </li>
-              )
+              );
             })}
           </ul>
         </nav>
@@ -206,7 +301,10 @@ export function TopNavigation() {
               <HelpCircle className="h-5 w-5" />
               <span>Help</span>
             </Button>
-            <Button variant="outline" className="w-full justify-start gap-3 text-sdc-danger">
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 text-sdc-danger"
+            >
               <LogOut className="h-5 w-5" />
               <span>Log out</span>
             </Button>
@@ -214,7 +312,7 @@ export function TopNavigation() {
         </div>
       </div>
     </header>
-  )
+  );
 }
 
 // Missing components
@@ -235,7 +333,7 @@ function User(props: React.SVGProps<SVGSVGElement>) {
       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
     </svg>
-  )
+  );
 }
 
 function X(props: React.SVGProps<SVGSVGElement>) {
@@ -255,5 +353,5 @@ function X(props: React.SVGProps<SVGSVGElement>) {
       <path d="M18 6 6 18" />
       <path d="m6 6 12 12" />
     </svg>
-  )
+  );
 }

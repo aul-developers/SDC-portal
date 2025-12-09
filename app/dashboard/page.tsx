@@ -1,42 +1,46 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { MetricCards } from "@/components/metric-cards"
-import { RecentActivities } from "@/components/recent-activities"
-import { QuickActions } from "@/components/quick-actions"
+import { DashboardHeader } from "./_components/dashboard-header";
+import { DashboardBanner } from "./_components/dashboard-banner";
+import { MetricCards } from "./_components/metric-cards";
+import { RecentActivities } from "./_components/recent-activities";
+import { RightPanel } from "./_components/right-panel";
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col">
-      <div className="flex-1 space-y-8 p-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-semibold text-sdc-navy">Dashboard</h1>
-          <p className="mt-1 text-sm text-sdc-gray">
-            Welcome back, Dr. Johnson. Here's an overview of the disciplinary committee.
-          </p>
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 h-full">
+      {/* Header Section */}
+      <DashboardHeader />
+
+      {/* Banner / Profile Card */}
+      <DashboardBanner />
+
+      {/* Stats Row */}
+      <div className="pt-2">
+        <MetricCards />
+      </div>
+
+      {/* Bottom Section: Activity & Right Panel */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* Main Activity Column */}
+        <div className="xl:col-span-2 space-y-8">
+          {/* Recent Cases Table */}
+          <div className="bg-white rounded-[30px] p-5 sm:p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="font-bold text-xl text-sdc-navy">Recent Cases</h3>
+              <div className="flex gap-2">
+                <select className="text-sm bg-gray-50 border-none rounded-lg px-3 py-1 font-medium text-gray-500 outline-none">
+                  <option>This Week</option>
+                </select>
+              </div>
+            </div>
+            <RecentActivities />
+          </div>
         </div>
 
-        {/* Metrics */}
-        <MetricCards />
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Recent Activities */}
-          <Card className="shadow-card hover:shadow-card-hover transition-shadow">
-            <CardContent className="p-6">
-              <h2 className="mb-6 text-lg font-semibold text-sdc-navy">Recent Activities</h2>
-              <RecentActivities />
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card className="shadow-card hover:shadow-card-hover transition-shadow">
-            <CardContent className="p-6">
-              <h2 className="mb-6 text-lg font-semibold text-sdc-navy">Quick Actions</h2>
-              <QuickActions />
-            </CardContent>
-          </Card>
+        {/* Right Panel Column */}
+        <div className="xl:col-span-1">
+          <RightPanel />
         </div>
       </div>
     </div>
-  )
+  );
 }

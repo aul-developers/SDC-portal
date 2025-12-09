@@ -4,28 +4,28 @@ import { cn } from "@/lib/utils";
 import { Suspense, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
-    Calendar,
-    Clock,
-    FileText,
-    User,
-    BookOpen,
-    AlertTriangle,
-    Building,
-    GraduationCap,
-    Mail,
-    Phone,
-    Gavel,
+  Calendar,
+  Clock,
+  FileText,
+  User,
+  BookOpen,
+  AlertTriangle,
+  Building,
+  GraduationCap,
+  Mail,
+  Phone,
+  Gavel,
 } from "lucide-react";
 import { PassJudgmentDialog, type JudgmentData } from "./pass-judgment-dialog";
 import { format } from "date-fns";
@@ -33,205 +33,210 @@ import { useFetch } from "@/hooks/useFetch";
 import { caseFormSchema, involvedStudentSchema } from "./create-case-form";
 
 interface CaseDetailsProps {
-    caseId: number;
+  caseId: number;
 }
 
 export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
-    
-    const { data, isLoading, isError } = useFetch<caseFormSchema>(
-        `/get/specific/case/${propCaseId}/`
-    );
-    const caseDetails: caseFormSchema | null = Array.isArray(data)
-        ? data[0]
-        : data;
-    const [showPassJudgmentDialog, setShowPassJudgmentDialog] = useState(false);
+  const { data, isLoading, isError } = useFetch<caseFormSchema>(
+    `/get/specific/case/${propCaseId}/`
+  );
+  const caseDetails: caseFormSchema | null = Array.isArray(data)
+    ? data[0]
+    : data;
+  const [showPassJudgmentDialog, setShowPassJudgmentDialog] = useState(false);
 
-    // const handleSaveJudgment = (judgmentData: JudgmentData) => {
-    //     const today = new Date();
-    //     setCaseDetails((prevDetails) => ({
-    //         ...prevDetails,
-    //         status: "Resolved",
-    //         punishment: {
-    //             type: judgmentData.punishmentType,
-    //             duration: judgmentData.duration,
-    //             startDate: judgmentData.startDate
-    //                 ? format(judgmentData.startDate, "yyyy-MM-dd")
-    //                 : "",
-    //             endDate: judgmentData.endDate
-    //                 ? format(judgmentData.endDate, "yyyy-MM-dd")
-    //                 : "",
-    //             additionalRequirements: judgmentData.additionalRequirements,
-    //         },
-    //         timeline: [
-    //             ...prevDetails.timeline,
-    //             {
-    //                 date: format(today, "yyyy-MM-dd"),
-    //                 time: format(today, "p"),
-    //                 action: "Judgment Passed",
-    //                 description: `Punishment: ${judgmentData.punishmentType}. Duration: ${judgmentData.duration}. Notes: ${judgmentData.judgmentNotes}`,
-    //                 user: "SDC Committee",
-    //             },
-    //         ],
-    //     }));
-    //     setShowPassJudgmentDialog(false);
-    // };
+  // const handleSaveJudgment = (judgmentData: JudgmentData) => {
+  //     const today = new Date();
+  //     setCaseDetails((prevDetails) => ({
+  //         ...prevDetails,
+  //         status: "Resolved",
+  //         punishment: {
+  //             type: judgmentData.punishmentType,
+  //             duration: judgmentData.duration,
+  //             startDate: judgmentData.startDate
+  //                 ? format(judgmentData.startDate, "yyyy-MM-dd")
+  //                 : "",
+  //             endDate: judgmentData.endDate
+  //                 ? format(judgmentData.endDate, "yyyy-MM-dd")
+  //                 : "",
+  //             additionalRequirements: judgmentData.additionalRequirements,
+  //         },
+  //         timeline: [
+  //             ...prevDetails.timeline,
+  //             {
+  //                 date: format(today, "yyyy-MM-dd"),
+  //                 time: format(today, "p"),
+  //                 action: "Judgment Passed",
+  //                 description: `Punishment: ${judgmentData.punishmentType}. Duration: ${judgmentData.duration}. Notes: ${judgmentData.judgmentNotes}`,
+  //                 user: "SDC Committee",
+  //             },
+  //         ],
+  //     }));
+  //     setShowPassJudgmentDialog(false);
+  // };
 
-    return (
-        <Suspense fallback={isLoading && <h1>Loading Case Details...</h1>}>
-            <div className="space-y-6">
-                <div className="flex flex-col space-y-4 md:flex-row md:items-start md:justify-between md:space-y-0">
-                    <div className="flex items-center space-x-4">
-                        <Avatar className="h-16 w-16">
-                            <AvatarImage
-                                src={"/placeholder.svg"}
-                                alt={caseDetails?.title}
-                            />
-                            <AvatarFallback>
-                                {caseDetails?.students === null ||
-                                caseDetails?.students === undefined ||
-                                caseDetails?.students.length === 0
-                                    ? "Loading..."
-                                    : (
-                                          caseDetails
-                                              .students[0] as involvedStudentSchema
-                                      ).full_name
-                                          .split(" ")
-                                          .map((n) => n[0])
-                                          .join("")}
-                            </AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <div className="flex items-center space-x-2">
-                                <h2 className="text-xl font-semibold text-sdc-navy">
-                                    {caseDetails?.students === null ||
-                                    caseDetails?.students === undefined ||
-                                    caseDetails?.students.length === 0
-                                        ? "NF"
-                                        : (
-                                              caseDetails
-                                                  .students[0] as involvedStudentSchema
-                                          ).full_name}
-                                </h2>
-                                <Badge>
-                                    {caseDetails?.students === null ||
-                                    caseDetails?.students === undefined ||
-                                    caseDetails?.students.length === 0
-                                        ? "Loading..."
-                                        : (
-                                              caseDetails
-                                                  .students[0] as involvedStudentSchema
-                                          ).matric_number}
-                                </Badge>
-                            </div>
-                            <div className="flex items-center space-x-2 text-sm text-sdc-gray">
-                                <GraduationCap className="h-4 w-4" />
-                                <span>
-                                    {caseDetails?.students === null ||
-                                    caseDetails?.students === undefined ||
-                                    caseDetails?.students.length === 0
-                                        ? "Loading..."
-                                        : (
-                                              caseDetails
-                                                  .students[0] as involvedStudentSchema
-                                          ).department}
-                                    ,{" "}
-                                    {caseDetails?.students === null ||
-                                    caseDetails?.students === undefined ||
-                                    caseDetails?.students.length === 0
-                                        ? "Loading..."
-                                        : (
-                                              caseDetails
-                                                  .students[0] as involvedStudentSchema
-                                          ).level}
-                                </span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-sm text-sdc-gray">
-                                <Building className="h-4 w-4" />
-                                <span>
-                                    {" "}
-                                    {caseDetails?.students === null ||
-                                    caseDetails?.students === undefined ||
-                                    caseDetails?.students.length === 0
-                                        ? "Loading..."
-                                        : (
-                                              caseDetails
-                                                  .students[0] as involvedStudentSchema
-                                          ).faculty}
-                                </span>
-                            </div>
-                        </div>
+  return (
+    <Suspense fallback={isLoading && <h1>Loading Case Details...</h1>}>
+      <div className="space-y-6">
+        <div className="flex flex-col space-y-4 md:flex-row md:items-start md:justify-between md:space-y-0">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={"/placeholder.svg"} alt={caseDetails?.title} />
+              <AvatarFallback>
+                {caseDetails?.students === null ||
+                caseDetails?.students === undefined ||
+                caseDetails?.students.length === 0
+                  ? "Loading..."
+                  : (caseDetails.students[0] as involvedStudentSchema).full_name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-xl font-semibold text-sdc-navy">
+                  {caseDetails?.students === null ||
+                  caseDetails?.students === undefined ||
+                  caseDetails?.students.length === 0
+                    ? "NF"
+                    : (caseDetails.students[0] as involvedStudentSchema)
+                        .full_name}
+                </h2>
+                <Badge>
+                  {caseDetails?.students === null ||
+                  caseDetails?.students === undefined ||
+                  caseDetails?.students.length === 0
+                    ? "Loading..."
+                    : (caseDetails.students[0] as involvedStudentSchema)
+                        .matric_number}
+                </Badge>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-sdc-gray">
+                <GraduationCap className="h-4 w-4" />
+                <span>
+                  {caseDetails?.students === null ||
+                  caseDetails?.students === undefined ||
+                  caseDetails?.students.length === 0
+                    ? "Loading..."
+                    : (caseDetails.students[0] as involvedStudentSchema)
+                        .department}
+                  ,{" "}
+                  {caseDetails?.students === null ||
+                  caseDetails?.students === undefined ||
+                  caseDetails?.students.length === 0
+                    ? "Loading..."
+                    : (caseDetails.students[0] as involvedStudentSchema).level}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-sdc-gray">
+                <Building className="h-4 w-4" />
+                <span>
+                  {" "}
+                  {caseDetails?.students === null ||
+                  caseDetails?.students === undefined ||
+                  caseDetails?.students.length === 0
+                    ? "Loading..."
+                    : (caseDetails.students[0] as involvedStudentSchema)
+                        .faculty}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col items-end space-y-2">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-sdc-gray">
+                Case ID:
+              </span>
+              <span className="font-semibold text-sdc-navy">
+                {caseDetails?.id}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="w-full h-auto flex flex-wrap justify-start gap-2 bg-transparent p-0 sm:grid sm:grid-cols-5 sm:bg-muted sm:p-1">
+            <TabsTrigger
+              value="overview"
+              className="data-[state=active]:bg-sdc-navy data-[state=active]:text-white flex-1 min-w-[100px] sm:min-w-0"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="student"
+              className="data-[state=active]:bg-sdc-navy data-[state=active]:text-white flex-1 min-w-[100px] sm:min-w-0"
+            >
+              Student Info
+            </TabsTrigger>
+            <TabsTrigger
+              value="hearings"
+              className="data-[state=active]:bg-sdc-navy data-[state=active]:text-white flex-1 min-w-[100px] sm:min-w-0"
+            >
+              Hearings
+            </TabsTrigger>
+            <TabsTrigger
+              value="documents"
+              className="data-[state=active]:bg-sdc-navy data-[state=active]:text-white flex-1 min-w-[100px] sm:min-w-0"
+            >
+              Documents
+            </TabsTrigger>
+            <TabsTrigger
+              value="timeline"
+              className="data-[state=active]:bg-sdc-navy data-[state=active]:text-white flex-1 min-w-[100px] sm:min-w-0"
+            >
+              Timeline
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-4 mt-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">
+                    Offence Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <BookOpen className="mt-0.5 h-5 w-5 text-sdc-blue" />
+                    <div>
+                      <p className="font-medium text-sdc-navy">
+                        {caseDetails?.offence_type}
+                      </p>
+                      <p className="text-sm text-sdc-gray">
+                        {caseDetails?.description}
+                      </p>
                     </div>
-                    <div className="flex flex-col items-end space-y-2">
-                        <div className="flex items-center space-x-2">
-                            <span className="text-sm font-medium text-sdc-gray">
-                                Case ID:
-                            </span>
-                            <span className="font-semibold text-sdc-navy">
-                                {caseDetails?.id}
-                            </span>
-                        </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="h-5 w-5 text-sdc-gray" />
+                    <div>
+                      <p className="text-sm text-sdc-gray">Incident Date</p>
+                      <p className="font-medium text-sdc-navy">
+                        {caseDetails?.incident_date
+                          ? new Date(
+                              caseDetails.incident_date as string
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </p>
                     </div>
-                </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <User className="h-5 w-5 text-sdc-gray" />
+                    <div>
+                      <p className="text-sm text-sdc-gray">Reported By</p>
+                      <p className="font-medium text-sdc-navy">
+                        {caseDetails?.reported_by}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                <Separator />
-
-                <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-5">
-                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="student">Student Info</TabsTrigger>
-                        <TabsTrigger value="hearings">Hearings</TabsTrigger>
-                        <TabsTrigger value="documents">Documents</TabsTrigger>
-                        <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="overview" className="space-y-4">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg font-medium">
-                                        Offence Details
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="flex items-start space-x-3">
-                                        <BookOpen className="mt-0.5 h-5 w-5 text-sdc-blue" />
-                                        <div>
-                                            <p className="font-medium text-sdc-navy">
-                                                {caseDetails?.offence_type}
-                                            </p>
-                                            <p className="text-sm text-sdc-gray">
-                                                {caseDetails?.description}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center space-x-3">
-                                        <Calendar className="h-5 w-5 text-sdc-gray" />
-                                        <div>
-                                            <p className="text-sm text-sdc-gray">
-                                                Incident Date
-                                            </p>
-                                            <p className="font-medium text-sdc-navy">
-                                                {new Date(
-                                                    caseDetails?.incident_date as string
-                                                ).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center space-x-3">
-                                        <User className="h-5 w-5 text-sdc-gray" />
-                                        <div>
-                                            <p className="text-sm text-sdc-gray">
-                                                Reported By
-                                            </p>
-                                            <p className="font-medium text-sdc-navy">
-                                                {caseDetails?.reported_by}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* <Card>
+              {/* <Card>
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-lg font-medium">
                                     Disciplinary Action
@@ -309,9 +314,9 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                                 )}
                             </CardContent>
                         </Card> */}
-                        </div>
+            </div>
 
-                        {/* <Card>
+            {/* <Card>
                         <CardHeader className="pb-2">
                             <CardTitle className="text-lg font-medium">
                                 Recent Activity
@@ -352,116 +357,93 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                             </div>
                         </CardContent>
                     </Card> */}
-                    </TabsContent>
+          </TabsContent>
 
-                    <TabsContent value="student">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Student Information</CardTitle>
-                                <CardDescription>
-                                    Detailed information about the student
-                                    involved in this case.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-medium text-sdc-gray">
-                                            Full Name
-                                        </p>
-                                        <p className="font-medium text-sdc-navy">
-                                            {(
-                                                caseDetails
-                                                    ?.students?.[0] as involvedStudentSchema
-                                            )?.full_name ?? "Loading..."}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-medium text-sdc-gray">
-                                            Matric Number
-                                        </p>
-                                        <p className="font-medium text-sdc-navy">
-                                            {(
-                                                caseDetails
-                                                    ?.students?.[0] as involvedStudentSchema
-                                            )?.matric_number ?? "Loading..."}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-medium text-sdc-gray">
-                                            Department
-                                        </p>
-                                        <p className="font-medium text-sdc-navy">
-                                            {(
-                                                caseDetails
-                                                    ?.students?.[0] as involvedStudentSchema
-                                            )?.department ?? "Loading..."}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-medium text-sdc-gray">
-                                            Faculty
-                                        </p>
-                                        <p className="font-medium text-sdc-navy">
-                                            {(
-                                                caseDetails
-                                                    ?.students?.[0] as involvedStudentSchema
-                                            )?.faculty ?? "Loading..."}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-medium text-sdc-gray">
-                                            Level
-                                        </p>
-                                        <p className="font-medium text-sdc-navy">
-                                            {(
-                                                caseDetails
-                                                    ?.students?.[0] as involvedStudentSchema
-                                            )?.level ?? "Loading"}
-                                        </p>
-                                    </div>
-                                </div>
-                                <Separator />
-                                <div className="space-y-4">
-                                    <h3 className="text-lg font-medium text-sdc-navy">
-                                        Contact Information
-                                    </h3>
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        <div className="flex items-center space-x-3">
-                                            <Mail className="h-5 w-5 text-sdc-gray" />
-                                            <div>
-                                                <p className="text-sm text-sdc-gray">
-                                                    Email Address
-                                                </p>
-                                                <p className="font-medium text-sdc-navy">
-                                                    {(
-                                                        caseDetails
-                                                            ?.students?.[0] as involvedStudentSchema
-                                                    )?.email ?? "NF"}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center space-x-3">
-                                            <Phone className="h-5 w-5 text-sdc-gray" />
-                                            <div>
-                                                <p className="text-sm text-sdc-gray">
-                                                    Phone Number
-                                                </p>
-                                                <p className="font-medium text-sdc-navy">
-                                                    {(
-                                                        caseDetails
-                                                            ?.students?.[0] as involvedStudentSchema
-                                                    )?.phone ?? "NF"}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+          <TabsContent value="student">
+            <Card>
+              <CardHeader>
+                <CardTitle>Student Information</CardTitle>
+                <CardDescription>
+                  Detailed information about the student involved in this case.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-sdc-gray">
+                      Full Name
+                    </p>
+                    <p className="font-medium text-sdc-navy">
+                      {(caseDetails?.students?.[0] as involvedStudentSchema)
+                        ?.full_name ?? "Loading..."}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-sdc-gray">
+                      Matric Number
+                    </p>
+                    <p className="font-medium text-sdc-navy">
+                      {(caseDetails?.students?.[0] as involvedStudentSchema)
+                        ?.matric_number ?? "Loading..."}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-sdc-gray">
+                      Department
+                    </p>
+                    <p className="font-medium text-sdc-navy">
+                      {(caseDetails?.students?.[0] as involvedStudentSchema)
+                        ?.department ?? "Loading..."}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-sdc-gray">Faculty</p>
+                    <p className="font-medium text-sdc-navy">
+                      {(caseDetails?.students?.[0] as involvedStudentSchema)
+                        ?.faculty ?? "Loading..."}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-sdc-gray">Level</p>
+                    <p className="font-medium text-sdc-navy">
+                      {(caseDetails?.students?.[0] as involvedStudentSchema)
+                        ?.level ?? "Loading"}
+                    </p>
+                  </div>
+                </div>
+                <Separator />
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-sdc-navy">
+                    Contact Information
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="flex items-center space-x-3">
+                      <Mail className="h-5 w-5 text-sdc-gray" />
+                      <div>
+                        <p className="text-sm text-sdc-gray">Email Address</p>
+                        <p className="font-medium text-sdc-navy">
+                          {(caseDetails?.students?.[0] as involvedStudentSchema)
+                            ?.email ?? "NF"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Phone className="h-5 w-5 text-sdc-gray" />
+                      <div>
+                        <p className="text-sm text-sdc-gray">Phone Number</p>
+                        <p className="font-medium text-sdc-navy">
+                          {(caseDetails?.students?.[0] as involvedStudentSchema)
+                            ?.phone ?? "NF"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                    {/* <TabsContent value="hearings">
+          {/* <TabsContent value="hearings">
                     <Card>
                         <CardHeader>
                             <CardTitle>Disciplinary Hearings</CardTitle>
@@ -566,7 +548,7 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                     </Card>
                 </TabsContent> */}
 
-                    {/* <TabsContent value="documents">
+          {/* <TabsContent value="documents">
                     <Card>
                         <CardHeader>
                             <CardTitle>Case Documents</CardTitle>
@@ -664,9 +646,9 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                         </CardContent>
                     </Card>
                 </TabsContent> */}
-                </Tabs>
+        </Tabs>
 
-                {/* <div className="flex justify-end space-x-2 pt-4">
+        {/* <div className="flex justify-end space-x-2 pt-4">
                 {" "}
                  Added pt-4 for spacing
                 <Button variant="outline">Edit Case</Button>
@@ -683,7 +665,7 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                 </Button>
             </div> */}
 
-                {/* <PassJudgmentDialog
+        {/* <PassJudgmentDialog
                 open={showPassJudgmentDialog}
                 onOpenChange={setShowPassJudgmentDialog}
                 caseId={caseDetails.id}
@@ -692,7 +674,7 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                 // currentPunishment={caseDetails.punishment}
                 onSaveJudgment={handleSaveJudgment}
             /> */}
-            </div>
-        </Suspense>
-    );
+      </div>
+    </Suspense>
+  );
 }

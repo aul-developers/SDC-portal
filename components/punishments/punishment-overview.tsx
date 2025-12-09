@@ -1,30 +1,36 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { Chart, registerables } from "chart.js"
+import { useEffect, useRef } from "react";
+import { Chart, registerables } from "chart.js";
 
-Chart.register(...registerables)
+Chart.register(...registerables);
 
 export function PunishmentOverview() {
-  const chartRef = useRef<HTMLCanvasElement>(null)
-  const chartInstance = useRef<Chart | null>(null)
+  const chartRef = useRef<HTMLCanvasElement>(null);
+  const chartInstance = useRef<Chart | null>(null);
 
   useEffect(() => {
-    if (!chartRef.current) return
+    if (!chartRef.current) return;
 
     // Destroy existing chart
     if (chartInstance.current) {
-      chartInstance.current.destroy()
+      chartInstance.current.destroy();
     }
 
-    const ctx = chartRef.current.getContext("2d")
-    if (!ctx) return
+    const ctx = chartRef.current.getContext("2d");
+    if (!ctx) return;
 
     // Sample data
     chartInstance.current = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: ["Warning", "Probation", "Suspension", "Community Service", "Expulsion"],
+        labels: [
+          "Warning",
+          "Probation",
+          "Suspension",
+          "Community Service",
+          "Expulsion",
+        ],
         datasets: [
           {
             label: "Current Semester",
@@ -74,21 +80,19 @@ export function PunishmentOverview() {
             },
           },
         },
-        barPercentage: 0.6,
-        categoryPercentage: 0.7,
       },
-    })
+    });
 
     return () => {
       if (chartInstance.current) {
-        chartInstance.current.destroy()
+        chartInstance.current.destroy();
       }
-    }
-  }, [])
+    };
+  }, []);
 
   return (
     <div className="h-[300px] w-full">
       <canvas ref={chartRef} />
     </div>
-  )
+  );
 }

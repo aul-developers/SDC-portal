@@ -1,57 +1,72 @@
-"use client"
+"use client";
 
-import { useState, useCallback } from "react"
-import { OffenceList } from "./offence-list"
-import { OffenceDetails } from "./offence-details"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
-import { Search, Plus, X } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { AddOffenceDialog } from "./add-offence-dialog"
+import { useState, useCallback } from "react";
+import { OffenceList } from "./offence-list";
+import { OffenceDetails } from "./offence-details";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Plus, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { AddOffenceDialog } from "./add-offence-dialog";
 
 export function OffenceDirectory() {
-  const [selectedOffence, setSelectedOffence] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [severityFilter, setSeverityFilter] = useState<string>("all")
-  const [sortBy, setSortBy] = useState<string>("name")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
-  const [isAddOffenceOpen, setIsAddOffenceOpen] = useState(false)
+  const [selectedOffence, setSelectedOffence] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [severityFilter, setSeverityFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [isAddOffenceOpen, setIsAddOffenceOpen] = useState(false);
 
   const handleSelectOffence = useCallback((offenceId: string) => {
-    setSelectedOffence(offenceId)
-  }, [])
+    setSelectedOffence(offenceId);
+  }, []);
 
   const handleBackToList = useCallback(() => {
-    setSelectedOffence(null)
-  }, [])
+    setSelectedOffence(null);
+  }, []);
 
   const handleClearFilters = useCallback(() => {
-    setSearchQuery("")
-    setSeverityFilter("all")
-  }, [])
+    setSearchQuery("");
+    setSeverityFilter("all");
+  }, []);
 
   if (selectedOffence) {
     return (
-      <div className="space-y-6 p-8">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-gray-800">Offence Details</h2>
-          <Button variant="outline" size="sm" onClick={handleBackToList} className="gap-2">
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Offence Details
+          </h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBackToList}
+            className="gap-2"
+          >
             <X className="h-4 w-4" /> Back to List
           </Button>
         </div>
         <OffenceDetails offenceId={selectedOffence} />
       </div>
-    )
+    );
   }
 
   return (
     <div className="flex flex-col space-y-6 p-8">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800">Offence Directory</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Offence Directory
+        </h1>
         <p className="mt-1 text-sm text-gray-500">
-          List of all offences with their severity levels and standard punishments.
+          List of all offences with their severity levels and standard
+          punishments.
         </p>
       </div>
 
@@ -78,7 +93,10 @@ export function OffenceDirectory() {
                   <SelectItem value="all">All Levels</SelectItem>
                   <SelectItem value="low">
                     <div className="flex items-center">
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 mr-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-blue-50 text-blue-700 border-blue-100 mr-2"
+                      >
                         Low
                       </Badge>
                       Low
@@ -86,7 +104,10 @@ export function OffenceDirectory() {
                   </SelectItem>
                   <SelectItem value="medium">
                     <div className="flex items-center">
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-100 mr-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-amber-50 text-amber-700 border-amber-100 mr-2"
+                      >
                         Medium
                       </Badge>
                       Medium
@@ -94,7 +115,10 @@ export function OffenceDirectory() {
                   </SelectItem>
                   <SelectItem value="high">
                     <div className="flex items-center">
-                      <Badge variant="outline" className="bg-red-50 text-red-700 border-red-100 mr-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-red-50 text-red-700 border-red-100 mr-2"
+                      >
                         High
                       </Badge>
                       High
@@ -103,12 +127,19 @@ export function OffenceDirectory() {
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" onClick={handleClearFilters} className="gap-1">
+              <Button
+                variant="outline"
+                onClick={handleClearFilters}
+                className="gap-1"
+              >
                 <X className="h-3.5 w-3.5" />
                 <span>Clear</span>
               </Button>
 
-              <Button onClick={() => setIsAddOffenceOpen(true)} className="gap-1">
+              <Button
+                onClick={() => setIsAddOffenceOpen(true)}
+                className="gap-1"
+              >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Add Offence</span>
               </Button>
@@ -125,7 +156,10 @@ export function OffenceDirectory() {
         onSelectOffence={handleSelectOffence}
       />
 
-      <AddOffenceDialog open={isAddOffenceOpen} onOpenChange={setIsAddOffenceOpen} />
+      <AddOffenceDialog
+        open={isAddOffenceOpen}
+        onOpenChange={setIsAddOffenceOpen}
+      />
     </div>
-  )
+  );
 }
