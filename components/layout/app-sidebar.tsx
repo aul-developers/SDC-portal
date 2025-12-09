@@ -24,7 +24,33 @@ import {
 } from "@/components/ui/sheet";
 import { useState } from "react";
 
-// ... existing routes ...
+const routes = [
+  {
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    href: "/dashboard",
+  },
+  {
+    label: "Cases",
+    icon: FileText,
+    href: "/dashboard/cases",
+  },
+  {
+    label: "Punishments",
+    icon: Gavel,
+    href: "/dashboard/punishments",
+  },
+  {
+    label: "Offences",
+    icon: AlertTriangle,
+    href: "/dashboard/offences",
+  },
+  {
+    label: "Students",
+    icon: Users,
+    href: "/dashboard/students",
+  },
+];
 
 export function MobileSidebar() {
   const pathname = usePathname();
