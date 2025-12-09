@@ -1,23 +1,151 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Bell, Lock, User, Shield, Moon, Monitor } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-sdc-navy">
           Settings
         </h1>
         <p className="text-gray-500">
-          Manage your preferences and account settings.
+          Manage your application preferences and security.
         </p>
       </div>
-      <Card>
-        <CardContent className="p-8 text-center text-gray-500">
-          Settings module coming soon.
-        </CardContent>
-      </Card>
+
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsTrigger value="general">
+            <User className="mr-2 h-4 w-4" />
+            General
+          </TabsTrigger>
+          <TabsTrigger value="notifications">
+            <Bell className="mr-2 h-4 w-4" />
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger value="security">
+            <Shield className="mr-2 h-4 w-4" />
+            Security
+          </TabsTrigger>
+        </TabsList>
+
+        {/* General Settings */}
+        <TabsContent value="general" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Appearance</CardTitle>
+              <CardDescription>
+                Customize how the SDC Portal looks on your device.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center">
+                    <Moon className="h-5 w-5 text-slate-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sdc-navy">Dark Mode</p>
+                    <p className="text-sm text-gray-500">
+                      Switch between light and dark themes
+                    </p>
+                  </div>
+                </div>
+                <Switch />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Notification Settings */}
+        <TabsContent value="notifications" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Notifications</CardTitle>
+              <CardDescription>
+                Choose what updates you want to receive via email.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Case Updates</Label>
+                  <p className="text-sm text-gray-500">
+                    Receive emails when cases are updated.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Hearing Schedules</Label>
+                  <p className="text-sm text-gray-500">
+                    Get reminders for upcoming hearings.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-base">System Alerts</Label>
+                  <p className="text-sm text-gray-500">
+                    Important system notifications and security alerts.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Security Settings */}
+        <TabsContent value="security" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Password</CardTitle>
+              <CardDescription>
+                Change your password to keep your account secure.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="current">Current Password</Label>
+                <Input id="current" type="password" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new">New Password</Label>
+                <Input id="new" type="password" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm">Confirm New Password</Label>
+                <Input id="confirm" type="password" />
+              </div>
+            </CardContent>
+            <CardFooter className="bg-gray-50/50 px-6 py-4 flex justify-end rounded-b-xl">
+              <Button className="bg-sdc-navy hover:bg-sdc-navy/90 text-white">
+                Update Password
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

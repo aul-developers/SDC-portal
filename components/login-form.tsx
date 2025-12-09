@@ -53,7 +53,6 @@ export function LoginForm() {
       <div className="relative group">
         <Mail className="absolute left-0 top-3 h-5 w-5 text-gray-400 transition-colors" />
         <Input
-  
           placeholder="admin.aul.edu.ng"
           ref={formUserEmailInputRef}
           autoCapitalize="none"
@@ -61,7 +60,7 @@ export function LoginForm() {
           autoCorrect="off"
           disabled={isLoading}
           required
-          className="pl-8 border-0 border-b border-gray-200 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-gray-200 focus-visible:ring-offset-0 bg-transparent h-10 placeholder:text-gray-800 font-medium transition-none"
+          className="pl-8 border-0 border-b border-gray-200 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-gray-200 focus-visible:ring-offset-0 bg-transparent h-10 placeholder:text-gray-500 font-medium transition-none"
         />
       </div>
 
@@ -69,7 +68,6 @@ export function LoginForm() {
         <div className="relative group">
           <Lock className="absolute left-0 top-3 h-5 w-5 text-gray-400 transition-colors" />
           <Input
-
             placeholder="••••••••"
             ref={formPasswordInputRef}
             type={showPassword ? "text" : "password"}
@@ -77,7 +75,7 @@ export function LoginForm() {
             autoComplete="current-password"
             disabled={isLoading}
             required
-            className="pl-8 border-0 border-b border-gray-200 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-gray-200 focus-visible:ring-offset-0 bg-transparent h-10 placeholder:text-gray-400 font-medium tracking-widest transition-none"
+            className="pl-8 border-0 border-b border-gray-200 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-gray-200 focus-visible:ring-offset-0 bg-transparent h-10 placeholder:text-gray-500 font-medium tracking-widest transition-none"
           />
           <button
             type="button"

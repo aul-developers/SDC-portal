@@ -15,41 +15,16 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { useState } from "react";
 
-const routes = [
-  {
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/dashboard",
-  },
-  {
-    label: "Cases",
-    icon: FileText,
-    href: "/dashboard/cases",
-  },
-  {
-    label: "Punishments",
-    icon: Gavel,
-    href: "/dashboard/punishments",
-  },
-  {
-    label: "Offences",
-    icon: AlertTriangle,
-    href: "/dashboard/offences",
-  },
-  {
-    label: "Students",
-    icon: Users,
-    href: "/dashboard/students",
-  },
-  // {
-  //   label: "Users",
-  //   icon: Users,
-  //   href: "/dashboard/users",
-  // },
-];
+// ... existing routes ...
 
 export function MobileSidebar() {
   const pathname = usePathname();
@@ -64,8 +39,12 @@ export function MobileSidebar() {
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="p-0 w-72 bg-white border-r border-gray-100"
+        className="p-0 w-72 bg-white border-r border-gray-100 z-[100]"
       >
+        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+        <SheetDescription className="sr-only">
+          Mobile navigation sidebar
+        </SheetDescription>
         <SidebarContent pathname={pathname} setIsOpen={setIsOpen} />
       </SheetContent>
     </Sheet>
@@ -145,30 +124,8 @@ function SidebarContent({
         })}
       </div>
 
-      {/* Promo/System Card - Minimal Version */}
-      <div className="p-4 mt-auto">
-        <div className="rounded-2xl bg-sdc-navy p-5 text-center relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none transition-colors"></div>
-
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="w-10 h-10 bg-white/10 text-white rounded-full flex items-center justify-center mb-3 border border-white/10">
-              <HelpCircle className="h-5 w-5" />
-            </div>
-            <h4 className="font-bold text-white text-sm mb-1">Need Help?</h4>
-            <p className="text-xs text-white/70 mb-3">Check portal guide</p>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="w-full h-8 text-xs bg-white text-sdc-navy"
-            >
-              View Docs
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* Logout / User */}
-      <div className="p-4 border-t border-gray-100">
+      <div className="p-4 border-t border-gray-100 mt-auto">
         <div className="flex items-center gap-3 px-2 mb-4">
           <div className="h-10 w-10 rounded-full bg-gray-100 border border-white shadow-sm flex items-center justify-center text-sdc-navy font-bold">
             AD

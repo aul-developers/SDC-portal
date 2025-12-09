@@ -128,14 +128,7 @@ export function Header() {
                 Settings
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                href="/dashboard/help"
-                className="cursor-pointer font-medium"
-              >
-                Help & Support
-              </Link>
-            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link
