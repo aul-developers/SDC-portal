@@ -1,13 +1,34 @@
+"use client";
 import type React from "react";
 import { DesktopSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
 import { Toaster } from "sonner";
+import { useEffect } from "react";
+import { checkUser } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await checkUser("/status/");
+        if (response.message === false) {
+          return router.push("/");
+        }
+        console.log(response);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <div className="h-full relative font-sans bg-sdc-slate-bg min-h-screen">
       {/* Desktop Sidebar - Fixed */}

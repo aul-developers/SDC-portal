@@ -20,7 +20,9 @@ export const postRequest = async <T>(
   receivedData?: T,
 ): Promise<APIResponse<any> | null> => {
   try {
-    const request = await DataApiClient.post<APIResponse<any>>(endpoint, receivedData);
+    const request = await DataApiClient.post<APIResponse<any>>(endpoint, receivedData, {
+      withCredentials: true,
+    });
 
     return request.data;
   } catch (error) {
@@ -87,6 +89,15 @@ export const getDashboardMetrics = async (endpoint: string) => {
   try {
     const response = await DataApiClient.get(endpoint);
     console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const checkUser = async (endpoint: string) => {
+  try {
+    const response = await DataApiClient.get(endpoint);
     return response.data;
   } catch (error) {
     console.log(error);
