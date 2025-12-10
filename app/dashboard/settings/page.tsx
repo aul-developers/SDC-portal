@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Lock, User, Shield, Moon, Monitor } from "lucide-react";
+import { Bell, Lock, Shield } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
@@ -28,12 +28,8 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="general">
-            <User className="mr-2 h-4 w-4" />
-            General
-          </TabsTrigger>
+      <Tabs defaultValue="notifications" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-8">
           <TabsTrigger value="notifications">
             <Bell className="mr-2 h-4 w-4" />
             Notifications
@@ -43,34 +39,6 @@ export default function SettingsPage() {
             Security
           </TabsTrigger>
         </TabsList>
-
-        {/* General Settings */}
-        <TabsContent value="general" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Appearance</CardTitle>
-              <CardDescription>
-                Customize how the SDC Portal looks on your device.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center">
-                    <Moon className="h-5 w-5 text-slate-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-sdc-navy">Dark Mode</p>
-                    <p className="text-sm text-gray-500">
-                      Switch between light and dark themes
-                    </p>
-                  </div>
-                </div>
-                <Switch />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* Notification Settings */}
         <TabsContent value="notifications" className="space-y-4">
