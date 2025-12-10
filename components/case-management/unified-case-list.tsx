@@ -35,9 +35,13 @@ import { MOCK_CASES } from "@/app/dashboard/_data/mock-data";
 
 interface UnifiedCaseListProps {
   onViewDetails: (caseId: number, type: "Individual" | "Grouped") => void;
+  onEdit: (caseItem: Case) => void;
 }
 
-export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
+export function UnifiedCaseList({
+  onViewDetails,
+  onEdit,
+}: UnifiedCaseListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const isLoading = false;
@@ -66,8 +70,8 @@ export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
     alert(`Delete ${type} case ${caseId}`);
   };
 
-  const handleEdit = (caseId: number, type: string) => {
-    alert(`Edit ${type} case ${caseId}`);
+  const handleEdit = (caseItem: Case) => {
+    onEdit(caseItem);
   };
 
   return (
@@ -264,12 +268,7 @@ export function UnifiedCaseList({ onViewDetails }: UnifiedCaseListProps) {
                         <DropdownMenuItem asChild>
                           <button
                             className="flex w-full items-center cursor-pointer"
-                            onClick={() =>
-                              handleEdit(
-                                caseItem.id as number,
-                                caseItem.case_type as "Individual" | "Grouped"
-                              )
-                            }
+                            onClick={() => handleEdit(caseItem)}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Case

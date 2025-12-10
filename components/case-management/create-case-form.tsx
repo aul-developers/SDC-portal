@@ -34,6 +34,7 @@ import { toast } from "sonner";
 
 interface CreateCaseFormProps {
   onSuccess: () => void;
+  initialData?: caseFormSchema;
 }
 
 export interface involvedStudentSchema {
@@ -107,24 +108,27 @@ export interface Student {
   phone: string;
 }
 
-export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
+export function CreateCaseForm({
+  onSuccess,
+  initialData,
+}: CreateCaseFormProps) {
   const initialFieldState: caseFormSchema = useMemo(
     () => ({
-      title: "",
-      offence_type: "",
-      description: "",
-      incident_date: "",
-      case_type: "Individual",
-      incident_time: "",
-      reported_by: "",
-      location: "",
-      position: "",
-      priority: "",
-      reporter_mail: "",
-      reporters_phone: "",
-      students: [],
+      title: initialData?.title || "",
+      offence_type: initialData?.offence_type || "",
+      description: initialData?.description || "",
+      incident_date: initialData?.incident_date || "",
+      case_type: initialData?.case_type || "Individual",
+      incident_time: initialData?.incident_time || "",
+      reported_by: initialData?.reported_by || "",
+      location: initialData?.location || "",
+      position: initialData?.position || "",
+      priority: initialData?.priority || "",
+      reporter_mail: initialData?.reporter_mail || "",
+      reporters_phone: initialData?.reporters_phone || "",
+      students: initialData?.students || [],
     }),
-    []
+    [initialData]
   );
   const [state, dispatch] = useReducer<
     React.Reducer<caseFormSchema, formActions>
@@ -162,7 +166,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
   }, [state]);
 
   const [studentInvolved, setStudentInvolved] = useState<involvedStudentSchema>(
-    {
+    (initialData?.students?.[0] as involvedStudentSchema) || {
       full_name: "",
       matric_number: "",
       phone: "",
@@ -172,7 +176,9 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
       email: "",
     }
   );
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | undefined>(
+    initialData?.incident_date ? new Date(initialData.incident_date) : undefined
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = useCallback(
@@ -234,10 +240,12 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
     <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
       <div className="text-center space-y-2 mb-8">
         <h2 className="text-2xl font-bold text-sdc-navy">
-          Create Individual Case
+          {initialData ? "Edit Individual Case" : "Create Individual Case"}
         </h2>
         <p className="text-gray-600">
-          Fill in all the details to create a new disciplinary case
+          {initialData
+            ? "Update the details of the disciplinary case"
+            : "Fill in all the details to create a new disciplinary case"}
         </p>
       </div>
 
@@ -261,6 +269,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
                 placeholder="e.g., Academic Dishonesty - Examination Malpractice"
                 className="h-11"
                 required
+                value={state.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
               />
             </div>
@@ -271,6 +280,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Select
                 required
+                value={state.offence_type}
                 onValueChange={(value) =>
                   handleInputChange("offence_type", value)
                 }
@@ -305,6 +315,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             <Textarea
               onChange={(e) => handleInputChange("description", e.target.value)}
               id="description"
+              value={state.description}
               placeholder="Provide a detailed description of the case and incident"
               className="min-h-[100px]"
               required
@@ -358,6 +369,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
                 onChange={(e) =>
                   handleInputChange("incident_time", e.target.value)
                 }
+                value={state.incident_time}
                 id="incident-time"
                 type="time"
                 className="h-11"
@@ -371,6 +383,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Select
                 required
+                value={state.priority}
                 onValueChange={(value: string) =>
                   handleInputChange("priority", value)
                 }
@@ -396,6 +409,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               id="location"
               placeholder="e.g., Main Library, Room 204, Computer Lab A"
               className="h-11"
+              value={state.location}
               onChange={(e) => handleInputChange("location", e.target.value)}
               required
             />
@@ -418,6 +432,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Input
                 id="student-name"
+                value={studentInvolved.full_name}
                 onChange={(e) =>
                   handleStudentInputChange("full_name", e.target.value)
                 }
@@ -433,6 +448,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Input
                 id="student-id"
+                value={studentInvolved.matric_number}
                 onChange={(e) =>
                   handleStudentInputChange("matric_number", e.target.value)
                 }
@@ -448,6 +464,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Select
                 required
+                value={studentInvolved.faculty}
                 onValueChange={(value: string) =>
                   handleStudentInputChange("faculty", value)
                 }
@@ -477,6 +494,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Select
                 required
+                value={studentInvolved.department}
                 onValueChange={(value: string) =>
                   handleStudentInputChange("department", value)
                 }
@@ -511,6 +529,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Select
                 required
+                value={studentInvolved.level}
                 onValueChange={(value: string) =>
                   handleStudentInputChange("level", value)
                 }
@@ -536,6 +555,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Input
                 id="student-email"
                 type="email"
+                value={studentInvolved.email}
                 placeholder="student@university.edu"
                 className="h-11"
                 onChange={(e) =>
@@ -554,6 +574,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
                   handleStudentInputChange("phone", e.target.value)
                 }
                 id="student-phone"
+                value={studentInvolved.phone}
                 type="tel"
                 placeholder="+234 xxx xxx xxxx"
                 className="h-11"
@@ -580,6 +601,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
                 onChange={(e) =>
                   handleInputChange("reported_by", e.target.value)
                 }
+                value={state.reported_by}
                 id="reported-by"
                 placeholder="Name of person reporting"
                 className="h-11"
@@ -593,6 +615,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Input
                 id="reporter-title"
+                value={state.position}
                 onChange={(e) => handleInputChange("position", e.target.value)}
                 placeholder="e.g., Professor, Security Officer, Student"
                 className="h-11"
@@ -607,6 +630,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               <Input
                 id="reporter-email"
                 type="email"
+                value={state.reporter_mail}
                 placeholder="reporter@university.edu"
                 className="h-11"
                 onChange={(e) =>
@@ -622,6 +646,7 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
               </Label>
               <Input
                 id="reporter-phone"
+                value={state.reporters_phone}
                 onChange={(e) =>
                   handleInputChange("reporters_phone", e.target.value)
                 }
@@ -648,7 +673,13 @@ export function CreateCaseForm({ onSuccess }: CreateCaseFormProps) {
             className="bg-sdc-blue hover:bg-sdc-blue/90 text-white px-6 shadow-lg shadow-sdc-blue/20 rounded-xl"
             disabled={isSubmitting ? true : false}
           >
-            {isSubmitting ? "Creating Case..." : "Create Individual Case"}
+            {isSubmitting
+              ? initialData
+                ? "Updating Case..."
+                : "Creating Case..."
+              : initialData
+              ? "Update Individual Case"
+              : "Create Individual Case"}
           </Button>
         </div>
       </form>
