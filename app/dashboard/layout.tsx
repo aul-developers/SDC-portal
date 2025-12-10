@@ -3,7 +3,7 @@ import type React from "react";
 import { DesktopSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
 import { Toaster } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { checkUser } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
@@ -13,6 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -38,10 +39,17 @@ export default function DashboardLayout({
   return (
     <div className="h-full relative font-sans bg-sdc-slate-bg min-h-screen">
       {/* Desktop Sidebar - Fixed */}
-      <DesktopSidebar />
+      <DesktopSidebar
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+      />
 
       {/* Main Content Area */}
-      <main className="md:pl-72 h-full flex flex-col">
+      <main
+        className={`transition-all duration-300 h-full flex flex-col ${
+          isCollapsed ? "md:pl-20" : "md:pl-72"
+        }`}
+      >
         <Header />
         <div
           id="dashboard-content"

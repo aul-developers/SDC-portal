@@ -1,13 +1,32 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Search, MoreHorizontal, Eye, Edit, Trash2, Filter } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  Search,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
+  Filter,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Mock data for cases
 const mockCases = [
@@ -83,15 +102,15 @@ const mockCases = [
     status: "resolved",
     date: "2024-05-03",
   },
-]
+];
 
 interface CaseListProps {
-  onViewDetails: (caseId: string) => void
+  onViewDetails: (caseId: string) => void;
 }
 
 export function CaseList({ onViewDetails }: CaseListProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   // Filter cases based on search term and status filter
   const filteredCases = mockCases.filter((caseItem) => {
@@ -100,22 +119,23 @@ export function CaseList({ onViewDetails }: CaseListProps) {
       caseItem.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       caseItem.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
       caseItem.matricNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caseItem.offence.toLowerCase().includes(searchTerm.toLowerCase())
+      caseItem.offence.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === null || caseItem.status === statusFilter
+    const matchesStatus =
+      statusFilter === null || caseItem.status === statusFilter;
 
-    return matchesSearch && matchesStatus
-  })
+    return matchesSearch && matchesStatus;
+  });
 
   const handleDelete = (caseId: string) => {
     // In a real application, this would call an API to delete the case
-    alert(`Delete case ${caseId}`)
-  }
+    alert(`Delete case ${caseId}`);
+  };
 
   const handleEdit = (caseId: string) => {
     // In a real application, this would open an edit form
-    alert(`Edit case ${caseId}`)
-  }
+    alert(`Edit case ${caseId}`);
+  };
 
   return (
     <div className="space-y-6">
@@ -138,58 +158,94 @@ export function CaseList({ onViewDetails }: CaseListProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => setStatusFilter(null)}>All Statuses</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter("pending")}>Pending</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter("scheduled")}>Scheduled</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter("in-progress")}>In Progress</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter("resolved")}>Resolved</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter(null)}>
+              All Statuses
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("pending")}>
+              Pending
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("scheduled")}>
+              Scheduled
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("in-progress")}>
+              In Progress
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("resolved")}>
+              Resolved
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div className="rounded-lg border bg-white shadow-sm">
+      <div className="rounded-lg border bg-white shadow-sm overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-b">
               <TableHead className="h-12 px-6 font-medium">Case ID</TableHead>
               <TableHead className="h-12 px-6 font-medium">Student</TableHead>
-              <TableHead className="h-12 px-6 font-medium">Matric Number</TableHead>
+              <TableHead className="h-12 px-6 font-medium">
+                Matric Number
+              </TableHead>
               <TableHead className="h-12 px-6 font-medium">Offence</TableHead>
-              <TableHead className="h-12 px-6 font-medium">Punishment</TableHead>
+              <TableHead className="h-12 px-6 font-medium">
+                Punishment
+              </TableHead>
               <TableHead className="h-12 px-6 font-medium">Status</TableHead>
               <TableHead className="h-12 px-6 font-medium">Date</TableHead>
-              <TableHead className="h-12 px-6 text-right font-medium">Actions</TableHead>
+              <TableHead className="h-12 px-6 text-right font-medium">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredCases.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={8}
+                  className="h-32 text-center text-muted-foreground"
+                >
                   No cases found.
                 </TableCell>
               </TableRow>
             ) : (
               filteredCases.map((caseItem) => (
                 <TableRow key={caseItem.id} className="hover:bg-gray-50/50">
-                  <TableCell className="px-6 py-4 font-medium">{caseItem.id}</TableCell>
-                  <TableCell className="px-6 py-4">{caseItem.student}</TableCell>
-                  <TableCell className="px-6 py-4">{caseItem.matricNumber}</TableCell>
-                  <TableCell className="px-6 py-4">{caseItem.offence}</TableCell>
-                  <TableCell className="px-6 py-4">{caseItem.punishment}</TableCell>
+                  <TableCell className="px-6 py-4 font-medium">
+                    {caseItem.id}
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    {caseItem.student}
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    {caseItem.matricNumber}
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    {caseItem.offence}
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    {caseItem.punishment}
+                  </TableCell>
                   <TableCell className="px-6 py-4">
                     <Badge
                       className={cn(
                         "px-3 py-1",
-                        caseItem.status === "pending" && "bg-amber-500 hover:bg-amber-600",
-                        caseItem.status === "scheduled" && "bg-blue-500 hover:bg-blue-600",
-                        caseItem.status === "in-progress" && "bg-indigo-500 hover:bg-indigo-600",
-                        caseItem.status === "resolved" && "bg-emerald-500 hover:bg-emerald-600",
+                        caseItem.status === "pending" &&
+                          "bg-amber-500 hover:bg-amber-600",
+                        caseItem.status === "scheduled" &&
+                          "bg-blue-500 hover:bg-blue-600",
+                        caseItem.status === "in-progress" &&
+                          "bg-indigo-500 hover:bg-indigo-600",
+                        caseItem.status === "resolved" &&
+                          "bg-emerald-500 hover:bg-emerald-600"
                       )}
                     >
-                      {caseItem.status.charAt(0).toUpperCase() + caseItem.status.slice(1)}
+                      {caseItem.status.charAt(0).toUpperCase() +
+                        caseItem.status.slice(1)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-6 py-4">{new Date(caseItem.date).toLocaleDateString()}</TableCell>
+                  <TableCell className="px-6 py-4">
+                    {new Date(caseItem.date).toLocaleDateString()}
+                  </TableCell>
                   <TableCell className="px-6 py-4 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -217,7 +273,10 @@ export function CaseList({ onViewDetails }: CaseListProps) {
                             Edit Case
                           </button>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild className="text-red-600 focus:text-red-600">
+                        <DropdownMenuItem
+                          asChild
+                          className="text-red-600 focus:text-red-600"
+                        >
                           <button
                             className="flex w-full items-center cursor-pointer"
                             onClick={() => handleDelete(caseItem.id)}
@@ -236,5 +295,5 @@ export function CaseList({ onViewDetails }: CaseListProps) {
         </Table>
       </div>
     </div>
-  )
+  );
 }

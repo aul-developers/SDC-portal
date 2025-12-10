@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   HelpCircle,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,13 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 
 const routes = [
@@ -77,12 +85,27 @@ export function MobileSidebar() {
   );
 }
 
-export function DesktopSidebar() {
+export function DesktopSidebar({
+  isCollapsed,
+  setIsCollapsed,
+}: {
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
+}) {
   const pathname = usePathname();
 
   return (
-    <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-[80] bg-white shadow-xl border-r border-gray-100">
-      <SidebarContent pathname={pathname} />
+    <div
+      className={cn(
+        "hidden h-full md:flex md:flex-col md:fixed md:inset-y-0 z-[40] bg-white shadow-xl border-r border-gray-100 transition-all duration-300",
+        isCollapsed ? "md:w-20" : "md:w-72"
+      )}
+    >
+      <SidebarContent
+        pathname={pathname}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+      />
     </div>
   );
 }
@@ -90,15 +113,45 @@ export function DesktopSidebar() {
 function SidebarContent({
   pathname,
   setIsOpen,
+  isCollapsed,
+  setIsCollapsed,
 }: {
   pathname: string;
   setIsOpen?: (open: boolean) => void;
+  isCollapsed?: boolean;
+  setIsCollapsed?: (collapsed: boolean) => void;
 }) {
   return (
     <div className="flex flex-col h-full bg-white relative">
-      {/* Clean Header - No Semi-Circle */}
-      <div className="h-20 flex items-center px-6 border-b border-gray-100">
-        <div className="relative w-10 h-10 mr-3">
+      {/* Toggle Button for Desktop */}
+      {setIsCollapsed && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute -right-3 top-24 h-6 w-6 rounded-full border shadow-md bg-white text-gray-500 hover:text-sdc-navy z-50 hidden md:flex"
+        >
+          {isCollapsed ? (
+            <Menu className="h-3 w-3" />
+          ) : (
+            <Menu className="h-3 w-3" />
+          )}
+        </Button>
+      )}
+
+      {/* Header */}
+      <div
+        className={cn(
+          "h-20 flex items-center border-b border-gray-100 transition-all duration-300 ease-in-out",
+          isCollapsed ? "justify-center px-0 bg-sdc-navy" : "px-6"
+        )}
+      >
+        <div
+          className={cn(
+            "relative transition-all duration-300 ease-in-out shrink-0",
+            isCollapsed ? "w-8 h-8" : "w-10 h-10 mr-3"
+          )}
+        >
           <Image
             src="/logo.png"
             alt="Anchor University Logo"
@@ -107,23 +160,43 @@ function SidebarContent({
             priority
           />
         </div>
-        <div>
-          <h1 className="text-sdc-navy font-bold text-lg leading-none">
-            SDC Portal
-          </h1>
-          <span className="text-[10px] bg-sdc-navy text-white px-1.5 py-0.5 rounded-full font-medium tracking-wide">
-            ADMIN
-          </span>
+        <div
+          className={cn(
+            "overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out",
+            isCollapsed
+              ? "w-0 opacity-0 scale-95"
+              : "w-auto opacity-100 scale-100"
+          )}
+        >
+          <div className="flex flex-col">
+            <h1 className="text-sdc-navy font-bold text-lg leading-none">
+              SDC Portal
+            </h1>
+            <span className="text-[10px] bg-sdc-navy text-white px-1.5 py-0.5 rounded-full font-medium tracking-wide w-fit mt-1">
+              ADMIN
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-        <div className="mb-2 px-4">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+      <div
+        className={cn(
+          "flex-1 py-6 space-y-1 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out",
+          isCollapsed ? "px-2" : "px-4"
+        )}
+      >
+        <div
+          className={cn(
+            "mb-2 px-4 overflow-hidden transition-all duration-300 ease-in-out",
+            isCollapsed ? "h-0 opacity-0" : "h-auto opacity-100"
+          )}
+        >
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">
             Overview
           </p>
         </div>
+
         {routes.map((route) => {
           const isActive = pathname === route.href;
           return (
@@ -132,44 +205,99 @@ function SidebarContent({
               href={route.href}
               onClick={() => setIsOpen?.(false)}
               className={cn(
-                "group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200",
+                "group flex items-center text-sm font-medium rounded-xl transition-all duration-200 relative overflow-hidden",
+                isCollapsed
+                  ? "justify-center p-3 w-10 mx-auto"
+                  : "px-4 py-3 w-full",
                 isActive
                   ? "bg-sdc-navy text-white shadow-md shadow-sdc-navy/20"
-                  : "text-gray-500"
+                  : "text-gray-500 hover:bg-gray-50 hover:text-sdc-navy"
               )}
+              title={isCollapsed ? route.label : undefined}
             >
-              <route.icon
+              <div className="relative flex items-center justify-center shrink-0">
+                <route.icon
+                  className={cn(
+                    "transition-colors duration-200",
+                    isCollapsed ? "h-5 w-5" : "h-5 w-5 mr-3",
+                    isActive
+                      ? "text-white"
+                      : "text-gray-400 group-hover:text-sdc-navy"
+                  )}
+                />
+              </div>
+              <span
                 className={cn(
-                  "h-5 w-5 mr-3 transition-colors",
-                  isActive ? "text-white" : "text-gray-400"
+                  "whitespace-nowrap transition-all duration-300 ease-in-out",
+                  isCollapsed
+                    ? "w-0 opacity-0 translate-x-10 absolute"
+                    : "w-auto opacity-100 translate-x-0 relative"
                 )}
-              />
-              {route.label}
+              >
+                {route.label}
+              </span>
             </Link>
           );
         })}
       </div>
 
-      {/* Logout / User */}
+      {/* User Profile Dropdown */}
       <div className="p-4 border-t border-gray-100 mt-auto">
-        <div className="flex items-center gap-3 px-2 mb-4">
-          <div className="h-10 w-10 rounded-full bg-gray-100 border border-white shadow-sm flex items-center justify-center text-sdc-navy font-bold">
-            AD
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-bold text-sdc-navy truncate">
-              Admin User
-            </p>
-            <p className="text-xs text-gray-500 truncate">Dean's Office</p>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-red-500 font-medium h-10 px-4"
-        >
-          <LogOut className="h-4 w-4 mr-3" />
-          Sign Out
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full p-0 hover:bg-gray-50 transition-all duration-300 ease-in-out h-auto",
+                isCollapsed ? "justify-center" : "justify-start"
+              )}
+            >
+              <div className="flex items-center gap-3 px-2 py-2 w-full">
+                <div className="h-10 w-10 rounded-full bg-gray-100 border border-white shadow-sm flex items-center justify-center text-sdc-navy font-bold shrink-0">
+                  AD
+                </div>
+                <div
+                  className={cn(
+                    "flex flex-col items-start overflow-hidden transition-all duration-300 ease-in-out",
+                    isCollapsed
+                      ? "w-0 opacity-0 hidden"
+                      : "w-auto opacity-100 block"
+                  )}
+                >
+                  <p className="text-sm font-bold text-sdc-navy truncate">
+                    Admin User
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    Dean's Office
+                  </p>
+                </div>
+                {!isCollapsed && (
+                  <Settings className="ml-auto h-4 w-4 text-gray-400" />
+                )}
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-56"
+            align="end"
+            forceMount
+            side={isCollapsed ? "right" : "top"}
+          >
+            <DropdownMenuItem>
+              <Users className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red-600 focus:text-red-600">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign Out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

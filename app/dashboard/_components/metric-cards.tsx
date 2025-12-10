@@ -51,7 +51,7 @@ export async function MetricCards() {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
       {newMetrics.map((item, index) => {
         const Icon = item.icon;
         return (

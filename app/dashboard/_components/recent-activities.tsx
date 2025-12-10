@@ -69,20 +69,20 @@ const activities = [
 
 export function RecentActivities() {
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full overflow-x-auto">
       <Table>
         <TableHeader>
-          <TableRow className="border-b border-gray-50 hover:bg-transparent">
-            <TableHead className="w-[300px] text-xs font-bold text-gray-400 uppercase tracking-wider pl-4 h-10">
+          <TableRow className="border-b border-gray-100 hover:bg-transparent">
+            <TableHead className="w-[300px] text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-4 h-12">
               Student
             </TableHead>
-            <TableHead className="text-xs font-bold text-gray-400 uppercase tracking-wider h-10">
+            <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-widest h-12">
               Offense
             </TableHead>
-            <TableHead className="text-xs font-bold text-gray-400 uppercase tracking-wider h-10">
+            <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-widest h-12">
               Status
             </TableHead>
-            <TableHead className="text-xs font-bold text-gray-400 uppercase tracking-wider text-right pr-4 h-10">
+            <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right pr-4 h-12">
               Date
             </TableHead>
           </TableRow>
@@ -93,70 +93,80 @@ export function RecentActivities() {
               key={item.id}
               className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors group cursor-pointer"
             >
-              <TableCell className="font-medium pl-4 py-4">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-9 w-9 border border-gray-100">
+              <TableCell className="pl-4 py-5">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-10 w-10 border border-gray-100 bg-gray-50">
                     <AvatarImage src={item.student.avatar} />
-                    <AvatarFallback className="bg-sdc-blue/5 text-sdc-blue font-bold text-xs">
+                    <AvatarFallback className="bg-gray-100 text-gray-500 font-bold text-xs">
                       {item.student.initials}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-bold text-sdc-navy text-sm leading-tight">
+                    <p className="font-bold text-sdc-navy text-sm leading-tight mb-1">
                       {item.student.name}
                     </p>
-                    <p className="text-[11px] text-gray-400">
+                    <p className="text-[11px] font-medium text-gray-400 tracking-wide">
                       {item.student.matric}
                     </p>
                   </div>
                 </div>
               </TableCell>
-              <TableCell>
-                <p className="font-medium text-sdc-navy text-sm">
-                  {item.offense}
-                </p>
-                <span
-                  className={`inline-block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-                    item.severity === "High"
-                      ? "bg-red-50 text-red-500 border-red-100"
-                      : item.severity === "Medium"
-                      ? "bg-orange-50 text-orange-500 border-orange-100"
-                      : "bg-green-50 text-green-500 border-green-100"
-                  }`}
-                >
-                  {item.severity} Priority
-                </span>
+              <TableCell className="py-5">
+                <div className="flex flex-col gap-2">
+                  <p className="font-bold text-sdc-navy text-sm">
+                    {item.offense}
+                  </p>
+                  <span
+                    className={`inline-flex w-fit items-center text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                      item.severity === "High"
+                        ? "bg-red-50 text-red-600 border-red-100"
+                        : item.severity === "Medium"
+                        ? "bg-orange-50 text-orange-600 border-orange-100"
+                        : "bg-green-50 text-green-600 border-green-100"
+                    }`}
+                  >
+                    {item.severity} Priority
+                  </span>
+                </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="py-5">
                 <div
-                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold border ${
                     item.status === "Active"
-                      ? "bg-sdc-pink-dim text-sdc-pink"
+                      ? "bg-pink-50 text-pink-600 border-pink-100" // Closer match to screenshot pink
                       : item.status === "Completed"
-                      ? "bg-sdc-blue-dim text-sdc-blue"
+                      ? "bg-blue-50 text-blue-600 border-blue-100"
                       : item.status === "Pending"
-                      ? "bg-orange-50 text-orange-600"
-                      : "bg-gray-100 text-gray-500"
+                      ? "bg-orange-50 text-orange-600 border-orange-100"
+                      : "bg-gray-100 text-gray-500 border-gray-200"
                   }`}
                 >
                   <div
-                    className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                    className={`w-1.5 h-1.5 rounded-full mr-2 ${
                       item.status === "Active"
-                        ? "bg-sdc-pink"
+                        ? "bg-pink-500"
                         : item.status === "Completed"
-                        ? "bg-sdc-blue"
+                        ? "bg-blue-500"
                         : item.status === "Pending"
                         ? "bg-orange-500"
-                        : "bg-gray-400"
+                        : "bg-gray-500"
                     }`}
                   ></div>
                   {item.status}
                 </div>
               </TableCell>
-              <TableCell className="text-right pr-4">
-                <span className="text-xs font-bold text-gray-400">
-                  {item.date}
-                </span>
+              <TableCell className="text-right pr-4 py-5">
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase">
+                    Dec
+                  </span>
+                  <span className="text-sm font-bold text-gray-600">
+                    {item.date.split(" ")[1].replace(",", "")}
+                  </span>
+                  <span className="text-[11px] font-bold text-gray-400">
+                    {item.date.split(" ")[2]}
+                  </span>
+                </div>
               </TableCell>
             </TableRow>
           ))}

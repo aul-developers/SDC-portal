@@ -91,7 +91,7 @@ export function PunishmentStatusList({
     <div className="space-y-4">
       <h3 className="text-lg font-medium text-sdc-navy">{getStatusTitle()}</h3>
 
-      <div className="w-full overflow-auto">
+      <div className="w-full overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-gray-100/50 hover:bg-transparent">
