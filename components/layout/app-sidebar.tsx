@@ -143,7 +143,7 @@ function SidebarContent({
       <div
         className={cn(
           "h-20 flex items-center border-b border-gray-100 transition-all duration-300 ease-in-out",
-          isCollapsed ? "justify-center px-0 bg-sdc-navy" : "px-6"
+          isCollapsed ? "justify-center px-0 bg-white" : "px-6"
         )}
       >
         <div
@@ -249,11 +249,14 @@ function SidebarContent({
               variant="ghost"
               className={cn(
                 "w-full p-0 hover:bg-gray-50 transition-all duration-300 ease-in-out h-auto",
-                isCollapsed ? "justify-center" : "justify-start"
+                isCollapsed ? "justify-center" : "justify-start",
+                (pathname.includes("/profile") ||
+                  pathname.includes("/settings")) &&
+                  "bg-gray-100"
               )}
             >
               <div className="flex items-center gap-3 px-2 py-2 w-full">
-                <div className="h-10 w-10 rounded-full bg-gray-100 border border-white shadow-sm flex items-center justify-center text-sdc-navy font-bold shrink-0">
+                <div className="h-10 w-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-sdc-navy font-bold shrink-0">
                   AD
                 </div>
                 <div
@@ -283,19 +286,35 @@ function SidebarContent({
             forceMount
             side={isCollapsed ? "right" : "top"}
           >
-            <DropdownMenuItem>
-              <Users className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
+            <Link href="/dashboard/profile">
+              <DropdownMenuItem
+                className={cn(
+                  "cursor-pointer",
+                  pathname.includes("/profile") && "bg-gray-100"
+                )}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/dashboard/settings">
+              <DropdownMenuItem
+                className={cn(
+                  "cursor-pointer",
+                  pathname.includes("/settings") && "bg-gray-100"
+                )}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600 focus:text-red-600">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Sign Out</span>
-            </DropdownMenuItem>
+            <Link href="/">
+              <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sign Out</span>
+              </DropdownMenuItem>
+            </Link>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -25,7 +25,7 @@ export default function DashboardLayout({
 
         const response = await checkUser("/status/");
         if (response.message === false) {
-          // return router.push("/"); // Temporarily disabled for UI demo
+          return router.push("/?unauthorized=true"); // Redirect to login if auth fails
           console.log("Auth check failed but redirect disabled for demo");
         }
         console.log(response);
