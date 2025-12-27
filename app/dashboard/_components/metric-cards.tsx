@@ -1,23 +1,36 @@
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  FileText,
-  AlertTriangle,
-  Calendar,
-  Clock,
-  CheckCheckIcon,
-  BarChart,
-} from "lucide-react";
+"use client";
 
-import { MOCK_METRICS } from "../_data/mock-data";
+import { useEffect, useState } from "react";
+import { AlertTriangle, Clock, CheckCheckIcon, BarChart } from "lucide-react";
+import { getDashboardMetrics } from "@/actions/dashboard";
 
-export async function MetricCards() {
-  const response = MOCK_METRICS;
-  console.log(response);
+export function MetricCards() {
+  const [metrics, setMetrics] = useState({
+    totalCases: 0,
+    activeCases: 0,
+    pendingHearings: 0,
+    resolvedCases: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
-  const active = response?.activeCases || 0;
-  const completed = response?.resolvedCases || 0;
-  const pending = response?.pendingHearings || 0;
-  const total = response?.totalCases || 0;
+  useEffect(() => {
+    async function loadMetrics() {
+      try {
+        const data = await getDashboardMetrics();
+        setMetrics(data);
+      } catch (error) {
+        console.error("Failed to load metrics", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadMetrics();
+  }, []);
+
+  const active = metrics.activeCases;
+  const completed = metrics.resolvedCases;
+  const pending = metrics.pendingHearings;
+  const total = metrics.totalCases;
 
   const newMetrics = [
     {
@@ -50,6 +63,27 @@ export async function MetricCards() {
     },
   ];
 
+  if (loading) {
+    return (
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="rounded-[24px] bg-white p-6 shadow-sm border border-gray-50/50 flex flex-col justify-between h-36 animate-pulse"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="h-4 w-20 bg-gray-100 rounded mb-2"></div>
+                <div className="h-8 w-12 bg-gray-100 rounded"></div>
+              </div>
+              <div className="h-12 w-12 bg-gray-100 rounded-2xl"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
       {newMetrics.map((item, index) => {
@@ -79,9 +113,8 @@ export async function MetricCards() {
 
             <div className="flex items-center gap-2 mt-auto">
               <span className="text-xs font-medium text-green-500 bg-green-50 px-2 py-0.5 rounded-full">
-                +12%
+                Live Data
               </span>
-              <span className="text-xs text-gray-300">from last month</span>
             </div>
           </div>
         );

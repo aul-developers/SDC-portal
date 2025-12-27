@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { Calendar, Clock, ChevronLeft, CheckCircle2 } from "lucide-react"
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Calendar, Clock, ChevronLeft, CheckCircle2 } from "lucide-react";
 
 const upcomingHearings = [
   {
@@ -34,7 +34,7 @@ const upcomingHearings = [
     location: "Admin Building, Room 203",
     status: "tomorrow",
   },
-]
+];
 
 const notifications = [
   {
@@ -58,24 +58,31 @@ const notifications = [
     time: "2 hours ago",
     read: true,
   },
-]
+];
 
 export function SidePanel() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
-  const [activeTab, setActiveTab] = useState<"hearings" | "notifications">("hearings")
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState<"hearings" | "notifications">(
+    "hearings"
+  );
 
   return (
     <div
       className={cn(
         "relative flex flex-col border-l bg-sdc-surface transition-all duration-300",
-        isCollapsed ? "w-0" : "w-80",
+        isCollapsed ? "w-0" : "w-80"
       )}
     >
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="absolute -left-3 top-6 flex h-6 w-6 items-center justify-center rounded-full border bg-white shadow-sm"
       >
-        <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
+        <ChevronLeft
+          className={cn(
+            "h-4 w-4 transition-transform",
+            isCollapsed && "rotate-180"
+          )}
+        />
       </button>
 
       {!isCollapsed && (
@@ -86,7 +93,7 @@ export function SidePanel() {
                 "flex-1 border-b-2 py-3 text-sm font-medium",
                 activeTab === "hearings"
                   ? "border-sdc-primary text-sdc-primary"
-                  : "border-transparent text-sdc-muted hover:text-sdc-dark",
+                  : "border-transparent text-sdc-muted hover:text-sdc-dark"
               )}
               onClick={() => setActiveTab("hearings")}
             >
@@ -97,7 +104,7 @@ export function SidePanel() {
                 "flex-1 border-b-2 py-3 text-sm font-medium",
                 activeTab === "notifications"
                   ? "border-sdc-primary text-sdc-primary"
-                  : "border-transparent text-sdc-muted hover:text-sdc-dark",
+                  : "border-transparent text-sdc-muted hover:text-sdc-dark"
               )}
               onClick={() => setActiveTab("notifications")}
             >
@@ -115,13 +122,16 @@ export function SidePanel() {
                 {upcomingHearings.map((hearing) => (
                   <div
                     key={hearing.id}
-                    className="overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:shadow"
+                    className="overflow-hidden rounded-lg border bg-white shadow-sm"
                   >
                     <div className="p-4">
                       <div className="mb-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={hearing.student.image || "/placeholder.svg"} alt={hearing.student.name} />
+                            <AvatarImage
+                              src={hearing.student.image || "/placeholder.svg"}
+                              alt={hearing.student.name}
+                            />
                             <AvatarFallback>
                               {hearing.student.name
                                 .split(" ")
@@ -130,15 +140,19 @@ export function SidePanel() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <h4 className="text-sm font-medium">{hearing.student.name}</h4>
-                            <p className="text-xs text-sdc-muted">Case #{hearing.caseId}</p>
+                            <h4 className="text-sm font-medium">
+                              {hearing.student.name}
+                            </h4>
+                            <p className="text-xs text-sdc-muted">
+                              Case #{hearing.caseId}
+                            </p>
                           </div>
                         </div>
                         <Badge
                           className={cn(
                             "px-2 py-0.5 text-[10px] uppercase",
                             hearing.status === "today" && "bg-sdc-danger",
-                            hearing.status === "tomorrow" && "bg-sdc-warning",
+                            hearing.status === "tomorrow" && "bg-sdc-warning"
                           )}
                         >
                           {hearing.status}
@@ -148,7 +162,9 @@ export function SidePanel() {
                       <div className="space-y-2 text-xs">
                         <div className="flex items-center gap-2 text-sdc-muted">
                           <Calendar className="h-3.5 w-3.5" />
-                          <span>{new Date(hearing.date).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(hearing.date).toLocaleDateString()}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-sdc-muted">
                           <Clock className="h-3.5 w-3.5" />
@@ -159,7 +175,11 @@ export function SidePanel() {
                       </div>
 
                       <div className="mt-3 flex gap-2">
-                        <Button size="sm" variant="outline" className="h-7 flex-1 text-xs">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 flex-1 text-xs"
+                        >
                           Details
                         </Button>
                         <Button
@@ -186,13 +206,19 @@ export function SidePanel() {
                     key={notification.id}
                     className={cn(
                       "relative rounded-lg border bg-white p-3 shadow-sm transition-all hover:shadow",
-                      !notification.read && "border-l-4 border-l-sdc-primary",
+                      !notification.read && "border-l-4 border-l-sdc-primary"
                     )}
                   >
-                    <h4 className="text-sm font-medium">{notification.title}</h4>
-                    <p className="mt-1 text-xs text-sdc-muted">{notification.description}</p>
+                    <h4 className="text-sm font-medium">
+                      {notification.title}
+                    </h4>
+                    <p className="mt-1 text-xs text-sdc-muted">
+                      {notification.description}
+                    </p>
                     <div className="mt-2 flex items-center justify-between">
-                      <span className="text-xs text-sdc-muted">{notification.time}</span>
+                      <span className="text-xs text-sdc-muted">
+                        {notification.time}
+                      </span>
                       {!notification.read && (
                         <Button
                           variant="ghost"
@@ -215,5 +241,5 @@ export function SidePanel() {
         </>
       )}
     </div>
-  )
+  );
 }

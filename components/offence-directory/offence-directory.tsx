@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useAuth } from "@/app/context/auth-context";
 import { OffenceList } from "./offence-list";
 import { OffenceDetails } from "./offence-details";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { AddOffenceDialog } from "./add-offence-dialog";
 
 export function OffenceDirectory() {
+  const { user } = useAuth();
   const [selectedOffence, setSelectedOffence] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
@@ -136,13 +138,15 @@ export function OffenceDirectory() {
                 <span>Clear</span>
               </Button>
 
-              <Button
-                onClick={() => setIsAddOffenceOpen(true)}
-                className="gap-1"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                <span>Add Offence</span>
-              </Button>
+              {user?.role === "super_admin" && (
+                <Button
+                  onClick={() => setIsAddOffenceOpen(true)}
+                  className="gap-1"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Add Offence</span>
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>

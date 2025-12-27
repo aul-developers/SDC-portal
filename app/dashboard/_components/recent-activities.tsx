@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,63 +11,78 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const activities = [
-  {
-    id: "1",
-    student: {
-      name: "John Doe",
-      matric: "AUL/SCI/21/0045",
-      avatar: "/placeholder.svg",
-      initials: "JD",
-    },
-    offense: "Examination Malpractice",
-    status: "Active",
-    date: "Dec 8, 2024",
-    severity: "High",
-  },
-  {
-    id: "2",
-    student: {
-      name: "Sarah Smith",
-      matric: "AUL/HUM/20/0112",
-      avatar: "/placeholder.svg",
-      initials: "SS",
-    },
-    offense: "Dress Code Violation",
-    status: "Completed",
-    date: "Dec 7, 2024",
-    severity: "Low",
-  },
-  {
-    id: "3",
-    student: {
-      name: "Michael Brown",
-      matric: "AUL/SOC/22/0334",
-      avatar: "/placeholder.svg",
-      initials: "MB",
-    },
-    offense: "Unruly Behavior",
-    status: "Pending",
-    date: "Dec 6, 2024",
-    severity: "Medium",
-  },
-  {
-    id: "4",
-    student: {
-      name: "Emily Davis",
-      matric: "AUL/SCI/21/0099",
-      avatar: "/placeholder.svg",
-      initials: "ED",
-    },
-    offense: "Late Submission",
-    status: "Warning",
-    date: "Dec 5, 2024",
-    severity: "Low",
-  },
-];
+import { getRecentActivities } from "@/actions/dashboard";
 
 export function RecentActivities() {
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadActivities() {
+      try {
+        const data = await getRecentActivities();
+        setActivities(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadActivities();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="w-full overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-gray-100 hover:bg-transparent">
+              <TableHead className="w-[300px] pl-4 h-12">
+                <div className="h-3 w-16 bg-gray-100 rounded animate-pulse"></div>
+              </TableHead>
+              <TableHead className="h-12">
+                <div className="h-3 w-24 bg-gray-100 rounded animate-pulse"></div>
+              </TableHead>
+              <TableHead className="h-12">
+                <div className="h-3 w-12 bg-gray-100 rounded animate-pulse"></div>
+              </TableHead>
+              <TableHead className="h-12 text-right pr-4">
+                <div className="h-3 w-10 ml-auto bg-gray-100 rounded animate-pulse"></div>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[1, 2, 3].map((i) => (
+              <TableRow key={i} className="border-b border-gray-50">
+                <TableCell className="pl-4 py-5">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-gray-100 animate-pulse"></div>
+                    <div>
+                      <div className="h-4 w-32 bg-gray-100 rounded mb-1 animate-pulse"></div>
+                      <div className="h-3 w-20 bg-gray-100 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="py-5">
+                  <div className="flex flex-col gap-2">
+                    <div className="h-4 w-40 bg-gray-100 rounded animate-pulse"></div>
+                    <div className="h-5 w-24 bg-gray-100 rounded animate-pulse"></div>
+                  </div>
+                </TableCell>
+                <TableCell className="py-5">
+                  <div className="h-6 w-20 bg-gray-100 rounded-full animate-pulse"></div>
+                </TableCell>
+                <TableCell className="text-right pr-4 py-5">
+                  <div className="h-4 w-16 ml-auto bg-gray-100 rounded animate-pulse"></div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full overflow-x-auto">
       <Table>
@@ -77,7 +92,7 @@ export function RecentActivities() {
               Student
             </TableHead>
             <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-widest h-12">
-              Offense
+              Case Title / Offense
             </TableHead>
             <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-widest h-12">
               Status
@@ -88,88 +103,65 @@ export function RecentActivities() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {activities.map((item) => (
-            <TableRow
-              key={item.id}
-              className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors group cursor-pointer"
-            >
-              <TableCell className="pl-4 py-5">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-10 w-10 border border-gray-100 bg-gray-50">
-                    <AvatarImage src={item.student.avatar} />
-                    <AvatarFallback className="bg-gray-100 text-gray-500 font-bold text-xs">
-                      {item.student.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-bold text-sdc-navy text-sm leading-tight mb-1">
-                      {item.student.name}
-                    </p>
-                    <p className="text-[11px] font-medium text-gray-400 tracking-wide">
-                      {item.student.matric}
-                    </p>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="py-5">
-                <div className="flex flex-col gap-2">
-                  <p className="font-bold text-sdc-navy text-sm">
-                    {item.offense}
-                  </p>
-                  <span
-                    className={`inline-flex w-fit items-center text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-                      item.severity === "High"
-                        ? "bg-red-50 text-red-600 border-red-100"
-                        : item.severity === "Medium"
-                        ? "bg-orange-50 text-orange-600 border-orange-100"
-                        : "bg-green-50 text-green-600 border-green-100"
-                    }`}
-                  >
-                    {item.severity} Priority
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell className="py-5">
-                <div
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold border ${
-                    item.status === "Active"
-                      ? "bg-pink-50 text-pink-600 border-pink-100" // Closer match to screenshot pink
-                      : item.status === "Completed"
-                      ? "bg-blue-50 text-blue-600 border-blue-100"
-                      : item.status === "Pending"
-                      ? "bg-orange-50 text-orange-600 border-orange-100"
-                      : "bg-gray-100 text-gray-500 border-gray-200"
-                  }`}
-                >
-                  <div
-                    className={`w-1.5 h-1.5 rounded-full mr-2 ${
-                      item.status === "Active"
-                        ? "bg-pink-500"
-                        : item.status === "Completed"
-                        ? "bg-blue-500"
-                        : item.status === "Pending"
-                        ? "bg-orange-500"
-                        : "bg-gray-500"
-                    }`}
-                  ></div>
-                  {item.status}
-                </div>
-              </TableCell>
-              <TableCell className="text-right pr-4 py-5">
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-[11px] font-bold text-gray-400 uppercase">
-                    Dec
-                  </span>
-                  <span className="text-sm font-bold text-gray-600">
-                    {item.date.split(" ")[1].replace(",", "")}
-                  </span>
-                  <span className="text-[11px] font-bold text-gray-400">
-                    {item.date.split(" ")[2]}
-                  </span>
-                </div>
+          {activities.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center py-8 text-gray-400">
+                No recent cases found.
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            activities.map((item) => (
+              <TableRow
+                key={item.id}
+                className="border-b border-gray-50 last:border-0 cursor-pointer"
+              >
+                <TableCell className="pl-4 py-5">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-10 w-10 border border-gray-100 bg-gray-50">
+                      <AvatarImage src="/placeholder.svg" />
+                      <AvatarFallback className="bg-gray-100 text-gray-500 font-bold text-xs">
+                        {item.student?.full_name?.charAt(0) || "S"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-bold text-sdc-navy text-sm leading-tight mb-1">
+                        {item.student?.full_name || "Unknown Student"}
+                      </p>
+                      <p className="text-[11px] font-medium text-gray-400 tracking-wide">
+                        {item.student?.matric_no || "No Matric"}
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="py-5">
+                  <div className="flex flex-col gap-2">
+                    <p className="font-bold text-sdc-navy text-sm">
+                      {item.title}
+                    </p>
+                    <span
+                      className={`inline-flex w-fit items-center text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                        item.priority === "High"
+                          ? "bg-red-50 text-red-600 border-red-100"
+                          : "bg-green-50 text-green-600 border-green-100"
+                      }`}
+                    >
+                      {item.priority || "Normal"} Priority
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="py-5">
+                  <div className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold border bg-gray-100 text-gray-500 border-gray-200">
+                    {item.status}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right pr-4 py-5">
+                  <span className="text-sm font-bold text-gray-600">
+                    {new Date(item.created_at).toLocaleDateString()}
+                  </span>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
 

@@ -3,15 +3,9 @@ import { AlertTriangle, Clock, CheckCircle, Calendar } from "lucide-react";
 
 // Mock data for punishments (same as in punishment-status-list.tsx)
 
-import { DashboardMetrics } from "@/app/_types";
-import { MOCK_METRICS } from "@/app/dashboard/_data/mock-data";
-
-// Mock data for punishments (same as in punishment-status-list.tsx)
-
+// Local fallback
 export function PunishmentMetrics() {
-  // Count punishments ending this month
-
-  const data = MOCK_METRICS;
+  const data = { activeCases: 0, pendingHearings: 0, resolvedCases: 0 };
   const isLoading = false;
 
   // const currentDate = new Date();

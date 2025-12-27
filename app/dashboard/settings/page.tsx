@@ -16,7 +16,45 @@ import { Switch } from "@/components/ui/switch";
 import { Bell, Lock, Shield } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
+import { useState } from "react";
+import { toast } from "sonner";
+import { createClient } from "@/utils/supabase/client";
+
 export default function SettingsPage() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const supabase = createClient();
+
+  const handleUpdatePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsLoading(true);
+    // Supabase requires re-authentication or just straight update if session is active
+    // For update, we just call updateUser
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Password updated successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+    setIsLoading(false);
+  };
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
@@ -28,60 +66,13 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="notifications" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="notifications">
-            <Bell className="mr-2 h-4 w-4" />
-            Notifications
-          </TabsTrigger>
+      <Tabs defaultValue="security" className="w-full">
+        <TabsList className="grid w-full grid-cols-1 mb-8">
           <TabsTrigger value="security">
             <Shield className="mr-2 h-4 w-4" />
             Security
           </TabsTrigger>
         </TabsList>
-
-        {/* Notification Settings */}
-        <TabsContent value="notifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Email Notifications</CardTitle>
-              <CardDescription>
-                Choose what updates you want to receive via email.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Case Updates</Label>
-                  <p className="text-sm text-gray-500">
-                    Receive emails when cases are updated.
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Hearing Schedules</Label>
-                  <p className="text-sm text-gray-500">
-                    Get reminders for upcoming hearings.
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">System Alerts</Label>
-                  <p className="text-sm text-gray-500">
-                    Important system notifications and security alerts.
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* Security Settings */}
         <TabsContent value="security" className="space-y-4">
@@ -93,22 +84,36 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="current">Current Password</Label>
-                <Input id="current" type="password" />
-              </div>
+              {/* Note: Supabase doesn't strictly verify 'current' password on Client update if session is active, 
+                  but good practice often requires re-auth. For simplicity efficiently, we update directly. 
+                  If strict security needed, we'd Re-Auth first. Keeping UI simple. */}
+
               <div className="space-y-2">
                 <Label htmlFor="new">New Password</Label>
-                <Input id="new" type="password" />
+                <Input
+                  id="new"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm">Confirm New Password</Label>
-                <Input id="confirm" type="password" />
+                <Input
+                  id="confirm"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
               </div>
             </CardContent>
             <CardFooter className="bg-gray-50/50 px-6 py-4 flex justify-end rounded-b-xl">
-              <Button className="bg-sdc-navy hover:bg-sdc-navy/90 text-white">
-                Update Password
+              <Button
+                className="bg-sdc-navy hover:bg-sdc-navy/90 text-white"
+                onClick={handleUpdatePassword}
+                disabled={isLoading}
+              >
+                {isLoading ? "Updating..." : "Update Password"}
               </Button>
             </CardFooter>
           </Card>

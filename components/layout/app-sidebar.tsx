@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   LayoutDashboard,
   Users,
@@ -12,8 +13,8 @@ import {
   Gavel,
   LogOut,
   Menu,
-  HelpCircle,
   Settings,
+  UserCog,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,32 +32,57 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { useAuth } from "@/app/context/auth-context";
 
-const routes = [
+// Base routes available to everyone (filtered later)
+const baseRoutes = [
   {
     label: "Dashboard",
     icon: LayoutDashboard,
     href: "/dashboard",
+    roles: ["super_admin", "board_member", "viewer"],
+  },
+  {
+    label: "Audit Logs",
+    icon: FileText,
+    href: "/dashboard/audit-logs",
+    roles: ["super_admin"],
   },
   {
     label: "Cases",
     icon: FileText,
     href: "/dashboard/cases",
+    roles: ["super_admin", "board_member", "viewer"],
   },
   {
     label: "Punishments",
     icon: Gavel,
     href: "/dashboard/punishments",
+    roles: ["super_admin", "board_member", "viewer"],
   },
   {
     label: "Offences",
     icon: AlertTriangle,
     href: "/dashboard/offences",
+    roles: ["super_admin", "board_member", "viewer"],
   },
   {
     label: "Students",
     icon: Users,
     href: "/dashboard/students",
+    roles: ["super_admin", "board_member", "viewer"],
+  },
+  {
+    label: "User Management",
+    icon: UserCog,
+    href: "/dashboard/users",
+    roles: ["super_admin"], // Restricted
+  },
+  {
+    label: "Approvals",
+    icon: FileText, // Using FileText or maybe CheckSquare if available, but FileText is imported
+    href: "/dashboard/approvals",
+    roles: ["super_admin"],
   },
 ];
 
@@ -97,7 +123,7 @@ export function DesktopSidebar({
   return (
     <div
       className={cn(
-        "hidden h-full md:flex md:flex-col md:fixed md:inset-y-0 z-[40] bg-white shadow-xl border-r border-gray-100 transition-all duration-300",
+        "hidden h-full md:flex md:flex-col md:fixed md:inset-y-0 z-[40] bg-white shadow-xl border-r border-gray-100 transition-all duration-200",
         isCollapsed ? "md:w-20" : "md:w-72"
       )}
     >
@@ -121,6 +147,13 @@ function SidebarContent({
   isCollapsed?: boolean;
   setIsCollapsed?: (collapsed: boolean) => void;
 }) {
+  const { user, logout, isLoading } = useAuth();
+
+  // Filter routes based on user role
+  const routes = baseRoutes.filter(
+    (route) => user && user.role && route.roles.includes(user.role)
+  );
+
   return (
     <div className="flex flex-col h-full bg-white relative">
       {/* Toggle Button for Desktop */}
@@ -142,13 +175,13 @@ function SidebarContent({
       {/* Header */}
       <div
         className={cn(
-          "h-20 flex items-center border-b border-gray-100 transition-all duration-300 ease-in-out",
+          "h-20 flex items-center border-b border-gray-100 transition-all duration-200 ease-in-out",
           isCollapsed ? "justify-center px-0 bg-white" : "px-6"
         )}
       >
         <div
           className={cn(
-            "relative transition-all duration-300 ease-in-out shrink-0",
+            "relative transition-all duration-200 ease-in-out shrink-0",
             isCollapsed ? "w-8 h-8" : "w-10 h-10 mr-3"
           )}
         >
@@ -162,7 +195,7 @@ function SidebarContent({
         </div>
         <div
           className={cn(
-            "overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out",
+            "overflow-hidden whitespace-nowrap transition-all duration-200 ease-in-out",
             isCollapsed
               ? "w-0 opacity-0 scale-95"
               : "w-auto opacity-100 scale-100"
@@ -172,9 +205,13 @@ function SidebarContent({
             <h1 className="text-sdc-navy font-bold text-lg leading-none">
               SDC Portal
             </h1>
-            <span className="text-[10px] bg-sdc-navy text-white px-1.5 py-0.5 rounded-full font-medium tracking-wide w-fit mt-1">
-              ADMIN
-            </span>
+            {user ? (
+              <span className="text-[10px] bg-sdc-navy text-white px-1.5 py-0.5 rounded-full font-medium tracking-wide w-fit mt-1 uppercase">
+                {user.role ? user.role.replace("_", " ") : "Viewer"}
+              </span>
+            ) : (
+              <div className="h-4 w-16 bg-gray-200 animate-pulse rounded mt-1" />
+            )}
           </div>
         </div>
       </div>
@@ -182,13 +219,13 @@ function SidebarContent({
       {/* Navigation */}
       <div
         className={cn(
-          "flex-1 py-6 space-y-1 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out",
+          "flex-1 py-6 space-y-1 overflow-y-auto overflow-x-hidden transition-all duration-200 ease-in-out",
           isCollapsed ? "px-2" : "px-4"
         )}
       >
         <div
           className={cn(
-            "mb-2 px-4 overflow-hidden transition-all duration-300 ease-in-out",
+            "mb-2 px-4 overflow-hidden transition-all duration-200 ease-in-out",
             isCollapsed ? "h-0 opacity-0" : "h-auto opacity-100"
           )}
         >
@@ -211,7 +248,7 @@ function SidebarContent({
                   : "px-4 py-3 w-full",
                 isActive
                   ? "bg-sdc-navy text-white shadow-md shadow-sdc-navy/20"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-sdc-navy"
+                  : "text-gray-500 hover:text-sdc-navy"
               )}
               title={isCollapsed ? route.label : undefined}
             >
@@ -228,7 +265,7 @@ function SidebarContent({
               </div>
               <span
                 className={cn(
-                  "whitespace-nowrap transition-all duration-300 ease-in-out",
+                  "whitespace-nowrap transition-all duration-200 ease-in-out",
                   isCollapsed
                     ? "w-0 opacity-0 translate-x-10 absolute"
                     : "w-auto opacity-100 translate-x-0 relative"
@@ -248,30 +285,38 @@ function SidebarContent({
             <Button
               variant="ghost"
               className={cn(
-                "w-full p-0 hover:bg-gray-50 transition-all duration-300 ease-in-out h-auto",
-                isCollapsed ? "justify-center" : "justify-start",
-                (pathname.includes("/profile") ||
-                  pathname.includes("/settings")) &&
-                  "bg-gray-100"
+                "w-full p-0 transition-all duration-200 ease-in-out h-auto",
+                isCollapsed ? "justify-center" : "justify-start"
               )}
             >
               <div className="flex items-center gap-3 px-2 py-2 w-full">
-                <div className="h-10 w-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-sdc-navy font-bold shrink-0">
-                  AD
-                </div>
+                <Avatar className="h-8 w-8 rounded-lg bg-sdc-navy text-white">
+                  <AvatarImage
+                    src={user?.user_metadata?.avatar_url}
+                    alt={user?.user_metadata?.full_name}
+                  />
+                  <AvatarFallback className="rounded-lg bg-sdc-navy text-white font-medium">
+                    {user?.user_metadata?.full_name
+                      ?.split(" ")
+                      .map((n: string) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2) || "U"}
+                  </AvatarFallback>
+                </Avatar>
                 <div
                   className={cn(
-                    "flex flex-col items-start overflow-hidden transition-all duration-300 ease-in-out",
+                    "flex flex-col items-start overflow-hidden transition-all duration-200 ease-in-out",
                     isCollapsed
                       ? "w-0 opacity-0 hidden"
                       : "w-auto opacity-100 block"
                   )}
                 >
-                  <p className="text-sm font-bold text-sdc-navy truncate">
-                    Admin User
+                  <p className="text-sm font-bold text-sdc-navy truncate w-[120px] text-left">
+                    {user?.user_metadata?.full_name || "User"}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    Dean's Office
+                  <p className="text-xs text-gray-500 truncate w-[120px] text-left">
+                    {user?.email || "Loading..."}
                   </p>
                 </div>
                 {!isCollapsed && (
@@ -297,24 +342,29 @@ function SidebarContent({
                 <span>Profile</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/dashboard/settings">
-              <DropdownMenuItem
-                className={cn(
-                  "cursor-pointer",
-                  pathname.includes("/settings") && "bg-gray-100"
-                )}
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-            </Link>
+
+            {user?.role !== "viewer" && (
+              <Link href="/dashboard/settings">
+                <DropdownMenuItem
+                  className={cn(
+                    "cursor-pointer",
+                    pathname.includes("/settings") && "bg-gray-100"
+                  )}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+              </Link>
+            )}
+
             <DropdownMenuSeparator />
-            <Link href="/">
-              <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Sign Out</span>
-              </DropdownMenuItem>
-            </Link>
+            <DropdownMenuItem
+              className="text-red-600 focus:text-red-600 cursor-pointer"
+              onClick={logout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign Out</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -16,7 +16,7 @@ import { Edit2, Trash2 } from "lucide-react";
 import { cn, deleteRequest, patchRequest } from "@/lib/utils";
 import { EditOffenceDialog } from "./edit-offence-dialog"; // Import the dialog
 import { DeleteOffenceConfirmationDialog } from "./delete-offence-confirmation-dialog"; // Import the dialog
-import { useFetch } from "@/hooks/useFetch";
+import { DataApiClient } from "@/service/apiClient";
 import { toast } from "sonner";
 
 export interface Offence {
@@ -42,11 +42,31 @@ interface OffenceListProps {
 }
 
 export function OffenceList({ searchQuery, severityFilter }: OffenceListProps) {
-  const {
-    data: currentOffences,
-    isLoading,
-    isError,
-  } = useFetch<Offence[]>("/offences/");
+  const [currentOffences, setCurrentOffences] = useState<Offence[] | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    const fetchOffences = async () => {
+      setIsLoading(true);
+      try {
+        const response = await DataApiClient.get<Offence[]>("/offences/");
+        setCurrentOffences(response.data);
+        setIsError(false);
+      } catch (error) {
+        console.error("Failed to fetch offences:", error);
+        setIsError(true);
+        toast.error("Failed to fetch offences");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOffences();
+  }, []);
   const [sortColumn, setSortColumn] = useState<keyof Offence | null>("offence");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
@@ -194,7 +214,7 @@ export function OffenceList({ searchQuery, severityFilter }: OffenceListProps) {
               sortedOffences.map((offence) => (
                 <TableRow
                   key={offence.id}
-                  className="border-none hover:bg-white hover:shadow-sm transition-all group cursor-pointer rounded-2xl mb-2"
+                  className="border-none hover:bg-gray-50 cursor-pointer rounded-2xl mb-2"
                 >
                   <TableCell className="pl-4 py-4 rounded-l-2xl font-bold text-sdc-navy text-sm">
                     {offence.offence}

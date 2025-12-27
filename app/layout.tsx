@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Jost } from "next/font/google";
 import "./globals.css";
 import ToasterClient from "@/components/toasterClient";
+import { AuthProvider } from "./context/auth-context";
 
 const jost = Jost({ subsets: ["latin"] });
 
@@ -22,8 +23,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={jost.className}>
-        {children}
-        <ToasterClient />
+        <AuthProvider>
+          {children}
+          <ToasterClient />
+        </AuthProvider>
       </body>
     </html>
   );

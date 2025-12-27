@@ -1,8 +1,17 @@
-"use client"
+"use client";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { BookOpen, Users, Building, FileText, ShieldAlert, Laptop, Pill, Gavel } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  BookOpen,
+  Users,
+  Building,
+  FileText,
+  ShieldAlert,
+  Laptop,
+  Pill,
+  Gavel,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // Mock data for offence categories
 const offenceCategories = [
@@ -57,7 +66,8 @@ const offenceCategories = [
   {
     id: "substance",
     name: "Substance Violations",
-    description: "Violations related to alcohol, drugs, and prohibited substances",
+    description:
+      "Violations related to alcohol, drugs, and prohibited substances",
     icon: Pill,
     count: 14,
     color: "bg-orange-100 text-orange-800",
@@ -70,34 +80,41 @@ const offenceCategories = [
     count: 8,
     color: "bg-gray-100 text-gray-800",
   },
-]
+];
 
 interface OffenceCategoryListProps {
-  searchQuery: string
-  onSelectCategory: (categoryId: string) => void
+  searchQuery: string;
+  onSelectCategory: (categoryId: string) => void;
 }
 
-export function OffenceCategoryList({ searchQuery, onSelectCategory }: OffenceCategoryListProps) {
+export function OffenceCategoryList({
+  searchQuery,
+  onSelectCategory,
+}: OffenceCategoryListProps) {
   // Filter categories based on search query
   const filteredCategories = offenceCategories.filter(
     (category) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+      category.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {filteredCategories.map((category) => (
         <Card
           key={category.id}
-          className="cursor-pointer transition-all hover:shadow-md"
+          className="cursor-pointer border-l-4"
           onClick={() => onSelectCategory(category.id)}
         >
           <CardContent className="flex flex-col items-start p-6">
             <div className={`rounded-full p-2 ${category.color.split(" ")[0]}`}>
-              <category.icon className={`h-6 w-6 ${category.color.split(" ")[1]}`} />
+              <category.icon
+                className={`h-6 w-6 ${category.color.split(" ")[1]}`}
+              />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-sdc-navy">{category.name}</h3>
+            <h3 className="mt-4 text-lg font-semibold text-sdc-navy">
+              {category.name}
+            </h3>
             <p className="mt-1 text-sm text-sdc-gray">{category.description}</p>
             <div className="mt-4 flex w-full justify-between">
               <Badge variant="outline" className="text-xs">
@@ -108,5 +125,5 @@ export function OffenceCategoryList({ searchQuery, onSelectCategory }: OffenceCa
         </Card>
       ))}
     </div>
-  )
+  );
 }

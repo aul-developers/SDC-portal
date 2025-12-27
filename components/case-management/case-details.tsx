@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { PassJudgmentDialog, type JudgmentData } from "./pass-judgment-dialog";
 import { format } from "date-fns";
-import { useFetch } from "@/hooks/useFetch";
+import { DataApiClient } from "@/service/apiClient";
 import { caseFormSchema, involvedStudentSchema } from "./create-case-form";
 
 interface CaseDetailsProps {
@@ -37,9 +37,34 @@ interface CaseDetailsProps {
 }
 
 export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
-  const { data, isLoading, isError } = useFetch<caseFormSchema>(
-    `/get/specific/case/${propCaseId}/`
+  const [data, setData] = useState<caseFormSchema | caseFormSchema[] | null>(
+    null
   );
+  const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    const fetchCaseDetails = async () => {
+      setIsLoading(true);
+      try {
+        const response = await DataApiClient.get<caseFormSchema>(
+          `/get/specific/case/${propCaseId}/`
+        );
+        setData(response.data);
+        setIsError(false);
+      } catch (error) {
+        console.error("Failed to fetch case details:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (propCaseId) {
+      fetchCaseDetails();
+    }
+  }, [propCaseId]);
   const caseDetails: caseFormSchema | null = Array.isArray(data)
     ? data[0]
     : data;

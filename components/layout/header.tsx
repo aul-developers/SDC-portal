@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MobileSidebar } from "./app-sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/app/context/auth-context";
 
 export function Header() {
+  const { user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [date, setDate] = useState("");
 
@@ -68,7 +70,9 @@ export function Header() {
           <h2 className="text-2xl font-bold text-sdc-navy tracking-tight">
             Dashboard Overview
           </h2>
-          <p className="text-sm text-gray-500">Welcome back, Admin</p>
+          <p className="text-sm text-gray-500">
+            Welcome back, {user?.user_metadata?.full_name || "User"}
+          </p>
         </div>
         <h2 className="text-xl font-bold text-sdc-navy md:hidden tracking-tight">
           SDC Portal
@@ -95,19 +99,24 @@ export function Header() {
         {/* User Profile Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-              <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-2 ring-gray-100 cursor-pointer">
-                <AvatarImage src="https://github.com/shadcn.png" alt="@admin" />
-                <AvatarFallback>AD</AvatarFallback>
-              </Avatar>
+            <Button
+              variant="ghost"
+              className="relative h-10 w-10 rounded-full p-0"
+            >
+              <UserAvatar
+                name={user?.user_metadata?.full_name || "User"}
+                avatarUrl={user?.user_metadata?.avatar_url} // Use real avatar or fallback to initials
+              />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Admin User</p>
+                <p className="text-sm font-medium leading-none">
+                  {user?.user_metadata?.full_name || "User"}
+                </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  admin@aul.edu.ng
+                  {user?.email || "user@example.com"}
                 </p>
               </div>
             </DropdownMenuLabel>

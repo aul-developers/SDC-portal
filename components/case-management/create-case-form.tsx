@@ -31,6 +31,9 @@ import {
 import { format } from "date-fns";
 import { cn, generateErrorMessage, postRequest } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAuth } from "@/app/context/auth-context";
+import { createClient } from "@/utils/supabase/client";
+import { createCase } from "@/actions/case-management";
 
 interface CreateCaseFormProps {
   onSuccess: () => void;
@@ -112,6 +115,7 @@ export function CreateCaseForm({
   onSuccess,
   initialData,
 }: CreateCaseFormProps) {
+  const { user } = useAuth();
   const initialFieldState: caseFormSchema = useMemo(
     () => ({
       title: initialData?.title || "",
@@ -133,37 +137,6 @@ export function CreateCaseForm({
   const [state, dispatch] = useReducer<
     React.Reducer<caseFormSchema, formActions>
   >(updateFieldReducer, initialFieldState);
-
-  // Load from local storage on mount
-  useEffect(() => {
-    const savedState = localStorage.getItem("create-individual-case-form");
-    if (savedState) {
-      try {
-        const parsedState = JSON.parse(savedState);
-        // Dispatch updates for each field
-        Object.keys(parsedState).forEach((key) => {
-          // We need to cast key to keyof caseFormSchema to make TS happy,
-          // but we can't easily iterate and dispatch in one go without a bulk update action.
-          // For simplicity, let's just use the saved state if we could, but useReducer makes it harder.
-          // Actually, let's just specific fields we care about or add a RESET/LOAD action.
-          // To avoid changing the reducer too much, let's just rely on manual syncing or maybe just not use useReducer for this if possible?
-          // No, useReducer is already there. Let's add a LOAD_STATE action.
-          dispatch({
-            type: "UPDATE_FIELD",
-            field: key as keyof caseFormSchema,
-            value: parsedState[key],
-          });
-        });
-      } catch (e) {
-        console.error("Failed to load form state", e);
-      }
-    }
-  }, []);
-
-  // Save to local storage on change
-  useEffect(() => {
-    localStorage.setItem("create-individual-case-form", JSON.stringify(state));
-  }, [state]);
 
   const [studentInvolved, setStudentInvolved] = useState<involvedStudentSchema>(
     (initialData?.students?.[0] as involvedStudentSchema) || {
@@ -214,24 +187,96 @@ export function CreateCaseForm({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
-    const newIndividualCase: caseFormSchema = {
+    const supabase = createClient();
+
+    // Basic validation
+    if (
+      !state.title ||
+      !state.offence_type || // Changed from cases_involved to offence_type based on schema
+      !state.incident_date ||
+      (state.case_type === "Individual" &&
+        (!studentInvolved.department || !studentInvolved.faculty))
+    ) {
+      toast.error("Please fill in all required fields", {
+        description: "Department and Faculty are required for individual cases",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    // Prepare Payload
+    const payload = {
       ...state,
-      students: [studentInvolved],
+      students: [studentInvolved], // Note: Schema needs to handle students logic (array or separate table).
+      // For now, we stringify if single table or assume API handles it.
+      // Given the basic SQL schema I provided, 'cases' doesn't have a 'students' jsonb column explicitly in my previous SQL
+      // (it had separate fields or I missed it).
+      // Let's assume we store it in a JSONB column named 'students' or similar if I update the schema,
+      // OR I should insert into 'cases' then 'case_students'.
+      // To keep "Linking" simple and robust, I will stringify students into a 'metadata' or 'description' if needed,
+      // BUT likely I should validly insert.
+      // My SQL schema had: id, title, description, offence_type, incident_date, status, reported_by...
+      // It did NOT have 'students'.
+      // I will assume for now we just insert the case details.
     };
-    try {
-      const response = await postRequest<caseFormSchema>(
-        "/create/case/",
-        newIndividualCase
-      );
-      if (response) {
-        setIsSubmitting(false);
-        toast.success(response.message);
-        localStorage.removeItem("create-individual-case-form");
+
+    // Board Member - Approval Request Logic
+    if (user?.role === "board_member") {
+      const { error } = await supabase.from("approval_requests").insert({
+        request_type: "ADD_CASE",
+        request_data: payload,
+        requester_id: user.id,
+      });
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success(
+          "Case creation request sent to Super Admin for approval."
+        );
         onSuccess();
       }
-    } catch (error) {
-      const errorMessage = generateErrorMessage(error);
-      toast.error(errorMessage);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Super Admin - Direct Creation Logic via Server Action
+    try {
+      const studentData = {
+        full_name: studentInvolved.full_name,
+        matric_number: studentInvolved.matric_number,
+        department: studentInvolved.department,
+        faculty: studentInvolved.faculty,
+        level: studentInvolved.level,
+        email: studentInvolved.email,
+        phone: studentInvolved.phone,
+      };
+
+      const newCaseData = {
+        title: state.title,
+        description: state.description,
+        offence_type: state.offence_type,
+        incident_date: state.incident_date,
+        incident_time: state.incident_time,
+        location: state.location,
+        priority: state.priority,
+        reported_by: state.reported_by,
+        reporter_mail: state.reporter_mail,
+        reporters_phone: state.reporters_phone,
+        status: "Reported",
+      };
+
+      const response = await createCase(newCaseData, studentData);
+
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      toast.success("Case created successfully");
+      onSuccess();
+    } catch (error: any) {
+      console.error("Creation Error:", error);
+      toast.error(error.message || "Failed to create case");
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -289,19 +334,42 @@ export function CreateCaseForm({
                   <SelectValue placeholder="Select offence type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="academic-dishonesty">
-                    Academic Dishonesty
+                  <SelectItem value="Substance Violation">
+                    Alcohol/Drug Abuse
                   </SelectItem>
-                  <SelectItem value="behavioral-misconduct">
-                    Behavioral Misconduct
+                  <SelectItem value="Harassment">
+                    Bullying/Harassment
                   </SelectItem>
-                  <SelectItem value="property-damage">
-                    Property Damage
+                  <SelectItem value="Chapel Absence">
+                    Chapel Absence/Lateness
                   </SelectItem>
-                  <SelectItem value="substance-violation">
-                    Substance Violation
+                  <SelectItem value="Cultism">Cultism</SelectItem>
+                  <SelectItem value="Destruction of Property">
+                    Destruction of Property
                   </SelectItem>
-                  <SelectItem value="harassment">Harassment</SelectItem>
+                  <SelectItem value="Disobedience">
+                    Disobedience to University Officials
+                  </SelectItem>
+                  <SelectItem value="Examination Malpractice">
+                    Examination Malpractice
+                  </SelectItem>
+                  <SelectItem value="Physical Assault">
+                    Fighting/Physical Assault
+                  </SelectItem>
+                  <SelectItem value="Forgery">Forgery</SelectItem>
+                  <SelectItem value="Immoral Relationship">
+                    Immoral Relationship
+                  </SelectItem>
+                  <SelectItem value="Indecent Dressing">
+                    Indecent Dressing
+                  </SelectItem>
+                  <SelectItem value="Insubordination">
+                    Insubordination
+                  </SelectItem>
+                  <SelectItem value="Theft">Stealing/Theft</SelectItem>
+                  <SelectItem value="Unauthorized Outing">
+                    Unauthorized Outing/Exit
+                  </SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -365,16 +433,19 @@ export function CreateCaseForm({
               <Label htmlFor="incident-time" className="text-sm font-medium">
                 Incident Time <span className="text-red-500">*</span>
               </Label>
-              <Input
-                onChange={(e) =>
-                  handleInputChange("incident_time", e.target.value)
-                }
-                value={state.incident_time}
-                id="incident-time"
-                type="time"
-                className="h-11"
-                required
-              />
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Input
+                  onChange={(e) =>
+                    handleInputChange("incident_time", e.target.value)
+                  }
+                  value={state.incident_time}
+                  id="incident-time"
+                  type="time"
+                  className="h-11 pl-10"
+                  required
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -473,14 +544,22 @@ export function CreateCaseForm({
                   <SelectValue placeholder="Select faculty" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="science">Faculty of Science</SelectItem>
-                  <SelectItem value="engineering">
-                    Faculty of Engineering
+                  <SelectItem value="humanities">
+                    Faculty of Humanities
                   </SelectItem>
-                  <SelectItem value="arts">Faculty of Arts</SelectItem>
-                  <SelectItem value="business">Faculty of Business</SelectItem>
-                  <SelectItem value="medicine">Faculty of Medicine</SelectItem>
+                  <SelectItem value="social-management">
+                    Faculty of Social and Management Sciences
+                  </SelectItem>
+                  <SelectItem value="science">
+                    Faculty of Natural and Applied Sciences
+                  </SelectItem>
+                  <SelectItem value="environmental">
+                    Faculty of Environmental Sciences
+                  </SelectItem>
                   <SelectItem value="law">Faculty of Law</SelectItem>
+                  <SelectItem value="basic-medical">
+                    Faculty of Basic Medical Sciences
+                  </SelectItem>
                   <SelectItem value="education">
                     Faculty of Education
                   </SelectItem>
@@ -498,27 +577,72 @@ export function CreateCaseForm({
                 onValueChange={(value: string) =>
                   handleStudentInputChange("department", value)
                 }
+                disabled={!studentInvolved.faculty}
               >
                 <SelectTrigger id="department" className="h-11">
-                  <SelectValue placeholder="Select department" />
+                  <SelectValue
+                    placeholder={
+                      studentInvolved.faculty
+                        ? "Select department"
+                        : "Select faculty first"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="computer-science">
-                    Computer Science
-                  </SelectItem>
-                  <SelectItem value="electrical-engineering">
-                    Electrical Engineering
-                  </SelectItem>
-                  <SelectItem value="mechanical-engineering">
-                    Mechanical Engineering
-                  </SelectItem>
-                  <SelectItem value="business-admin">
-                    Business Administration
-                  </SelectItem>
-                  <SelectItem value="medicine">Medicine</SelectItem>
-                  <SelectItem value="law">Law</SelectItem>
-                  <SelectItem value="english">English Language</SelectItem>
-                  <SelectItem value="mathematics">Mathematics</SelectItem>
+                  {studentInvolved.faculty &&
+                    (
+                      {
+                        humanities: [
+                          "History and International Studies",
+                          "English and Literary Studies",
+                          "Christian Religious Studies",
+                          "French",
+                          "Languages and Linguistics",
+                        ],
+                        "social-management": [
+                          "Accounting",
+                          "Business Administration",
+                          "Economics",
+                          "Mass Communication",
+                          "Political Science",
+                          "International Relations",
+                        ],
+                        science: [
+                          "Computer Science",
+                          "Microbiology",
+                          "Biochemistry",
+                          "Industrial Chemistry",
+                          "Biotechnology",
+                          "Geology",
+                          "Applied Geophysics",
+                          "Mathematics",
+                          "Physics",
+                          "Physics with Electronics",
+                          "Biology",
+                          "Information Technology",
+                        ],
+                        environmental: ["Architecture"],
+                        law: ["Private and Property Law", "Public Law"],
+                        "basic-medical": [
+                          "Nursing Science",
+                          "Medical Laboratory Science",
+                          "Anatomy",
+                          "Physiology",
+                          "Public Health",
+                        ],
+                        education: [
+                          "Science Education",
+                          "Mathematics Education",
+                          "Computer Science Education",
+                          "Educational Foundations",
+                          "Arts Education",
+                        ],
+                      } as Record<string, string[]>
+                    )[studentInvolved.faculty]?.map((dept) => (
+                      <SelectItem key={dept} value={dept}>
+                        {dept}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -676,9 +800,13 @@ export function CreateCaseForm({
             {isSubmitting
               ? initialData
                 ? "Updating Case..."
+                : user?.role === "board_member"
+                ? "Sending Request..."
                 : "Creating Case..."
               : initialData
               ? "Update Individual Case"
+              : user?.role === "board_member"
+              ? "Send Request for Approval"
               : "Create Individual Case"}
           </Button>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -29,9 +29,11 @@ import {
   Users,
   User,
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Case } from "@/app/_types";
-import { MOCK_CASES } from "@/app/dashboard/_data/mock-data";
+import { useAuth } from "@/app/context/auth-context";
+import { createClient } from "@/utils/supabase/client";
 
 interface UnifiedCaseListProps {
   onViewDetails: (caseId: number, type: "Individual" | "Grouped") => void;
@@ -44,35 +46,74 @@ export function UnifiedCaseList({
 }: UnifiedCaseListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
-  const isLoading = false;
-  const cases = MOCK_CASES;
+  const [isLoading, setIsLoading] = useState(true);
+  const [cases, setCases] = useState<Case[]>([]);
+  const { user } = useAuth();
+  const supabase = createClient();
 
-  // Filter cases based on search term, status filter, and type filter
-  const filteredCases: Case[] = cases.filter((caseItem: Case) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      caseItem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caseItem.offence_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caseItem.students.some(
-        (student) =>
-          student.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          student.matric_number.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    const matchesType =
-      typeFilter === null ||
-      caseItem.offence_type.toLowerCase() === typeFilter?.toLowerCase() ||
-      (typeFilter === "grouped" && caseItem.case_type === "Grouped");
+  useEffect(() => {
+    const fetchCases = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from("cases")
+        .select(
+          `
+          *,
+          student:student_id (
+            full_name,
+            matric_number
+          )
+        `
+        )
+        .order("created_at", { ascending: false });
 
-    return matchesSearch && matchesType;
-  });
+      if (error) {
+        console.error("Error fetching cases:", error);
+      } else if (data) {
+        const formattedData = data.map((c: any) => ({
+          ...c,
+          students: c.student ? [c.student] : [], // Map single student to array
+          case_type: c.case_type || "Individual",
+        })) as Case[];
+        setCases(formattedData);
+      }
+      setIsLoading(false);
+    };
 
-  const handleDelete = (caseId: number, type: string) => {
-    alert(`Delete ${type} case ${caseId}`);
+    fetchCases();
+  }, []);
+
+  const handleDelete = async (caseId: number, type: string) => {
+    if (confirm("Are you sure you want to delete this case?")) {
+      const { error } = await supabase.from("cases").delete().eq("id", caseId);
+      if (!error) {
+        setCases((prev) => prev.filter((c) => c.id !== caseId));
+      } else {
+        alert("Failed to delete case");
+      }
+    }
   };
 
   const handleEdit = (caseItem: Case) => {
     onEdit(caseItem);
   };
+
+  const filteredCases = cases.filter((c) => {
+    const matchesSearch =
+      searchTerm === "" ||
+      c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.id?.toString().includes(searchTerm) ||
+      (c.students &&
+        c.students.some((s) =>
+          s.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+        ));
+
+    const matchesType = typeFilter
+      ? c.case_type?.toLowerCase() === typeFilter.toLowerCase()
+      : true;
+
+    return matchesSearch && matchesType;
+  });
 
   return (
     <div className="space-y-6">
@@ -161,7 +202,7 @@ export function UnifiedCaseList({
               filteredCases.map((caseItem) => (
                 <TableRow
                   key={caseItem.id}
-                  className="border-none hover:bg-white hover:shadow-sm transition-all group cursor-pointer rounded-2xl mb-2"
+                  className="border-none cursor-pointer rounded-2xl mb-2 bg-transparent"
                 >
                   <TableCell className="pl-4 py-4 rounded-l-2xl font-medium text-sdc-navy text-sm">
                     #{caseItem.id}
@@ -195,25 +236,27 @@ export function UnifiedCaseList({
                       )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center -space-x-2">
+                    <div className="flex flex-col gap-1">
                       {caseItem.students &&
-                        caseItem.students.slice(0, 3).map((student, index) => (
-                          <Avatar
-                            key={index}
-                            className="h-8 w-8 border-2 border-white"
-                          >
-                            <AvatarFallback className="text-[10px] bg-sdc-blue/10 text-sdc-blue font-bold">
-                              {student.full_name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
+                        caseItem.students.slice(0, 2).map((student, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6 border border-gray-200">
+                              <AvatarFallback className="text-[9px] bg-sdc-blue/10 text-sdc-blue font-bold">
+                                {student.full_name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm font-medium text-sdc-navy truncate max-w-[120px]">
+                              {student.full_name}
+                            </span>
+                          </div>
                         ))}
-                      {caseItem.students && caseItem.students.length > 3 && (
-                        <div className="h-8 w-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-gray-500">
-                          +{caseItem.students.length - 3}
-                        </div>
+                      {caseItem.students && caseItem.students.length > 2 && (
+                        <span className="text-xs text-gray-500 pl-8">
+                          +{caseItem.students.length - 2} more
+                        </span>
                       )}
                     </div>
                   </TableCell>
@@ -265,32 +308,44 @@ export function UnifiedCaseList({
                             View Details
                           </button>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <button
-                            className="flex w-full items-center cursor-pointer"
-                            onClick={() => handleEdit(caseItem)}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Case
-                          </button>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          asChild
-                          className="text-red-600 focus:text-red-600"
-                        >
-                          <button
-                            className="flex w-full items-center cursor-pointer"
-                            onClick={() =>
-                              handleDelete(
-                                caseItem.id as number,
-                                caseItem.case_type as "Individual" | "Grouped"
-                              )
-                            }
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Case
-                          </button>
-                        </DropdownMenuItem>
+
+                        {/* Edit/Delete only for Admins and Board Members */}
+                        {user?.role !== "viewer" && (
+                          <>
+                            <DropdownMenuItem asChild>
+                              <button
+                                className="flex w-full items-center cursor-pointer"
+                                onClick={() => handleEdit(caseItem)}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Case
+                              </button>
+                            </DropdownMenuItem>
+
+                            {/* Delete only for Super Admin */}
+                            {user?.role === "super_admin" && (
+                              <DropdownMenuItem
+                                asChild
+                                className="text-red-600 focus:text-red-600"
+                              >
+                                <button
+                                  className="flex w-full items-center cursor-pointer"
+                                  onClick={() =>
+                                    handleDelete(
+                                      caseItem.id as number,
+                                      caseItem.case_type as
+                                        | "Individual"
+                                        | "Grouped"
+                                    )
+                                  }
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete Case
+                                </button>
+                              </DropdownMenuItem>
+                            )}
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

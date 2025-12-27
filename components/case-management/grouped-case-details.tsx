@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -24,7 +24,7 @@ import {
   Gavel,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useFetch } from "@/hooks/useFetch";
+import { DataApiClient } from "@/service/apiClient";
 import { caseFormSchema, involvedStudentSchema } from "./create-case-form";
 
 // Mock grouped case details data
@@ -34,9 +34,36 @@ interface GroupedCaseDetailsProps {
 }
 
 export function GroupedCaseDetails({ groupedCaseId }: GroupedCaseDetailsProps) {
-  const { data } = useFetch<caseFormSchema>(
-    `/get/specific/case/${groupedCaseId}/`
+  const [data, setData] = useState<caseFormSchema | caseFormSchema[] | null>(
+    null
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    const fetchCaseDetails = async () => {
+      setIsLoading(true);
+      try {
+        const response = await DataApiClient.get<caseFormSchema>(
+          `/get/specific/case/${groupedCaseId}/`
+        );
+        setData(response.data);
+        setIsError(false);
+      } catch (error) {
+        console.error("Failed to fetch grouped case details:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (groupedCaseId) {
+      fetchCaseDetails();
+    }
+  }, [groupedCaseId]);
+
   const caseDetails: caseFormSchema | null = Array.isArray(data)
     ? data[0]
     : data;

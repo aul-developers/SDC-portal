@@ -3,8 +3,8 @@ import type React from "react";
 import { DesktopSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
 import { Toaster } from "sonner";
-import { useEffect, useState } from "react";
-import { checkUser } from "@/lib/utils";
+import { useState } from "react";
+
 import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({
@@ -12,29 +12,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // For demo purposes, we are bypassing the strict server-side check if we have the local cookie.
-        if (document.cookie.includes("auth_token=valid")) {
-          return;
-        }
-
-        const response = await checkUser("/status/");
-        if (response.message === false) {
-          return router.push("/?unauthorized=true"); // Redirect to login if auth fails
-          console.log("Auth check failed but redirect disabled for demo");
-        }
-        console.log(response);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    fetchData();
-  }, []);
 
   return (
     <div className="h-full relative font-sans bg-sdc-slate-bg min-h-screen">
@@ -58,7 +36,6 @@ export default function DashboardLayout({
           {children}
         </div>
       </main>
-      <Toaster />
     </div>
   );
 }

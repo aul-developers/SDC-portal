@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Eye, Edit, CheckCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MOCK_PUNISHMENTS } from "@/app/dashboard/_data/mock-data";
-
 interface PunishmentStatusListProps {
   status: "Active" | "Pending" | "Completed";
   searchTerm: string;
@@ -38,24 +36,8 @@ export function PunishmentStatusList({
   const [page, setPage] = useState(1);
   const isLoading = false; // Mock loading state
 
-  // Filter punishments from mock data
-  const filteredPunishments = MOCK_PUNISHMENTS.filter((punishment) => {
-    // Check status match (case-insensitive)
-    const statusMatch =
-      punishment.status.toLowerCase() === status.toLowerCase();
-
-    if (!statusMatch) return false;
-
-    if (searchTerm === "") return true;
-    const lowerSearch = searchTerm.toLowerCase();
-
-    return (
-      punishment.id.toString().toLowerCase().includes(lowerSearch) ||
-      punishment.punishment_type?.toLowerCase().includes(lowerSearch) ||
-      punishment.student?.matric_number?.toLowerCase().includes(lowerSearch) ||
-      punishment.student?.full_name?.toLowerCase().includes(lowerSearch)
-    );
-  });
+  // Local fallback
+  const filteredPunishments: any[] = [];
 
   const handleMarkActive = async (punishmentId: string) => {
     toast.success("Punishment marked as Active (Mock)");

@@ -11,8 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PunishmentStatusTabs } from "./punishment-status-tabs";
 
 import { API_ENDPOINTS } from "@/app/_data/api-constants";
+import { useAuth } from "@/app/context/auth-context";
 
 export function PunishmentTracker() {
+  const { user } = useAuth();
   const [selectedPunishment, setSelectedPunishment] = useState<string | null>(
     null
   );
@@ -115,13 +117,20 @@ export function PunishmentTracker() {
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={() => setShowAddDialog(true)}
-                className="bg-sdc-blue hover:bg-sdc-blue/90 text-white gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add Punishment
-              </Button>
+              {/* Add Button - Hide for Viewers */}
+              {/* Board Members can Request, Super Admin can Add */}
+              {(user?.role === "super_admin" ||
+                user?.role === "board_member") && (
+                <Button
+                  onClick={() => setShowAddDialog(true)}
+                  className="bg-sdc-blue hover:bg-sdc-blue/90 text-white gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  {user?.role === "board_member"
+                    ? "Request Punishment"
+                    : "Add Punishment"}
+                </Button>
+              )}
             </div>
 
             {/* Metrics */}

@@ -8,17 +8,26 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
 export function UserManagement() {
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Handle user selection
-  const handleUserSelect = (userId: number) => {
+  const handleUserSelect = (userId: string) => {
     setSelectedUserId(userId);
   };
   // Handle closing user details
-  const handleCloseDetails = () => {
+  const handleCloseDetails = (shouldRefresh = false) => {
     setSelectedUserId(null);
+    if (shouldRefresh) {
+      setRefreshTrigger((prev) => prev + 1);
+    }
+  };
+
+  const handleUserCreated = () => {
+    setRefreshTrigger((prev) => prev + 1);
+    setIsAddUserOpen(false);
   };
 
   return (
@@ -46,14 +55,22 @@ export function UserManagement() {
 
       {selectedUserId ? (
         <UserDetails
-          userId={selectedUserId?.toString() || ""}
-          onClose={handleCloseDetails}
+          userId={selectedUserId}
+          onClose={handleCloseDetails} // Matches (shouldRefresh?: boolean) => void
         />
       ) : (
-        <UserList onUserSelect={handleUserSelect} searchQuery={searchQuery} />
+        <UserList
+          onUserSelect={handleUserSelect}
+          searchQuery={searchQuery}
+          refreshTrigger={refreshTrigger}
+        />
       )}
 
-      <AddUserDialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen} />
+      <AddUserDialog
+        open={isAddUserOpen}
+        onOpenChange={setIsAddUserOpen}
+        onSuccess={handleUserCreated}
+      />
     </div>
   );
 }

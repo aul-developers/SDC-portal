@@ -15,8 +15,10 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { PlusCircle, X, ChevronDown } from "lucide-react";
+import { useAuth } from "@/app/context/auth-context";
 
 export function UnifiedCaseManagement() {
+  const { user } = useAuth();
   const [selectedCase, setSelectedCase] = useState<{
     id: number;
     type: "Individual" | "Grouped";
@@ -192,23 +194,28 @@ export function UnifiedCaseManagement() {
                   View, search, and manage all disciplinary cases in the system.
                 </p>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="bg-sdc-blue hover:bg-sdc-blue/90 text-white gap-2">
-                    <PlusCircle className="h-4 w-4" />
-                    Create New Case
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={handleCreateIndividualCase}>
-                    Individual Case
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleCreateGroupedCase}>
-                    Grouped Case
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
+              {user?.role !== "viewer" && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="bg-sdc-blue hover:bg-sdc-blue/90 text-white gap-2">
+                      <PlusCircle className="h-4 w-4" />
+                      {user?.role === "board_member"
+                        ? "Request New Case"
+                        : "Create New Case"}
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleCreateIndividualCase}>
+                      Individual Case
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleCreateGroupedCase}>
+                      Grouped Case
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
             <UnifiedCaseList
               onViewDetails={handleViewDetails}

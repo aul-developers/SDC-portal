@@ -22,11 +22,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, MapPin, User } from "lucide-react";
+import { X, Plus, MapPin, User, Clock } from "lucide-react";
 import { caseFormSchema } from "./create-case-form";
 import { generateErrorMessage, postRequest } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { createClient } from "@/utils/supabase/client";
 
 interface CreateGroupedCaseFormProps {
   onSuccess: () => void;
@@ -71,62 +72,6 @@ export function CreateGroupedCaseForm({
     phone: "",
   });
 
-  // Load state from local storage
-  useEffect(() => {
-    const saved = localStorage.getItem("create-grouped-case-form");
-    if (saved) {
-      try {
-        const p = JSON.parse(saved);
-        setTitle(p.title || "");
-        setDescription(p.description || "");
-        setOffenceType(p.offence_type || "");
-        setIncidentDate(p.incident_date || "");
-        setIncidentTime(p.incident_time || "");
-        setPosition(p.position || "");
-        setLocation(p.location || "");
-        setReportedBy(p.reported_by || "");
-        setReporterEmail(p.reporter_mail || "");
-        setReporterPhone(p.reporters_phone || "");
-        setPriority(p.priority || "");
-        setStudents(p.students || []);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
-
-  // Save state to local storage
-  useEffect(() => {
-    const state = {
-      title,
-      description,
-      offence_type,
-      incident_date,
-      incident_time,
-      position,
-      location,
-      reported_by,
-      reporter_mail,
-      reporters_phone,
-      priority,
-      students,
-    };
-    localStorage.setItem("create-grouped-case-form", JSON.stringify(state));
-  }, [
-    title,
-    description,
-    offence_type,
-    incident_date,
-    incident_time,
-    position,
-    location,
-    reported_by,
-    reporter_mail,
-    reporters_phone,
-    priority,
-    students,
-  ]);
-
   const handleAddStudent = () => {
     if (
       newStudent.full_name &&
@@ -158,9 +103,13 @@ export function CreateGroupedCaseForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const supabase = createClient();
 
     const formattedDate = incident_date && format(incident_date, "yyyy-MM-dd");
-    const groupedCase: caseFormSchema = {
+
+    // Construct the payload matching the DB expected structure
+    // Assuming 'students' is a JSONB column in 'cases' table
+    const caseData = {
       title,
       description,
       case_type: "Grouped",
@@ -168,31 +117,28 @@ export function CreateGroupedCaseForm({
       incident_date: formattedDate,
       incident_time,
       location,
-      position,
+      position, // Reporter position
       reported_by,
       reporter_mail,
       reporters_phone,
       priority,
-      students,
+      status: "Reported",
+      students: students, // Storing strictured student data
     };
-    try {
-      const response = await postRequest<caseFormSchema>(
-        "/create/case/",
-        groupedCase
-      );
 
-      if (response) {
-        setIsSubmitting(false);
-        toast.success(response.message);
-        localStorage.removeItem("create-grouped-case-form");
-      }
-    } catch (error) {
-      const errorMessage = generateErrorMessage(error);
+    try {
+      const { error } = await supabase.from("cases").insert(caseData);
+
+      if (error) throw error;
+
+      toast.success("Grouped case created successfully");
+      onSuccess();
+    } catch (error: any) {
+      const errorMessage = error.message || "Failed to create grouped case";
       toast.error(errorMessage);
+    } finally {
       setIsSubmitting(false);
     }
-
-    onSuccess();
   };
 
   return (
@@ -241,21 +187,41 @@ export function CreateGroupedCaseForm({
                     <SelectValue placeholder="Select offence type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Academic Dishonesty">
-                      Academic Dishonesty
-                    </SelectItem>
-                    <SelectItem value="Behavioral Misconduct">
-                      Behavioral Misconduct
-                    </SelectItem>
-                    <SelectItem value="Property Damage">
-                      Property Damage
-                    </SelectItem>
                     <SelectItem value="Substance Violation">
-                      Substance Violation
+                      Alcohol/Drug Abuse
                     </SelectItem>
-                    <SelectItem value="Harassment">Harassment</SelectItem>
+                    <SelectItem value="Harassment">
+                      Bullying/Harassment
+                    </SelectItem>
+                    <SelectItem value="Chapel Absence">
+                      Chapel Absence/Lateness
+                    </SelectItem>
+                    <SelectItem value="Cultism">Cultism</SelectItem>
+                    <SelectItem value="Destruction of Property">
+                      Destruction of Property
+                    </SelectItem>
+                    <SelectItem value="Disobedience">
+                      Disobedience to University Officials
+                    </SelectItem>
                     <SelectItem value="Examination Malpractice">
                       Examination Malpractice
+                    </SelectItem>
+                    <SelectItem value="Physical Assault">
+                      Fighting/Physical Assault
+                    </SelectItem>
+                    <SelectItem value="Forgery">Forgery</SelectItem>
+                    <SelectItem value="Immoral Relationship">
+                      Immoral Relationship
+                    </SelectItem>
+                    <SelectItem value="Indecent Dressing">
+                      Indecent Dressing
+                    </SelectItem>
+                    <SelectItem value="Insubordination">
+                      Insubordination
+                    </SelectItem>
+                    <SelectItem value="Theft">Stealing/Theft</SelectItem>
+                    <SelectItem value="Unauthorized Outing">
+                      Unauthorized Outing/Exit
                     </SelectItem>
                     <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
@@ -317,12 +283,16 @@ export function CreateGroupedCaseForm({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="incidentTime">Incident Time</Label>
-                <Input
-                  id="incidentTime"
-                  type="time"
-                  value={incident_time}
-                  onChange={(e) => setIncidentTime(e.target.value)}
-                />
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="incidentTime"
+                    type="time"
+                    value={incident_time}
+                    onChange={(e) => setIncidentTime(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="location">Location *</Label>
@@ -473,28 +443,106 @@ export function CreateGroupedCaseForm({
                       <SelectValue placeholder="Select faculty" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Engineering">Engineering</SelectItem>
-                      <SelectItem value="Sciences">Sciences</SelectItem>
-                      <SelectItem value="Arts">Arts</SelectItem>
-                      <SelectItem value="Business">Business</SelectItem>
-                      <SelectItem value="Medicine">Medicine</SelectItem>
-                      <SelectItem value="Law">Law</SelectItem>
+                      <SelectItem value="Humanities">
+                        Faculty of Humanities
+                      </SelectItem>
+                      <SelectItem value="Social and Management Sciences">
+                        Faculty of Social and Management Sciences
+                      </SelectItem>
+                      <SelectItem value="Natural and Applied Sciences">
+                        Faculty of Natural and Applied Sciences
+                      </SelectItem>
+                      <SelectItem value="Environmental Sciences">
+                        Faculty of Environmental Sciences
+                      </SelectItem>
+                      <SelectItem value="Law">Faculty of Law</SelectItem>
+                      <SelectItem value="Basic Medical Sciences">
+                        Faculty of Basic Medical Sciences
+                      </SelectItem>
+                      <SelectItem value="Education">
+                        Faculty of Education
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="department">Department *</Label>
-                  <Input
-                    id="department"
+                  <Select
                     value={newStudent.department}
-                    onChange={(e) =>
+                    onValueChange={(value) =>
                       setNewStudent({
                         ...newStudent,
-                        department: e.target.value,
+                        department: value,
                       })
                     }
-                    placeholder="e.g., Computer Science"
-                  />
+                    disabled={!newStudent.faculty}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          newStudent.faculty
+                            ? "Select department"
+                            : "Select faculty first"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {newStudent.faculty &&
+                        (
+                          {
+                            Humanities: [
+                              "History and International Studies",
+                              "English and Literary Studies",
+                              "Christian Religious Studies",
+                              "French",
+                              "Languages and Linguistics",
+                            ],
+                            "Social and Management Sciences": [
+                              "Accounting",
+                              "Business Administration",
+                              "Economics",
+                              "Mass Communication",
+                              "Political Science",
+                              "International Relations",
+                            ],
+                            "Natural and Applied Sciences": [
+                              "Computer Science",
+                              "Microbiology",
+                              "Biochemistry",
+                              "Industrial Chemistry",
+                              "Biotechnology",
+                              "Geology",
+                              "Applied Geophysics",
+                              "Mathematics",
+                              "Physics",
+                              "Physics with Electronics",
+                              "Biology",
+                              "Information Technology",
+                            ],
+                            "Environmental Sciences": ["Architecture"],
+                            Law: ["Private and Property Law", "Public Law"],
+                            "Basic Medical Sciences": [
+                              "Nursing Science",
+                              "Medical Laboratory Science",
+                              "Anatomy",
+                              "Physiology",
+                              "Public Health",
+                            ],
+                            Education: [
+                              "Science Education",
+                              "Mathematics Education",
+                              "Computer Science Education",
+                              "Educational Foundations",
+                              "Arts Education",
+                            ],
+                          } as Record<string, string[]>
+                        )[newStudent.faculty]?.map((dept) => (
+                          <SelectItem key={dept} value={dept}>
+                            {dept}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="level">Level *</Label>

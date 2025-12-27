@@ -306,7 +306,7 @@ export function EnhancedStudentList({
                 filteredStudents.map((student) => (
                   <TableRow
                     key={student.matricNumber}
-                    className="border-none hover:bg-white hover:shadow-sm transition-all group cursor-pointer rounded-2xl mb-2"
+                    className="border-none hover:bg-gray-50 cursor-pointer rounded-2xl mb-2"
                   >
                     <TableCell className="pl-4 py-4 rounded-l-2xl">
                       <div className="flex items-center gap-3">
@@ -405,7 +405,7 @@ export function EnhancedStudentList({
             filteredStudents.map((student) => (
               <Card
                 key={student.matricNumber}
-                className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow"
+                className="overflow-hidden border-none shadow-sm"
               >
                 <CardContent className="p-0">
                   <div className="p-4">

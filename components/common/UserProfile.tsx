@@ -17,13 +17,9 @@ export function UserProfile({ collapsed, onSignOut }: UserProfileProps) {
     >
       {!collapsed && (
         <div className="mb-4 flex items-center gap-3">
-          <div className="relative h-10 w-10 overflow-hidden rounded-full bg-white/10">
-            <Image
-              src="/diverse-user-avatars.png"
-              alt="User Avatar"
-              fill
-              className="object-cover"
-            />
+          <div className="relative h-10 w-10 flex items-center justify-center overflow-hidden rounded-full bg-sdc-blue text-white font-bold">
+            {/* Simple initials fallback since this seems to be a static component or receives hardcoded props in some usages */}
+            SJ
           </div>
           <div>
             <p className="font-medium text-white">Dr. Sarah Johnson</p>
