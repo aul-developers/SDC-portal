@@ -150,8 +150,12 @@ function SidebarContent({
   const { user, logout, isLoading } = useAuth();
 
   // Filter routes based on user role
+  // OPTIMIZATION: If loading, assume 'viewer' role to show common routes immediately.
+  // Middleware protects the page, so we can be optimistic about presence of basic access.
+  const effectiveRole = user?.role || (isLoading ? "viewer" : null);
+
   const routes = baseRoutes.filter(
-    (route) => user && user.role && route.roles.includes(user.role)
+    (route) => effectiveRole && route.roles.includes(effectiveRole)
   );
 
   return (
@@ -205,13 +209,9 @@ function SidebarContent({
             <h1 className="text-sdc-navy font-bold text-lg leading-none">
               SDC Portal
             </h1>
-            {user ? (
-              <span className="text-[10px] bg-sdc-navy text-white px-1.5 py-0.5 rounded-full font-medium tracking-wide w-fit mt-1 uppercase">
-                {user.role ? user.role.replace("_", " ") : "Viewer"}
-              </span>
-            ) : (
-              <div className="h-4 w-16 bg-gray-200 animate-pulse rounded mt-1" />
-            )}
+            <span className="text-[10px] bg-sdc-navy text-white px-1.5 py-0.5 rounded-full font-medium tracking-wide w-fit mt-1 uppercase">
+              {effectiveRole ? effectiveRole.replace("_", " ") : "Viewer"}
+            </span>
           </div>
         </div>
       </div>
@@ -316,7 +316,7 @@ function SidebarContent({
                     {user?.user_metadata?.full_name || "User"}
                   </p>
                   <p className="text-xs text-gray-500 truncate w-[120px] text-left">
-                    {user?.email || "Loading..."}
+                    {user?.email}
                   </p>
                 </div>
                 {!isCollapsed && (

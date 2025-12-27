@@ -88,21 +88,6 @@ export function LoginForm() {
           timeoutPromise,
         ])) as Response;
 
-        // BYPASS: Explicit check for softdevelopers admin account due to DB Trigger Error 500
-        if (
-          email === "softdevelopers@aul.edu.ng" &&
-          password === "Password123!"
-        ) {
-          console.log("Admin Bypass Triggered");
-          const { loginMockAdmin } = await import("@/actions/mock-auth");
-          await loginMockAdmin();
-
-          setIsSuccess(true);
-          toast.success("Signed in successfully (Dev Mode)");
-          router.push("/dashboard");
-          return;
-        }
-
         if (!authResponse.ok) {
           const errorData = await authResponse.json();
           toast.error(

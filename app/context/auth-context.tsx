@@ -22,7 +22,7 @@ interface AuthContextType {
 
 // Helper to check cookie client-side? No, cookies are server/httpOnly often.
 // We can use a Server Action to check, but we need to call it from useEffect.
-import { checkMockAdmin } from "@/actions/mock-auth";
+// Mock auth import removed
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -117,35 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           });
         } else {
-          // CHECK FOR MOCK ADMIN SESSION
-          console.log(
-            "AuthContext: No Supabase session, checking mock cookie..."
-          );
-
-          // Timeout mock check to avoid hanging
-          const mockCheckPromise = checkMockAdmin();
-          const timeoutPromise = new Promise<boolean>((resolve) =>
-            setTimeout(() => {
-              console.warn("Mock admin check timed out");
-              resolve(false);
-            }, 5000)
-          );
-
-          const isMock = await Promise.race([mockCheckPromise, timeoutPromise]);
-
-          console.timeEnd("AuthContext:getSession"); // Finished check
-          if (isMock) {
-            console.log("AuthContext: Mock Admin Session found");
-            setUser({
-              id: "mock-admin-id",
-              email: "softdevelopers@aul.edu.ng",
-              app_metadata: {},
-              user_metadata: { role: "super_admin" },
-              aud: "authenticated",
-              created_at: new Date().toISOString(),
-              role: "super_admin",
-            } as AuthUser);
-          }
           setIsLoading(false);
         }
       } catch (error) {
@@ -269,9 +240,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Clear regular auth
     await supabase.auth.signOut();
 
-    // Clear mock auth
-    const { logoutMockAdmin } = await import("@/actions/mock-auth");
-    await logoutMockAdmin();
+    // Mock admin logout removed
 
     setUser(null);
     router.push("/");

@@ -34,11 +34,7 @@ export async function updateSession(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
-        // BYPASS: Check for Mock Admin Session (Dev Mode)
-        const mockAdminSession = request.cookies.get('SDC_ADMIN_SESSION')?.value
-        if (mockAdminSession === 'true') {
-            return supabaseResponse
-        }
+
 
         // no user, potentially respond by redirecting the user to the login page
         const url = request.nextUrl.clone()
