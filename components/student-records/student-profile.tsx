@@ -1,11 +1,18 @@
-"use client"
+"use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
+import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import {
   User,
   Mail,
@@ -16,88 +23,73 @@ import {
   Building,
   AlertTriangle,
   FileText,
-  Clock,
   Download,
-} from "lucide-react"
-
-// Mock student data
-const studentData = {
-  name: "Robert Chen",
-  matricNumber: "STU-45789",
-  department: "Computer Science",
-  faculty: "Science and Technology",
-  level: "300 Level",
-  email: "robert.chen@university.edu",
-  phone: "+1234567890",
-  address: "123 University Housing, Campus Road",
-  dateOfBirth: "1999-05-15",
-  enrollmentDate: "2021-09-01",
-  academicStatus: "Good Standing",
-  cgpa: "3.75",
-  image: "/monogram-mb.png",
-  emergencyContact: {
-    name: "Wei Chen",
-    relationship: "Father",
-    phone: "+1234567891",
-    email: "wei.chen@example.com",
-  },
-  disciplinaryRecord: {
-    status: "active",
-    caseCount: 2,
-    currentPunishment: "Academic Probation",
-    punishmentEndDate: "2024-09-15",
-  },
-  academicHistory: [
-    {
-      semester: "Fall 2021",
-      gpa: "3.8",
-      courses: [
-        { code: "CSC101", title: "Introduction to Computer Science", grade: "A" },
-        { code: "MTH101", title: "Calculus I", grade: "A-" },
-        { code: "PHY101", title: "Physics I", grade: "B+" },
-        { code: "ENG101", title: "English Composition", grade: "A" },
-      ],
-    },
-    {
-      semester: "Spring 2022",
-      gpa: "3.7",
-      courses: [
-        { code: "CSC102", title: "Programming Fundamentals", grade: "A" },
-        { code: "MTH102", title: "Calculus II", grade: "B+" },
-        { code: "PHY102", title: "Physics II", grade: "B+" },
-        { code: "SOC101", title: "Introduction to Sociology", grade: "A-" },
-      ],
-    },
-    {
-      semester: "Fall 2022",
-      gpa: "3.9",
-      courses: [
-        { code: "CSC201", title: "Data Structures", grade: "A" },
-        { code: "CSC203", title: "Computer Architecture", grade: "A-" },
-        { code: "MTH201", title: "Linear Algebra", grade: "A" },
-        { code: "PHI101", title: "Introduction to Philosophy", grade: "A-" },
-      ],
-    },
-    {
-      semester: "Spring 2023",
-      gpa: "3.6",
-      courses: [
-        { code: "CSC202", title: "Algorithms", grade: "B+" },
-        { code: "CSC204", title: "Database Systems", grade: "A" },
-        { code: "CSC206", title: "Software Engineering", grade: "A-" },
-        { code: "STA201", title: "Statistics for Computer Science", grade: "B+" },
-      ],
-    },
-  ],
-}
+} from "lucide-react";
+import { getStudentProfile } from "@/actions/student-management";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface StudentProfileProps {
-  matricNumber: string
+  matricNumber: string;
 }
 
 export function StudentProfile({ matricNumber }: StudentProfileProps) {
-  // In a real application, you would fetch the student data based on the matricNumber
-  // For this example, we'll use the mock data
+  const [profile, setProfile] = useState<any>(null);
+  const [cases, setCases] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const result = await getStudentProfile(matricNumber);
+      if (result.error) {
+        setError(result.error);
+        toast.error("Failed to load student profile");
+      } else {
+        setProfile(result.student);
+        setCases(result.cases || []);
+      }
+      setLoading(false);
+    }
+    loadData();
+  }, [matricNumber]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex gap-4">
+          <Skeleton className="h-20 w-20 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <div className="text-center p-12 text-gray-500">Student not found.</div>
+    );
+  }
+
+  // Determine Status
+  const activeCases = cases.filter(
+    (c) => c.status !== "Closed" && c.status !== "Resolved"
+  );
+  const hasActiveRecord = activeCases.length > 0;
+  const currentSanction = hasActiveRecord ? activeCases[0].title : null; // Simplified logic
 
   return (
     <div className="space-y-6">
@@ -105,30 +97,36 @@ export function StudentProfile({ matricNumber }: StudentProfileProps) {
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div className="flex items-center gap-4">
           <Avatar className="h-20 w-20 border-2 border-border">
-            <AvatarImage src={studentData.image || "/placeholder.svg"} alt={studentData.name} />
+            <AvatarImage
+              src={"/profile-placeholder.png"} // Default placeholder
+              alt={profile.full_name}
+            />
             <AvatarFallback className="text-xl">
-              {studentData.name
+              {profile.full_name
                 .split(" ")
-                .map((n) => n[0])
+                .map((n: string) => n[0])
                 .join("")}
             </AvatarFallback>
           </Avatar>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-semibold text-sdc-navy">{studentData.name}</h2>
+              <h2 className="text-2xl font-semibold text-sdc-navy">
+                {profile.full_name}
+              </h2>
               <Badge variant="outline" className="ml-2">
-                {studentData.matricNumber}
+                {profile.matric_number}
               </Badge>
             </div>
             <div className="mt-1 flex items-center gap-2 text-sm text-sdc-gray">
               <GraduationCap className="h-4 w-4" />
               <span>
-                {studentData.department}, {studentData.level}
+                {profile.department || "No Department"},{" "}
+                {profile.level || "N/A"}
               </span>
             </div>
             <div className="mt-1 flex items-center gap-2 text-sm text-sdc-gray">
               <Building className="h-4 w-4" />
-              <span>{studentData.faculty}</span>
+              <span>{profile.faculty || "No Faculty"}</span>
             </div>
           </div>
         </div>
@@ -137,15 +135,12 @@ export function StudentProfile({ matricNumber }: StudentProfileProps) {
           <div className="flex items-center gap-2">
             <Badge
               className={
-                studentData.disciplinaryRecord.status === "active"
+                hasActiveRecord
                   ? "bg-amber-500 hover:bg-amber-600"
                   : "bg-emerald-500 hover:bg-emerald-600"
               }
             >
-              {studentData.disciplinaryRecord.status === "active" ? "Active Record" : "Clear Record"}
-            </Badge>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700">
-              CGPA: {studentData.cgpa}
+              {hasActiveRecord ? "Active Record" : "Clear Record"}
             </Badge>
           </div>
           <Button variant="outline" size="sm" className="gap-1">
@@ -177,21 +172,18 @@ export function StudentProfile({ matricNumber }: StudentProfileProps) {
                   <Mail className="h-5 w-5 text-sdc-gray" />
                   <div>
                     <p className="text-sm text-sdc-gray">Email Address</p>
-                    <p className="font-medium text-sdc-navy">{studentData.email}</p>
+                    <p className="font-medium text-sdc-navy">
+                      {profile.email || "N/A"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 text-sdc-gray" />
                   <div>
                     <p className="text-sm text-sdc-gray">Phone Number</p>
-                    <p className="font-medium text-sdc-navy">{studentData.phone}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <MapPin className="mt-0.5 h-5 w-5 text-sdc-gray" />
-                  <div>
-                    <p className="text-sm text-sdc-gray">Address</p>
-                    <p className="font-medium text-sdc-navy">{studentData.address}</p>
+                    <p className="font-medium text-sdc-navy">
+                      {profile.phone || "N/A"}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -199,70 +191,25 @@ export function StudentProfile({ matricNumber }: StudentProfileProps) {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Emergency Contact</CardTitle>
+                <CardTitle className="text-lg">Personal Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <User className="h-5 w-5 text-sdc-gray" />
-                  <div>
-                    <p className="text-sm text-sdc-gray">Name</p>
-                    <p className="font-medium text-sdc-navy">
-                      {studentData.emergencyContact.name} ({studentData.emergencyContact.relationship})
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-sdc-gray" />
-                  <div>
-                    <p className="text-sm text-sdc-gray">Phone Number</p>
-                    <p className="font-medium text-sdc-navy">{studentData.emergencyContact.phone}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-sdc-gray" />
-                  <div>
-                    <p className="text-sm text-sdc-gray">Email Address</p>
-                    <p className="font-medium text-sdc-navy">{studentData.emergencyContact.email}</p>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-5 w-5 text-sdc-gray" />
+                    <div>
+                      <p className="text-sm text-sdc-gray">Enrollment Date</p>
+                      <p className="font-medium text-sdc-navy">
+                        {profile.created_at
+                          ? new Date(profile.created_at).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Personal Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-sdc-gray" />
-                  <div>
-                    <p className="text-sm text-sdc-gray">Date of Birth</p>
-                    <p className="font-medium text-sdc-navy">
-                      {new Date(studentData.dateOfBirth).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-sdc-gray" />
-                  <div>
-                    <p className="text-sm text-sdc-gray">Enrollment Date</p>
-                    <p className="font-medium text-sdc-navy">
-                      {new Date(studentData.enrollmentDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <GraduationCap className="h-5 w-5 text-sdc-gray" />
-                  <div>
-                    <p className="text-sm text-sdc-gray">Academic Status</p>
-                    <p className="font-medium text-sdc-navy">{studentData.academicStatus}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Academic Record Tab */}
@@ -270,60 +217,17 @@ export function StudentProfile({ matricNumber }: StudentProfileProps) {
           <Card>
             <CardHeader>
               <CardTitle>Academic Summary</CardTitle>
-              <CardDescription>Overview of academic performance and achievements</CardDescription>
+              <CardDescription>
+                Overview of academic performance and achievements.
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="rounded-lg bg-blue-50 p-4 text-center">
-                  <p className="text-sm font-medium text-blue-700">Cumulative GPA</p>
-                  <p className="mt-1 text-3xl font-bold text-blue-700">{studentData.cgpa}</p>
-                </div>
-                <div className="rounded-lg bg-emerald-50 p-4 text-center">
-                  <p className="text-sm font-medium text-emerald-700">Completed Credits</p>
-                  <p className="mt-1 text-3xl font-bold text-emerald-700">72</p>
-                </div>
-                <div className="rounded-lg bg-amber-50 p-4 text-center">
-                  <p className="text-sm font-medium text-amber-700">Remaining Credits</p>
-                  <p className="mt-1 text-3xl font-bold text-amber-700">48</p>
-                </div>
-              </div>
+            <CardContent className="space-y-4 text-center py-8 text-gray-500">
+              <p>Academic records integration is currently unavailable.</p>
+              <p className="text-sm">
+                Please check the University Portal for full transcripts.
+              </p>
             </CardContent>
           </Card>
-
-          <div className="space-y-4">
-            {studentData.academicHistory.map((semester, index) => (
-              <Card key={index}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{semester.semester}</CardTitle>
-                    <Badge className="bg-blue-500">GPA: {semester.gpa}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Course Code</TableHead>
-                          <TableHead>Course Title</TableHead>
-                          <TableHead className="text-right">Grade</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {semester.courses.map((course, courseIndex) => (
-                          <TableRow key={courseIndex}>
-                            <TableCell className="font-medium">{course.code}</TableCell>
-                            <TableCell>{course.title}</TableCell>
-                            <TableCell className="text-right font-medium">{course.grade}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </TabsContent>
 
         {/* Disciplinary Status Tab */}
@@ -331,69 +235,48 @@ export function StudentProfile({ matricNumber }: StudentProfileProps) {
           <Card>
             <CardHeader>
               <CardTitle>Disciplinary Status</CardTitle>
-              <CardDescription>Current disciplinary standing and active sanctions</CardDescription>
+              <CardDescription>
+                Current disciplinary standing and active sanctions
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div
                   className={`rounded-lg p-4 text-center ${
-                    studentData.disciplinaryRecord.status === "active"
+                    hasActiveRecord
                       ? "bg-amber-50 text-amber-700"
                       : "bg-emerald-50 text-emerald-700"
                   }`}
                 >
                   <p className="text-sm font-medium">Record Status</p>
                   <p className="mt-1 text-xl font-bold">
-                    {studentData.disciplinaryRecord.status === "active" ? "Active Record" : "Clear Record"}
+                    {hasActiveRecord ? "Active Record" : "Clear Record"}
                   </p>
                 </div>
                 <div className="rounded-lg bg-gray-50 p-4 text-center">
-                  <p className="text-sm font-medium text-gray-700">Total Cases</p>
-                  <p className="mt-1 text-xl font-bold text-gray-700">{studentData.disciplinaryRecord.caseCount}</p>
-                </div>
-                <div
-                  className={`rounded-lg p-4 text-center ${
-                    studentData.disciplinaryRecord.currentPunishment
-                      ? "bg-amber-50 text-amber-700"
-                      : "bg-emerald-50 text-emerald-700"
-                  }`}
-                >
-                  <p className="text-sm font-medium">Current Sanctions</p>
-                  <p className="mt-1 text-xl font-bold">{studentData.disciplinaryRecord.currentPunishment || "None"}</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    Total Cases
+                  </p>
+                  <p className="mt-1 text-xl font-bold text-gray-700">
+                    {cases.length}
+                  </p>
                 </div>
               </div>
 
-              {studentData.disciplinaryRecord.currentPunishment && (
+              {hasActiveRecord && currentSanction && (
                 <div className="rounded-lg border p-4">
-                  <h3 className="mb-2 font-medium text-sdc-navy">Active Disciplinary Measure</h3>
+                  <h3 className="mb-2 font-medium text-sdc-navy">
+                    Active Disciplinary Measure
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-500" />
                       <div>
-                        <p className="font-medium text-sdc-navy">{studentData.disciplinaryRecord.currentPunishment}</p>
-                        <p className="text-sm text-sdc-gray">
-                          Ends on {new Date(studentData.disciplinaryRecord.punishmentEndDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <FileText className="mt-0.5 h-5 w-5 text-sdc-gray" />
-                      <div>
-                        <p className="text-sm text-sdc-gray">Additional Requirements</p>
                         <p className="font-medium text-sdc-navy">
-                          Must attend academic integrity workshop and resubmit the paper.
+                          {currentSanction}
                         </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Clock className="mt-0.5 h-5 w-5 text-sdc-gray" />
-                      <div>
-                        <p className="text-sm text-sdc-gray">Progress</p>
-                        <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                          <div className="h-full w-[60%] rounded-full bg-amber-500"></div>
-                        </div>
-                        <p className="mt-1 text-xs text-sdc-gray">
-                          60% complete - 4 months remaining out of 6 months total
+                        <p className="text-sm text-sdc-gray">
+                          See case details for more info.
                         </p>
                       </div>
                     </div>
@@ -401,16 +284,39 @@ export function StudentProfile({ matricNumber }: StudentProfileProps) {
                 </div>
               )}
 
-              <div className="flex justify-center">
-                <Button className="bg-sdc-blue hover:bg-sdc-blue/90 text-white">View Full Case History</Button>
+              {cases.length > 0 && (
+                <div className="rounded-md border mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Case Title</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {cases.map((c: any) => (
+                        <TableRow key={c.id}>
+                          <TableCell>
+                            {c.incident_date ||
+                              new Date(c.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>{c.title}</TableCell>
+                          <TableCell>{c.status}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+
+              <div className="flex justify-center mt-4">
+                {/* Could link to full case history view */}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
-
-// Import the Table components
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
