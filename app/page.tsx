@@ -6,7 +6,6 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans flex-col items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 sm:p-12">
-        {/* Header */}
         <div className="flex flex-col items-center mb-10 text-center">
           <div className="h-16 w-16 mb-6 rounded-2xl bg-sdc-navy text-white flex items-center justify-center shadow-lg shadow-sdc-navy/20">
             <span className="text-2xl font-bold tracking-tighter">AU</span>
@@ -24,8 +23,6 @@ export default function LoginPage() {
             <LoginForm />
           </Suspense>
         </div>
-
-        {/* Footer Link */}
       </div>
       <p className="text-center text-xs text-gray-400 mt-8 font-bold tracking-widest uppercase">
         Internal Portal — Access by Invite Only

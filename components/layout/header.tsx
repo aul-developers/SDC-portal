@@ -63,7 +63,6 @@ export function Header() {
           : "bg-transparent"
       )}
     >
-      {/* Left side: Mobile Trigger & Breadcrumbs/Title */}
       <div className="flex items-center gap-4">
         <MobileSidebar />
         <div className="hidden md:block">
@@ -91,12 +90,10 @@ export function Header() {
           </Button>
         </Link>
 
-        {/* Simple Date Badge for Desktop */}
         <div className="hidden md:flex items-center px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-100 text-sm font-medium text-sdc-navy">
           <span>{date}</span>
         </div>
 
-        {/* User Profile Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -105,7 +102,7 @@ export function Header() {
             >
               <UserAvatar
                 name={user?.user_metadata?.full_name || "User"}
-                avatarUrl={user?.user_metadata?.avatar_url} // Use real avatar or fallback to initials
+                avatarUrl={user?.user_metadata?.avatar_url}
               />
             </Button>
           </DropdownMenuTrigger>

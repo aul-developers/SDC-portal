@@ -178,7 +178,6 @@ export function LoginForm() {
           <Mail className="absolute left-0 top-3 h-5 w-5 text-gray-400 transition-colors" />
           <Input
             placeholder="email@aul.edu.ng"
-            defaultValue="softdevelopers@aul.edu.ng" // Auto-filled for admin
             ref={formUserEmailInputRef}
             autoCapitalize="none"
             autoComplete="username"
@@ -194,7 +193,6 @@ export function LoginForm() {
             <Lock className="absolute left-0 top-3 h-5 w-5 text-gray-400 transition-colors" />
             <Input
               placeholder="••••••••"
-              defaultValue="Password123!" // Auto-filled for admin
               ref={formPasswordInputRef}
               type={showPassword ? "text" : "password"}
               autoCapitalize="none"

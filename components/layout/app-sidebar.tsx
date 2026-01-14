@@ -34,7 +34,6 @@ import {
 import { useState } from "react";
 import { useAuth } from "@/app/context/auth-context";
 
-// Base routes available to everyone (filtered later)
 const baseRoutes = [
   {
     label: "Dashboard",
@@ -76,11 +75,11 @@ const baseRoutes = [
     label: "User Management",
     icon: UserCog,
     href: "/dashboard/users",
-    roles: ["super_admin"], // Restricted
+    roles: ["super_admin"],
   },
   {
     label: "Approvals",
-    icon: FileText, // Using FileText or maybe CheckSquare if available, but FileText is imported
+    icon: FileText,
     href: "/dashboard/approvals",
     roles: ["super_admin"],
   },
@@ -149,9 +148,6 @@ function SidebarContent({
 }) {
   const { user, logout, isLoading } = useAuth();
 
-  // Filter routes based on user role
-  // OPTIMIZATION: If loading, assume 'viewer' role to show common routes immediately.
-  // Middleware protects the page, so we can be optimistic about presence of basic access.
   const effectiveRole = user?.role || (isLoading ? "viewer" : null);
 
   const routes = baseRoutes.filter(
@@ -160,7 +156,6 @@ function SidebarContent({
 
   return (
     <div className="flex flex-col h-full bg-white relative">
-      {/* Toggle Button for Desktop */}
       {setIsCollapsed && (
         <Button
           variant="ghost"
@@ -176,7 +171,6 @@ function SidebarContent({
         </Button>
       )}
 
-      {/* Header */}
       <div
         className={cn(
           "h-20 flex items-center border-b border-gray-100 transition-all duration-200 ease-in-out",
@@ -216,7 +210,6 @@ function SidebarContent({
         </div>
       </div>
 
-      {/* Navigation */}
       <div
         className={cn(
           "flex-1 py-6 space-y-1 overflow-y-auto overflow-x-hidden transition-all duration-200 ease-in-out",
@@ -278,7 +271,6 @@ function SidebarContent({
         })}
       </div>
 
-      {/* User Profile Dropdown */}
       <div className="p-4 border-t border-gray-100 mt-auto">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
