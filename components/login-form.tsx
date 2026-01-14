@@ -53,14 +53,6 @@ export function LoginForm() {
       const email = formUserEmailInputRef.current.value;
       const password = formPasswordInputRef.current.value;
 
-      console.log("Login initiated for:", email);
-      console.log(
-        "Env Check - URL:",
-        !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        "Key:",
-        !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      );
-
       try {
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(
@@ -70,7 +62,6 @@ export function LoginForm() {
         );
 
         const startTime = performance.now();
-        console.log("Sending Supabase request...");
 
         // Direct API call instead of using Supabase client (temporary workaround)
         const authResponse = (await Promise.race([
@@ -116,11 +107,8 @@ export function LoginForm() {
 
         if (success) {
           const sessionTime = performance.now();
-          console.log("Session valid. Redirecting...");
           // logs removed for performance
-          console.log(
-            `⏱️ TOTAL LOGIN TIME: ${(sessionTime - startTime).toFixed(0)}ms`
-          );
+
           setIsSuccess(true);
           toast.success("Signed in successfully");
           router.push("/dashboard");

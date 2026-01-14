@@ -26,9 +26,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function AuthProvider({
+  children,
+  initialUser = null,
+}: {
+  children: React.ReactNode;
+  initialUser?: AuthUser | null;
+}) {
+  const [user, setUser] = useState<AuthUser | null>(initialUser);
+  const [isLoading, setIsLoading] = useState(!initialUser);
   const router = useRouter();
   const supabase = createClient();
 
@@ -49,80 +55,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check active session
     const getSession = async () => {
-      console.time("AuthContext:getSession");
       try {
         const {
           data: { session },
-          error,
         } = await supabase.auth.getSession();
-        console.timeLog("AuthContext:getSession", "Supabase session fetched");
 
         if (session?.user) {
-          console.log("AuthContext: Session found", session.user.email);
-          // ... (rest of logic)
-
-          // Force Super Admin for the developer account
-          let metadataRole = session.user.user_metadata?.role;
-          // Updated to plural 'softdevelopers' as per request
-          if (
-            session.user.email === "softdevelopers@aul.edu.ng" ||
-            session.user.email === "softdeveloper@aul.edu.ng"
-          ) {
-            metadataRole = "super_admin";
-          }
+          const metadataRole = session.user.user_metadata?.role;
 
           setUser({
             ...session.user,
-            role: metadataRole || "viewer", // Show viewer menu instantly while verifying
+            role: metadataRole || "viewer",
           });
           setIsLoading(false);
-          console.timeLog("AuthContext:getSession", "User set (optimistic)");
 
-          // Fetch strict profile data in background
           fetchProfile(session.user.id).then(async (profile) => {
-            console.log("AuthContext: Profile fetched in background", profile);
             if (profile) {
-              // AUTO-FIX: If Metadata is "board_member" but Profile is "viewer", trust Metadata (creation source)
-              // This fixes the "Glitch" where it switches back to viewer because DB was stale.
+              // DETECT MISMATCH: If Auth says Board but DB says Viewer, trust Auth (creation source)
               if (
                 metadataRole === "board_member" &&
                 profile.role === "viewer"
               ) {
-                console.log(
-                  "AuthContext: Detected Role Mismatch (Metadata > DB). Fixing DB..."
-                );
                 // Optimistically keep board_member
-                // Trigger server action to update DB (Needs import)
-                // For now, we just DON'T overwrite the state with 'viewer'
                 return;
               }
 
               setUser((prev) => {
-                // ... (merge logic)
-                if (
-                  prev?.email === "softdevelopers@aul.edu.ng" ||
-                  prev?.email === "softdeveloper@aul.edu.ng"
-                ) {
-                  return { ...prev!, ...profile, role: "super_admin" };
-                }
                 if (prev?.role !== profile.role) {
                   return { ...prev!, ...profile };
                 }
                 return prev;
               });
-            } else {
-              // Profile missing? Create it?
-              // The 'createUser' logic now handles this, but for old users it might be missing.
-              // We keep the optimistic metadata role.
             }
           });
         } else {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error("Auth check failed", error);
         setIsLoading(false);
-        console.timeEnd("AuthContext:getSession");
       }
     };
 
@@ -136,46 +106,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Optimistic Update first
         let currentRole = session.user.user_metadata?.role || "viewer";
 
-        // Special developer override
-        if (
-          session.user.email === "softdevelopers@aul.edu.ng" ||
-          session.user.email === "softdeveloper@aul.edu.ng"
-        ) {
-          currentRole = "super_admin";
-        }
-
         // Fetch profile
         const profile = await fetchProfile(session.user.id);
-        let dbRole = profile?.role;
+        const dbRole = profile?.role;
 
-        // DETECT MISMATCH: If Auth says Board/Admin but DB says Viewer, trust Auth
-        if (currentRole !== "viewer" && dbRole === "viewer") {
-          console.log(
-            "AuthContext (AuthStateChange): Role Mismatch. Trusting Metadata:",
-            currentRole
-          );
-          // Do NOT overwrite with viewer. Keep currentRole.
-
-          // Trigger background sync to fix DB permanently
-          import("@/actions/user-management").then(({ updateUser }) => {
-            updateUser(session.user.id, { role: currentRole });
-          });
-        } else if (dbRole) {
-          // Otherwise trust DB
+        if (dbRole) {
+          // Trust DB if available
           currentRole = dbRole;
-        }
-
-        // Final Override for Dev
-        if (
-          session.user.email === "softdevelopers@aul.edu.ng" ||
-          session.user.email === "softdeveloper@aul.edu.ng"
-        ) {
-          currentRole = "super_admin";
         }
 
         setUser({
           ...session.user,
-          role: currentRole,
+          role: currentRole as UserRole,
         });
       } else {
         setUser(null);

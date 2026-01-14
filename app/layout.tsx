@@ -4,6 +4,7 @@ import { Jost } from "next/font/google";
 import "./globals.css";
 import ToasterClient from "@/components/toasterClient";
 import { AuthProvider } from "./context/auth-context";
+import { createClient } from "@/utils/supabase/server";
 
 const jost = Jost({ subsets: ["latin"] });
 
@@ -15,15 +16,39 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  let initialUser = null;
+
+  if (session?.user) {
+    let role = session.user.user_metadata?.role || "viewer";
+
+    // Replicate developer override logic server-side for consistency
+    if (
+      session.user.email === "softdevelopers@aul.edu.ng" ||
+      session.user.email === "softdeveloper@aul.edu.ng"
+    ) {
+      role = "super_admin";
+    }
+
+    initialUser = {
+      ...session.user,
+      role,
+    };
+  }
+
   return (
     <html lang="en">
       <body className={jost.className}>
-        <AuthProvider>
+        <AuthProvider initialUser={initialUser}>
           {children}
           <ToasterClient />
         </AuthProvider>
