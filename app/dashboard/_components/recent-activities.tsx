@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,78 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getRecentActivities } from "@/actions/dashboard";
 
-export function RecentActivities() {
-  const [activities, setActivities] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+interface RecentActivitiesProps {
+  activities: any[];
+}
 
-  useEffect(() => {
-    async function loadActivities() {
-      try {
-        const data = await getRecentActivities();
-        setActivities(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadActivities();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="w-full overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b border-gray-100 hover:bg-transparent">
-              <TableHead className="w-[300px] pl-4 h-12">
-                <div className="h-3 w-16 bg-gray-100 rounded animate-pulse"></div>
-              </TableHead>
-              <TableHead className="h-12">
-                <div className="h-3 w-24 bg-gray-100 rounded animate-pulse"></div>
-              </TableHead>
-              <TableHead className="h-12">
-                <div className="h-3 w-12 bg-gray-100 rounded animate-pulse"></div>
-              </TableHead>
-              <TableHead className="h-12 text-right pr-4">
-                <div className="h-3 w-10 ml-auto bg-gray-100 rounded animate-pulse"></div>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[1, 2, 3].map((i) => (
-              <TableRow key={i} className="border-b border-gray-50">
-                <TableCell className="pl-4 py-5">
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-gray-100 animate-pulse"></div>
-                    <div>
-                      <div className="h-4 w-32 bg-gray-100 rounded mb-1 animate-pulse"></div>
-                      <div className="h-3 w-20 bg-gray-100 rounded animate-pulse"></div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="py-5">
-                  <div className="flex flex-col gap-2">
-                    <div className="h-4 w-40 bg-gray-100 rounded animate-pulse"></div>
-                    <div className="h-5 w-24 bg-gray-100 rounded animate-pulse"></div>
-                  </div>
-                </TableCell>
-                <TableCell className="py-5">
-                  <div className="h-6 w-20 bg-gray-100 rounded-full animate-pulse"></div>
-                </TableCell>
-                <TableCell className="text-right pr-4 py-5">
-                  <div className="h-4 w-16 ml-auto bg-gray-100 rounded animate-pulse"></div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }
-
+export function RecentActivities({ activities }: RecentActivitiesProps) {
   return (
     <div className="w-full overflow-x-auto">
       <Table>

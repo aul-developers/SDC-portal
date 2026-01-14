@@ -1,36 +1,35 @@
-"use client";
-
 import { DashboardHeader } from "./_components/dashboard-header";
 import { DashboardBanner } from "./_components/dashboard-banner";
 import { MetricCards } from "./_components/metric-cards";
 import { RecentActivities } from "./_components/recent-activities";
 import { RightPanel } from "./_components/right-panel";
 import { PendingApprovals } from "./_components/pending-approvals";
-import { useAuth } from "@/app/context/auth-context";
+import { createClient } from "@/utils/supabase/server";
+import {
+  getDashboardMetrics,
+  getRecentActivities,
+  getPendingApprovals,
+} from "@/actions/dashboard";
 
-import { getDashboardMetrics } from "@/actions/dashboard";
-import { useEffect, useState } from "react";
+export default async function DashboardPage() {
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-export default function DashboardPage() {
-  const { user } = useAuth();
-  const [metrics, setMetrics] = useState<{
-    pendingHearings: number;
-    nextHearing?: any;
-  }>({
-    pendingHearings: 0,
-    nextHearing: null,
-  });
+  // Parallel data fetching
+  const [metrics, activities, approvals] = await Promise.all([
+    getDashboardMetrics(),
+    getRecentActivities(),
+    getPendingApprovals(),
+  ]);
 
-  useEffect(() => {
-    async function loadMetrics() {
-      const data = await getDashboardMetrics();
-      setMetrics({
-        pendingHearings: data.pendingHearings,
-        nextHearing: data.nextHearing,
-      });
-    }
-    loadMetrics();
-  }, []);
+  const user = session?.user;
+  const role = user?.user_metadata?.role || "viewer";
+  const isSuperAdmin =
+    role === "super_admin" ||
+    user?.email === "softdevelopers@aul.edu.ng" ||
+    user?.email === "softdeveloper@aul.edu.ng";
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 h-full">
@@ -45,7 +44,7 @@ export default function DashboardPage() {
 
       {/* Stats Row */}
       <div className="pt-2">
-        <MetricCards />
+        <MetricCards metrics={metrics} />
       </div>
 
       {/* Bottom Section: Activity & Right Panel */}
@@ -53,7 +52,7 @@ export default function DashboardPage() {
         {/* Main Activity Column */}
         <div className="xl:col-span-2 space-y-8">
           {/* Pending Approvals (Super Admin Only) */}
-          {user?.role === "super_admin" && <PendingApprovals />}
+          {isSuperAdmin && <PendingApprovals initialApprovals={approvals} />}
 
           {/* Recent Cases Table */}
           <div className="bg-white rounded-[30px] p-5 sm:p-8 shadow-sm">
@@ -65,7 +64,7 @@ export default function DashboardPage() {
                 </select>
               </div>
             </div>
-            <RecentActivities />
+            <RecentActivities activities={activities} />
           </div>
         </div>
 

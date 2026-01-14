@@ -1,32 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { AlertTriangle, Clock, CheckCheckIcon, BarChart } from "lucide-react";
-import { getDashboardMetrics } from "@/actions/dashboard";
 
-export function MetricCards() {
-  const [metrics, setMetrics] = useState({
-    totalCases: 0,
-    activeCases: 0,
-    pendingHearings: 0,
-    resolvedCases: 0,
-  });
-  const [loading, setLoading] = useState(true);
+interface MetricCardsProps {
+  metrics: {
+    totalCases: number;
+    activeCases: number;
+    pendingHearings: number;
+    resolvedCases: number;
+  };
+}
 
-  useEffect(() => {
-    async function loadMetrics() {
-      try {
-        const data = await getDashboardMetrics();
-        setMetrics(data);
-      } catch (error) {
-        console.error("Failed to load metrics", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadMetrics();
-  }, []);
-
+export function MetricCards({ metrics }: MetricCardsProps) {
   const active = metrics.activeCases;
   const completed = metrics.resolvedCases;
   const pending = metrics.pendingHearings;
@@ -62,27 +47,6 @@ export function MetricCards() {
       bgColor: "bg-white",
     },
   ];
-
-  if (loading) {
-    return (
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="rounded-[24px] bg-white p-6 shadow-sm border border-gray-50/50 flex flex-col justify-between h-36 animate-pulse"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="h-4 w-20 bg-gray-100 rounded mb-2"></div>
-                <div className="h-8 w-12 bg-gray-100 rounded"></div>
-              </div>
-              <div className="h-12 w-12 bg-gray-100 rounded-2xl"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">

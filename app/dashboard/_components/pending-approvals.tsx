@@ -1,45 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { getPendingApprovals } from "@/actions/dashboard";
+
 import { logAuditAction } from "@/actions/audit";
 
-export function PendingApprovals() {
-  const [approvals, setApprovals] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+interface PendingApprovalsProps {
+  initialApprovals: any[];
+}
 
-  useEffect(() => {
-    loadApprovals();
-  }, []);
-
-  async function loadApprovals() {
-    try {
-      const data = await getPendingApprovals();
-      setApprovals(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }
+export function PendingApprovals({ initialApprovals }: PendingApprovalsProps) {
+  const [approvals, setApprovals] = useState<any[]>(initialApprovals);
 
   const handleApprove = async (id: number) => {
     toast.success(`Request #${id} approved successfully.`);
     await logAuditAction("Approved Request", { approval_id: id });
-    // In a real app, call API to update status
-    loadApprovals(); // Reload list
+    // In a real app, call API to update status, then refresh
+    // For now we optimistically remove
+    setApprovals((prev) => prev.filter((a) => a.id !== id));
   };
 
   const handleReject = async (id: number) => {
     toast.error(`Request #${id} rejected.`);
     await logAuditAction("Rejected Request", { approval_id: id });
-    loadApprovals();
+    setApprovals((prev) => prev.filter((a) => a.id !== id));
   };
 
-  if (loading) return <div>Loading...</div>;
   if (!approvals || approvals.length === 0) return null;
 
   return (
