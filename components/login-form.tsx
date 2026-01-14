@@ -219,7 +219,7 @@ export function LoginForm() {
 
         <div className="space-y-2">
           <Label className="sr-only">Select Role</Label>
-          <Select defaultValue="viewer" name="role">
+          <Select defaultValue="super_admin" name="role">
             <SelectTrigger className="w-full h-10 border-0 border-b border-gray-200 rounded-none shadow-none focus:ring-0 px-0">
               <div className="flex items-center gap-3 text-gray-500">
                 <UserCog className="h-5 w-5" />
