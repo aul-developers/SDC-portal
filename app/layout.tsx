@@ -39,9 +39,20 @@ export default async function RootLayout({
       role = "super_admin";
     }
 
+    // Fetch full profile data
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", session.user.id)
+      .single();
+
     initialUser = {
       ...session.user,
       role,
+      user_metadata: {
+        ...session.user.user_metadata,
+        full_name: profile?.full_name || session.user.user_metadata?.full_name,
+      },
     };
   }
 
