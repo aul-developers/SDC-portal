@@ -13,13 +13,11 @@ export async function storeSession(accessToken: string, refreshToken: string) {
         });
 
         if (error) {
-            console.error("Server storeSession error:", error);
             return { success: false, error: error.message };
         }
 
         return { success: true, user: data.user };
     } catch (err: any) {
-        console.error("Server storeSession exception:", err);
         return { success: false, error: err.message };
     }
 }

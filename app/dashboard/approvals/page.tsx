@@ -129,8 +129,7 @@ export default function ApprovalsPage() {
             throw new Error("Failed to create user via API");
           }
         } catch (e) {
-          console.error(e);
-          toast.error("Approved but failed to execute action. Check logs.");
+          toast.error("Approved but failed to execute action.");
         }
       } else if (req && req.request_type === "UPDATE_USER") {
         try {
@@ -141,7 +140,6 @@ export default function ApprovalsPage() {
           const response = await updateUser(id, data);
           if (!response.success) throw new Error(response.message);
         } catch (e: any) {
-          console.error(e);
           toast.error("Failed to update user: " + e.message);
           return;
         }
@@ -171,7 +169,6 @@ export default function ApprovalsPage() {
             throw new Error(response.message);
           }
         } catch (e: any) {
-          console.error(e);
           toast.error("Failed to create Case: " + e.message);
           return; // Do not mark as approved if action failed
         }
@@ -193,7 +190,6 @@ export default function ApprovalsPage() {
             .insert(finalData);
           if (error) throw error;
         } catch (e: any) {
-          console.error(e);
           toast.error("Failed to create Punishment: " + e.message);
           return;
         }

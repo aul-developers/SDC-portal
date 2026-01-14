@@ -57,7 +57,6 @@ export function OffenceList({ searchQuery, severityFilter }: OffenceListProps) {
         setCurrentOffences(response.data);
         setIsError(false);
       } catch (error) {
-        console.error("Failed to fetch offences:", error);
         setIsError(true);
         toast.error("Failed to fetch offences");
       } finally {

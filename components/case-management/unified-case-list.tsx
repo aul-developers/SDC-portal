@@ -68,7 +68,6 @@ export function UnifiedCaseList({
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Error fetching cases:", error);
       } else if (data) {
         const formattedData = data.map((c: any) => ({
           ...c,

@@ -54,7 +54,6 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
         setData(response.data);
         setIsError(false);
       } catch (error) {
-        console.error("Failed to fetch case details:", error);
         setIsError(true);
       } finally {
         setIsLoading(false);

@@ -12,11 +12,9 @@ export async function getStudentProfile(matricNumber: string) {
             .single();
 
         if (error) {
-            console.error("Error fetching student:", error);
-            return { error: error.message };
+            return null;
         }
 
-        // Fetch related cases to determine disciplinary status
         const { data: cases, error: casesError } = await supabase
             .from("cases")
             .select("*")
@@ -24,14 +22,11 @@ export async function getStudentProfile(matricNumber: string) {
             .order("created_at", { ascending: false });
 
         if (casesError) {
-            console.error("Error fetching cases:", casesError);
-            // Don't fail the whole profile if cases fail
             return { student, cases: [] };
         }
 
         return { student, cases };
     } catch (error: any) {
-        console.error("Error getting student profile:", error);
-        return { error: error.message };
+        return null;
     }
 }

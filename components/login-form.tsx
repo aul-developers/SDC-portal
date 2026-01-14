@@ -99,33 +99,23 @@ export function LoginForm() {
         );
 
         if (sessionError || !success) {
-          console.error("Session Error:", sessionError);
           toast.error(sessionError || "Failed to create session");
           setIsLoading(false);
           return;
         }
 
         if (success) {
-          const sessionTime = performance.now();
-          // logs removed for performance
-
           setIsSuccess(true);
           toast.success("Signed in successfully");
-          router.push("/dashboard");
-        } else {
-          // Fallback for when no error is returned but session is missing
-          console.warn("Login successful but no session returned:", authData);
-          toast.error("Login failed: No session created. Please try again.");
-          setIsLoading(false);
+          // Use hard navigation to force full server re-render with fresh session data
+          window.location.href = "/dashboard";
         }
       } catch (err: any) {
-        console.error("Login Exception:", err);
         toast.error(err.message || "Something went wrong during login");
         setIsLoading(false);
       }
     } else {
-      console.error("Form refs are null");
-      toast.error("Form error (Refs missing). Please refresh.");
+      toast.error("Please fill in all fields");
       setIsLoading(false);
     }
   }

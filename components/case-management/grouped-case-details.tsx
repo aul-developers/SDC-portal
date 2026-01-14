@@ -52,7 +52,6 @@ export function GroupedCaseDetails({ groupedCaseId }: GroupedCaseDetailsProps) {
         setData(response.data);
         setIsError(false);
       } catch (error) {
-        console.error("Failed to fetch grouped case details:", error);
         setIsError(true);
       } finally {
         setIsLoading(false);

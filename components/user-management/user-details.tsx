@@ -72,7 +72,6 @@ export function UserDetails({ userId, onClose }: UserDetailsProps) {
         const data = await getUser(userId);
         if (!isMounted) return;
 
-        console.log("User details fetched:", data);
         setUser(data);
         setFormValues({
           name: data.full_name || "",
@@ -91,7 +90,6 @@ export function UserDetails({ userId, onClose }: UserDetailsProps) {
         });
       } catch (error: any) {
         if (!isMounted) return;
-        console.error("Error fetching user details:", error);
         toast.error("Failed to load user details", {
           description: error.message,
         });
@@ -173,7 +171,6 @@ export function UserDetails({ userId, onClose }: UserDetailsProps) {
         });
       }
     } catch (error: any) {
-      console.error("Error updating user:", error);
       toast.error("Failed to update user", { description: error.message });
     }
   };

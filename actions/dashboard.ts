@@ -44,7 +44,6 @@ export async function getDashboardMetrics() {
             } : null
         };
     } catch (error) {
-        console.error("Error fetching dashboard metrics:", error);
         return {
             totalCases: 0,
             activeCases: 0,
@@ -78,7 +77,6 @@ export async function getRecentActivities() {
 
         return data || [];
     } catch (error) {
-        console.error("Error fetching recent activities:", error);
         return [];
     }
 }
@@ -96,14 +94,11 @@ export async function getPendingApprovals() {
             .limit(5);
 
         if (error) {
-            // Table might not exist yet, return empty array gracefully
-            console.warn("Error fetching pending approvals (table might not exist):", error.message);
             return [];
         }
 
         return data || [];
     } catch (error) {
-        console.error("Error in getPendingApprovals:", error);
         return [];
     }
 }

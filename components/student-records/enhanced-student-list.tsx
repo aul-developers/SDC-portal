@@ -94,9 +94,7 @@ export function EnhancedStudentList({
 
         setMockStudents(transformed);
         setTotalPages(Math.ceil(response.data.count / pageSize));
-      } catch (error) {
-        console.error("Failed to fetch students:", error);
-      }
+      } catch (error) {}
     };
 
     fetchStudents();

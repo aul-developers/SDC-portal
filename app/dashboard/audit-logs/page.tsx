@@ -36,8 +36,6 @@ export default function AuditLogsPage() {
         .limit(50);
 
       if (error) {
-        console.error("Error fetching audit logs:", error);
-        // Toast?
       } else {
         setAuditLogs(data || []);
       }

@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import { logAuditAction } from "@/actions/audit";
 
-// Initialize Service Role Client
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -38,16 +38,10 @@ interface CaseData {
     status: string;
 }
 
-// ... imports
-import { logAuditAction } from "@/actions/audit";
-
 export async function createCase(caseData: CaseData, studentData: StudentData) {
     try {
-        // ... (existing student logic) ...
-        // 1. Handle Student (Find or Create)
         let studentId: string | undefined;
 
-        // Check if student exists
         const { data: existingStudent, error: fetchError } = await supabase
             .from("students")
             .select("id")
@@ -55,14 +49,12 @@ export async function createCase(caseData: CaseData, studentData: StudentData) {
             .maybeSingle();
 
         if (fetchError) {
-            console.error("Error finding student:", fetchError);
-            throw new Error("Failed to verify student existence: " + fetchError.message);
+            return { success: false, error: fetchError.message };
         }
 
         if (existingStudent) {
             studentId = existingStudent.id;
         } else {
-            // Create new student
             const { data: newStudent, error: createError } = await supabase
                 .from("students")
                 .insert({
@@ -76,16 +68,13 @@ export async function createCase(caseData: CaseData, studentData: StudentData) {
                 .single();
 
             if (createError) {
-                console.error("Error creating student:", createError);
-                throw new Error("Failed to create student record: " + createError.message);
+                return { success: false, error: createError.message };
             }
             studentId = newStudent.id;
 
-            // Log Student Creation
             await logAuditAction("STUDENT_CREATED", { studentId, matric: studentData.matric_number });
         }
 
-        // 2. Create Case linked to student
         const { data, error } = await supabase
             .from("cases")
             .insert({
@@ -96,16 +85,13 @@ export async function createCase(caseData: CaseData, studentData: StudentData) {
             .single();
 
         if (error) {
-            console.error("Error creating case:", error);
-            throw new Error("Failed to create case: " + error.message);
+            return { success: false, error: error.message };
         }
 
-        // Log Case Creation
         await logAuditAction("CASE_CREATED", { caseId: data.id, title: caseData.title, studentId });
 
         return { success: true, message: "Case created successfully", data };
     } catch (error: any) {
-        console.error("Server Action createCase Error:", error);
-        return { success: false, message: error.message };
+        return { success: false, error: error.message || "Unknown error" };
     }
 }

@@ -88,10 +88,9 @@ export function generateErrorMessage(error: unknown) {
 export const getDashboardMetrics = async (endpoint: string) => {
   try {
     const response = await DataApiClient.get(endpoint);
-    console.log(response);
     return response.data;
   } catch (error) {
-    console.log(error);
+    return null;
   }
 };
 
@@ -100,6 +99,6 @@ export const checkUser = async (endpoint: string) => {
     const response = await DataApiClient.get(endpoint);
     return response.data;
   } catch (error) {
-    console.log(error);
+    return null;
   }
 };

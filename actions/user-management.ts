@@ -25,7 +25,6 @@ export async function getUsers() {
         // ... (error handling)
 
         if (error) {
-            console.error("Error fetching users (server action):", error);
             throw new Error(error.message);
         }
 
@@ -54,8 +53,6 @@ export async function getUsers() {
 
         return mappedUsers;
     } catch (error: any) {
-        // ...
-        console.error("Server Action Error:", error);
         throw new Error(error.message || "Failed to fetch users");
     }
 }
@@ -101,7 +98,6 @@ export async function getUser(userId: string) {
         };
 
     } catch (error: any) {
-        console.error("Server Action getUser Error:", error);
         throw new Error(error.message || "Failed to fetch user");
     }
 }
@@ -120,8 +116,6 @@ export async function createUser(userData: any) {
     );
 
     try {
-        console.log("Attempting to create Supabase Auth user for:", userData.email);
-        // Step 1: Create User
         const { data: user, error } = await supabase.auth.admin.createUser({
             email: userData.email,
             password: userData.password,
@@ -134,10 +128,8 @@ export async function createUser(userData: any) {
         });
 
         if (error) {
-            console.error("Supabase Auth Creation Failed:", error);
             throw new Error(error.message);
         }
-        console.log("Supabase Auth User Created ID:", user.user?.id);
 
         // Step 2: GUARANTEED Profile Creation (Upsert)
         if (user.user) {
@@ -153,7 +145,6 @@ export async function createUser(userData: any) {
                 }, { onConflict: 'id' });
 
             if (updateError) {
-                console.error("Failed to upsert user profile:", updateError);
                 await logAuditAction("USER_CREATION_PROFILE_FAIL", { userId: user.user.id, error: updateError.message });
                 // Return error so user sees it.
                 return { success: false, message: "Profile creation failed: " + updateError.message + ". The user account was created, but their profile data is missing." };
@@ -166,7 +157,6 @@ export async function createUser(userData: any) {
         revalidatePath("/dashboard/users");
         return { success: true, message: "User created successfully", user };
     } catch (error: any) {
-        console.error("Server Action Create Error:", error);
         throw new Error(error.message || "Failed to create user");
     }
 }
@@ -192,8 +182,6 @@ export async function deleteUser(userId: string) {
         const { error } = await supabase.auth.admin.deleteUser(userId);
 
         if (error) {
-            // ...
-            console.error("Error deleting user:", error);
             await logAuditAction("USER_DELETION_FAILED", { userId, error: error.message });
             return { success: false, message: error.message };
         }
@@ -202,8 +190,6 @@ export async function deleteUser(userId: string) {
         revalidatePath("/dashboard/users");
         return { success: true, message: "User deleted successfully" };
     } catch (error: any) {
-        // ...
-        console.error("Delete Action Error:", error);
         return { success: false, message: error.message };
     }
 }
@@ -228,7 +214,6 @@ export async function updateUser(userId: string, data: { full_name?: string; pho
             .eq("id", userId);
 
         if (profileError) {
-            console.error("Error updating user profile:", profileError);
             throw new Error(profileError.message);
         }
 
@@ -245,7 +230,6 @@ export async function updateUser(userId: string, data: { full_name?: string; pho
         revalidatePath("/dashboard/users");
         return { success: true, message: "User updated successfully" };
     } catch (error: any) {
-        console.error("Update Action Error:", error);
         return { success: false, message: error.message };
     }
 }

@@ -79,7 +79,6 @@ export function UserList({
         const data = await getUsers();
         setUsers(data || []);
       } catch (error: any) {
-        console.error("Error fetching users:", error);
         toast.error("Failed to fetch users", {
           description: error.message || "Check console for details",
         });

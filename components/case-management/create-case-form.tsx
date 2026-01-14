@@ -274,7 +274,6 @@ export function CreateCaseForm({
       toast.success("Case created successfully");
       onSuccess();
     } catch (error: any) {
-      console.error("Creation Error:", error);
       toast.error(error.message || "Failed to create case");
     } finally {
       setIsSubmitting(false);
