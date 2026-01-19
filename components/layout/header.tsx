@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { UserAvatar } from "@/components/user-avatar";
+import { UserAvatar } from "@/components/common/user-avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +28,7 @@ export function Header() {
         month: "short",
         day: "numeric",
         year: "numeric",
-      })
+      }),
     );
   }, []);
 
@@ -60,7 +60,7 @@ export function Header() {
         "flex items-center justify-between px-4 md:px-8 py-6 sticky top-0 z-40 transition-all duration-300",
         isScrolled
           ? "bg-white/90 backdrop-blur-md shadow-sm py-4"
-          : "bg-transparent"
+          : "bg-transparent",
       )}
     >
       <div className="flex items-center gap-4">

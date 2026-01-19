@@ -2,7 +2,7 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Jost } from "next/font/google";
 import "./globals.css";
-import ToasterClient from "@/components/toasterClient";
+import ToasterClient from "@/components/providers/toaster-client";
 import { AuthProvider } from "./context/auth-context";
 import { createClient } from "@/utils/supabase/server";
 

@@ -29,7 +29,7 @@ import {
   Clock,
   FileText,
 } from "lucide-react";
-import { UserAvatar } from "@/components/user-avatar";
+import { UserAvatar } from "@/components/common/user-avatar";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { updateUser, getUser } from "@/actions/user-management";

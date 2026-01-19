@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import LoadingButton from "../LoadingButton";
+import LoadingButton from "@/components/ui/loading-button";
 import { useAuth } from "@/app/context/auth-context";
 import { createClient } from "@/utils/supabase/client";
 import { createUser } from "@/actions/user-management";

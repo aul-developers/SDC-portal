@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { UserAvatar } from "@/components/user-avatar";
+import { UserAvatar } from "@/components/common/user-avatar";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { deleteRequest, generateErrorMessage } from "@/lib/utils";
@@ -92,19 +92,19 @@ export function UserList({
     users === null
       ? []
       : Array.isArray(users)
-      ? users.filter((user) => {
-          const lowerQuery = searchQuery.toLowerCase();
-          const fullName = user.full_name?.toLowerCase() || "";
-          const email = user.email?.toLowerCase() || "";
-          const role = user.role?.toLowerCase() || "";
+        ? users.filter((user) => {
+            const lowerQuery = searchQuery.toLowerCase();
+            const fullName = user.full_name?.toLowerCase() || "";
+            const email = user.email?.toLowerCase() || "";
+            const role = user.role?.toLowerCase() || "";
 
-          return (
-            fullName.includes(lowerQuery) ||
-            email.includes(lowerQuery) ||
-            role.includes(lowerQuery)
-          );
-        })
-      : [];
+            return (
+              fullName.includes(lowerQuery) ||
+              email.includes(lowerQuery) ||
+              role.includes(lowerQuery)
+            );
+          })
+        : [];
 
   async function handleDeleteUser(selectedId: any) {
     // Use Server Action for secure deletion and auditing

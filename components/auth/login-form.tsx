@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { storeSession } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import LoadingButton from "./LoadingButton";
+import LoadingButton from "@/components/ui/loading-button";
 import { toast } from "sonner";
 import { Mail, Lock, EyeOff, Eye, AlertCircle, UserCog } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -57,8 +57,8 @@ export function LoginForm() {
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(
             () => reject(new Error("Login timed out - Network slow")),
-            60000
-          )
+            60000,
+          ),
         );
 
         const startTime = performance.now();
@@ -74,7 +74,7 @@ export function LoginForm() {
                 apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
               },
               body: JSON.stringify({ email, password }),
-            }
+            },
           ),
           timeoutPromise,
         ])) as Response;
@@ -84,7 +84,7 @@ export function LoginForm() {
           toast.error(
             errorData.error_description ||
               errorData.msg ||
-              "Invalid credentials"
+              "Invalid credentials",
           );
           setIsLoading(false);
           return;
@@ -95,7 +95,7 @@ export function LoginForm() {
         // Set the session using Server Action
         const { success, error: sessionError } = await storeSession(
           authData.access_token,
-          authData.refresh_token
+          authData.refresh_token,
         );
 
         if (sessionError || !success) {

@@ -1,170 +1,67 @@
-# SDC Portal
+# SDC Frontend (Student Disciplinary Committee)
 
-A comprehensive **Student Disciplinary Committee (SDC) Portal** for managing student discipline, cases, punishments, and administrative workflows in educational institutions.
+A comprehensive student disciplinary management portal built for Anchor University.
 
-![Next.js](https://img.shields.io/badge/Next.js-16.1-black?logo=next.js)
-![React](https://img.shields.io/badge/React-19-blue?logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
-![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20DB-green?logo=supabase)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-cyan?logo=tailwindcss)
+## Overview
 
----
+The SDC Frontend is a Next.js application designed to manage student disciplinary cases, punishments, offences, and user roles (Super Admin, Board Member, Viewer). It features a robust dashboard, case tracking, and secure authentication via Supabase.
 
-## ✨ Features
+## Tech Stack
 
-### 📋 Case Management
+- **Framework:** Next.js 14+ (App Router)
+- **Styling:** Tailwind CSS, Shadcn UI
+- **Authentication:** Supabase Auth
+- **Database:** Supabase (PostgreSQL)
+- **State Management:** React Context, Server Actions
+- **Icons:** Lucide React
 
-- Create, track, and manage disciplinary cases
-- Case status workflow (pending, in-progress, resolved)
-- Detailed case history and audit logs
+## Project Structure
 
-### 👥 Student Records
+The project follows a modular architecture:
 
-- Comprehensive student profiles
-- Disciplinary history tracking
-- Student search and filtering
+- `actions/`: Server actions for data mutations and fetching.
+- `app/`: Next.js App Router pages and layouts.
+- `components/`: Reusable UI components organized by feature.
+  - `auth/`: Authentication forms and logic.
+  - `common/`: General components (Clock, UserAvatar).
+  - `dashboard/`: Dashboard-specific widgets.
+  - `layout/`: App layout components (Sidebar, TopNav).
+  - `providers/`: Context providers (Theme, Toast).
+  - `ui/`: Core UI primitives (Buttons, Inputs).
+- `lib/` & `utils/`: Helper functions and configurations.
 
-### ⚖️ Punishment Tracker
+## Setup Instructions
 
-- Record and manage punishments
-- Punishment recommendations
-- Status tracking and metrics dashboard
+1.  **Clone the repository:**
 
-### 🔔 Notifications & Alerts
+    ```bash
+    git clone <repository-url>
+    cd SDC-FRONTEND
+    ```
 
-- Real-time notification system
-- Custom alert creation
-- Upcoming hearings calendar
+2.  **Install dependencies:**
 
-### 👤 User Management
+    ```bash
+    npm install
+    ```
 
-- Role-based access control
-- User profiles and settings
-- Session logging and audit trails
+3.  **Environment Variables:**
+    Create a `.env.local` file with your Supabase credentials:
 
-### 📊 Dashboard & Analytics
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
 
-- Overview metrics and statistics
-- Recent activity feed
-- Visual data representations with charts
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
 
----
+## Features
 
-## 🛠️ Tech Stack
-
-| Category     | Technology                |
-| ------------ | ------------------------- |
-| Framework    | Next.js 16.1 (App Router) |
-| Language     | TypeScript 5              |
-| UI Library   | React 19                  |
-| Styling      | TailwindCSS 3.4           |
-| Components   | Radix UI Primitives       |
-| Backend/Auth | Supabase                  |
-| Forms        | React Hook Form + Zod     |
-| Charts       | Recharts                  |
-| Animations   | Framer Motion             |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- npm or pnpm
-- Supabase account
-
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/aul-developers/SDC-portal.git
-   cd SDC-portal
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-
-   Create a `.env.local` file in the root directory:
-
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-   ```
-
-4. **Run the development server**
-
-   ```bash
-   npm run dev
-   ```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
-
----
-
-## 📁 Project Structure
-
-```
-SDC-portal/
-├── app/                    # Next.js App Router pages
-│   ├── dashboard/          # Dashboard routes
-│   │   ├── alerts/         # Alert management
-│   │   ├── approvals/      # Approval workflows
-│   │   ├── audit-logs/     # Audit logging
-│   │   ├── cases/          # Case management
-│   │   ├── notifications/  # Notifications
-│   │   ├── offences/       # Offence records
-│   │   ├── profile/        # User profile
-│   │   ├── punishments/    # Punishment tracker
-│   │   ├── session-logs/   # Session logs
-│   │   ├── settings/       # Settings
-│   │   ├── students/       # Student records
-│   │   └── users/          # User management
-│   ├── auth/               # Authentication pages
-│   └── context/            # React Context providers
-├── actions/                # Server actions
-├── components/             # Reusable UI components
-├── lib/                    # Utility functions
-├── service/                # API service layer
-├── styles/                 # Global styles
-└── utils/                  # Helper utilities
-```
-
----
-
-## 🔧 Available Scripts
-
-| Command         | Description              |
-| --------------- | ------------------------ |
-| `npm run dev`   | Start development server |
-| `npm run build` | Build for production     |
-| `npm run start` | Start production server  |
-| `npm run lint`  | Run ESLint               |
-
----
-
-## 👥 Contributors
-
-- **Nedu2022** - Chinedu Nwabuokei
-- **Adeleye-Adeola** - Adeleye Adeola
-- **KeshiEmmanuel** - Keshi C. Emmanuel
-- **Skol-Chie** - Skol
-
----
-
-## 📄 License
-
-This project is private and proprietary to AUL Developers.
-
----
-
-<p align="center">
-  Made with ❤️ by <strong>AUL Developers</strong>
-</p>
+- **Dashboard:** Real-time metrics and activity feed.
+- **Case Management:** Create, update, and track disciplinary cases.
+- **Punishment Tracker:** Log and monitor student punishments.
+- **Offence Directory:** Manage standardized offences and penalties.
+- **Role-Based Access Control:** Secure access for Admins, Members, and Viewers.

@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import LoadingButton from "../LoadingButton";
+import LoadingButton from "@/components/ui/loading-button";
 import { postRequest } from "@/lib/utils";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
@@ -61,7 +61,7 @@ export function AddOffenceDialog({
         return { ...prevData, ...offenceValues };
       });
     },
-    []
+    [],
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

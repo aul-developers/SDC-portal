@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserAvatar } from "@/components/user-avatar";
+import { UserAvatar } from "@/components/common/user-avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { User, Mail, Phone, MapPin, Building, Briefcase } from "lucide-react";
