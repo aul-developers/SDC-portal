@@ -5,10 +5,12 @@ import { PunishmentDetails } from "./punishment-details";
 import { PunishmentMetrics } from "./punishment-metrics";
 import { UpdatePunishmentForm } from "./update-punishment-form";
 import { AddPunishmentDialog } from "./add-punishment-dialog";
+import { PunishmentHandbook } from "./punishment-handbook";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Scale } from "lucide-react";
+import { X, Plus, Scale, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PunishmentStatusTabs } from "./punishment-status-tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { API_ENDPOINTS } from "@/app/_data/api-constants";
 import { useAuth } from "@/app/context/auth-context";
@@ -16,10 +18,10 @@ import { useAuth } from "@/app/context/auth-context";
 export function PunishmentTracker() {
   const { user } = useAuth();
   const [selectedPunishment, setSelectedPunishment] = useState<string | null>(
-    null
+    null,
   );
   const [activeView, setActiveView] = useState<"list" | "details" | "update">(
-    "list"
+    "list",
   );
   const [showAddDialog, setShowAddDialog] = useState(false);
 
@@ -136,15 +138,32 @@ export function PunishmentTracker() {
             {/* Metrics */}
             <PunishmentMetrics />
 
-            {/* Status Tabs */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Punishment Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PunishmentStatusTabs onViewDetails={handleViewDetails} />
-              </CardContent>
-            </Card>
+            {/* Main Content Tabs */}
+            <Tabs defaultValue="status" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="status" className="gap-2">
+                  <Scale className="h-4 w-4" />
+                  Punishment Status
+                </TabsTrigger>
+                <TabsTrigger value="handbook" className="gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Punishment Handbook
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="status">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Punishment Management</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <PunishmentStatusTabs onViewDetails={handleViewDetails} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="handbook">
+                <PunishmentHandbook />
+              </TabsContent>
+            </Tabs>
           </>
         );
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import {
   AlertTriangle,
   FileText,
   Download,
+  Eye,
 } from "lucide-react";
 import { getStudentProfile } from "@/actions/student-management";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -42,10 +44,15 @@ interface StudentProfileProps {
 }
 
 export function StudentProfile({ matricNumber }: StudentProfileProps) {
+  const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [cases, setCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const handleViewCase = (caseId: number) => {
+    router.push(`/dashboard/cases?caseId=${caseId}`);
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -86,7 +93,7 @@ export function StudentProfile({ matricNumber }: StudentProfileProps) {
 
   // Determine Status
   const activeCases = cases.filter(
-    (c) => c.status !== "Closed" && c.status !== "Resolved"
+    (c) => c.status !== "Closed" && c.status !== "Resolved",
   );
   const hasActiveRecord = activeCases.length > 0;
   const currentSanction = hasActiveRecord ? activeCases[0].title : null; // Simplified logic
@@ -292,17 +299,49 @@ export function StudentProfile({ matricNumber }: StudentProfileProps) {
                         <TableHead>Date</TableHead>
                         <TableHead>Case Title</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {cases.map((c: any) => (
-                        <TableRow key={c.id}>
+                        <TableRow
+                          key={c.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => handleViewCase(c.id)}
+                        >
                           <TableCell>
                             {c.incident_date ||
                               new Date(c.created_at).toLocaleDateString()}
                           </TableCell>
-                          <TableCell>{c.title}</TableCell>
-                          <TableCell>{c.status}</TableCell>
+                          <TableCell className="font-medium text-sdc-navy">
+                            {c.title}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={`${
+                                c.status === "Resolved" || c.status === "Closed"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : "bg-amber-50 text-amber-700 border-amber-200"
+                              }`}
+                            >
+                              {c.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-1 text-sdc-blue hover:text-sdc-blue/80"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewCase(c.id);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                              View Case
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

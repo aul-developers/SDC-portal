@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,17 +9,29 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, AlertTriangle } from "lucide-react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CalendarIcon, AlertTriangle, BookOpen, Info } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { getRecommendedPunishment } from "@/components/punishment-tracker/punishment-handbook";
+import { Badge } from "@/components/ui/badge";
 
 // Mock list of standard punishments - in a real app, this might come from the offence directory
 const standardPunishments = [
@@ -32,25 +44,25 @@ const standardPunishments = [
   "Mandatory Workshop",
   "Fine",
   "Resubmission of Work",
-]
+];
 
 export interface JudgmentData {
-  punishmentType: string
-  duration: string
-  startDate: Date | undefined
-  endDate: Date | undefined
-  additionalRequirements: string
-  judgmentNotes: string
+  punishmentType: string;
+  duration: string;
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  additionalRequirements: string;
+  judgmentNotes: string;
 }
 
 interface PassJudgmentDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  caseId: string
-  studentName: string
-  currentOffenceType: string // To provide context
-  currentPunishment?: Partial<JudgmentData> // To pre-fill if editing or re-judging
-  onSaveJudgment: (judgmentData: JudgmentData) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  caseId: string;
+  studentName: string;
+  currentOffenceType: string; // To provide context
+  currentPunishment?: Partial<JudgmentData>; // To pre-fill if editing or re-judging
+  onSaveJudgment: (judgmentData: JudgmentData) => void;
 }
 
 export function PassJudgmentDialog({
@@ -62,37 +74,47 @@ export function PassJudgmentDialog({
   currentPunishment,
   onSaveJudgment,
 }: PassJudgmentDialogProps) {
-  const [punishmentType, setPunishmentType] = useState(currentPunishment?.punishmentType || "")
-  const [duration, setDuration] = useState(currentPunishment?.duration || "")
-  const [startDate, setStartDate] = useState<Date | undefined>(currentPunishment?.startDate)
-  const [endDate, setEndDate] = useState<Date | undefined>(currentPunishment?.endDate)
-  const [additionalRequirements, setAdditionalRequirements] = useState(currentPunishment?.additionalRequirements || "")
-  const [judgmentNotes, setJudgmentNotes] = useState(currentPunishment?.judgmentNotes || "")
+  const [punishmentType, setPunishmentType] = useState(
+    currentPunishment?.punishmentType || "",
+  );
+  const [duration, setDuration] = useState(currentPunishment?.duration || "");
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    currentPunishment?.startDate,
+  );
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    currentPunishment?.endDate,
+  );
+  const [additionalRequirements, setAdditionalRequirements] = useState(
+    currentPunishment?.additionalRequirements || "",
+  );
+  const [judgmentNotes, setJudgmentNotes] = useState(
+    currentPunishment?.judgmentNotes || "",
+  );
 
   useEffect(() => {
     if (currentPunishment) {
-      setPunishmentType(currentPunishment.punishmentType || "")
-      setDuration(currentPunishment.duration || "")
-      setStartDate(currentPunishment.startDate)
-      setEndDate(currentPunishment.endDate)
-      setAdditionalRequirements(currentPunishment.additionalRequirements || "")
-      setJudgmentNotes(currentPunishment.judgmentNotes || "")
+      setPunishmentType(currentPunishment.punishmentType || "");
+      setDuration(currentPunishment.duration || "");
+      setStartDate(currentPunishment.startDate);
+      setEndDate(currentPunishment.endDate);
+      setAdditionalRequirements(currentPunishment.additionalRequirements || "");
+      setJudgmentNotes(currentPunishment.judgmentNotes || "");
     } else {
       // Reset form when dialog opens for a new judgment
-      setPunishmentType("")
-      setDuration("")
-      setStartDate(undefined)
-      setEndDate(undefined)
-      setAdditionalRequirements("")
-      setJudgmentNotes("")
+      setPunishmentType("");
+      setDuration("");
+      setStartDate(undefined);
+      setEndDate(undefined);
+      setAdditionalRequirements("");
+      setJudgmentNotes("");
     }
-  }, [currentPunishment, open])
+  }, [currentPunishment, open]);
 
   const handleSubmit = () => {
     if (!punishmentType || !startDate || !endDate) {
       // Basic validation
-      alert("Please fill in Punishment Type, Start Date, and End Date.")
-      return
+      alert("Please fill in Punishment Type, Start Date, and End Date.");
+      return;
     }
     onSaveJudgment({
       punishmentType,
@@ -101,19 +123,62 @@ export function PassJudgmentDialog({
       endDate,
       additionalRequirements,
       judgmentNotes,
-    })
-    onOpenChange(false) // Close dialog on successful save
-  }
+    });
+    onOpenChange(false); // Close dialog on successful save
+  };
+
+  // Get recommended punishment from handbook
+  const recommendedPunishment = getRecommendedPunishment(currentOffenceType);
+
+  const applyRecommendedPunishment = () => {
+    if (recommendedPunishment) {
+      setPunishmentType(recommendedPunishment);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Pass Judgment: Case {caseId}</DialogTitle>
           <DialogDescription>
-            Assign punishment for {studentName} regarding the offence of "{currentOffenceType}".
+            Assign punishment for {studentName} regarding the offence of "
+            {currentOffenceType}".
           </DialogDescription>
         </DialogHeader>
+
+        {/* Handbook Recommendation Section */}
+        {recommendedPunishment && (
+          <div className="rounded-lg border border-sdc-blue/30 bg-sdc-blue/5 p-4 space-y-2">
+            <div className="flex items-center gap-2 text-sdc-blue">
+              <BookOpen className="h-4 w-4" />
+              <span className="font-medium text-sm">
+                Handbook Recommendation
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600">
+                Recommended for <strong>{currentOffenceType}</strong>:
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <Badge className="bg-sdc-blue text-white">
+                {recommendedPunishment}
+              </Badge>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={applyRecommendedPunishment}
+                className="text-xs"
+              >
+                Apply Recommendation
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="punishmentType" className="text-right">
@@ -175,11 +240,20 @@ export function PassJudgmentDialog({
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                  {startDate ? (
+                    format(startDate, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  initialFocus
+                />
               </PopoverContent>
             </Popover>
           </div>
@@ -191,14 +265,22 @@ export function PassJudgmentDialog({
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
-                  className={cn("col-span-3 justify-start text-left font-normal", !endDate && "text-muted-foreground")}
+                  className={cn(
+                    "col-span-3 justify-start text-left font-normal",
+                    !endDate && "text-muted-foreground",
+                  )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  initialFocus
+                />
               </PopoverContent>
             </Popover>
           </div>
@@ -231,11 +313,14 @@ export function PassJudgmentDialog({
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button onClick={handleSubmit} className="bg-sdc-blue hover:bg-sdc-blue/90 text-white">
+          <Button
+            onClick={handleSubmit}
+            className="bg-sdc-blue hover:bg-sdc-blue/90 text-white"
+          >
             <AlertTriangle className="mr-2 h-4 w-4" /> Submit Judgment
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

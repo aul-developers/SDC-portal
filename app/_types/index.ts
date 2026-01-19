@@ -33,6 +33,7 @@ export interface Case {
     case_type: string;
     priority: string;
     incident_date: string;
+    academic_session?: string; // e.g., "2024/2025"
 }
 
 export interface Punishment {

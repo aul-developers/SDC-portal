@@ -28,12 +28,15 @@ import {
   Filter,
   Users,
   User,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Case } from "@/app/_types";
 import { useAuth } from "@/app/context/auth-context";
 import { createClient } from "@/utils/supabase/client";
+import { AcademicSessionSelect } from "@/components/common/academic-session-select";
+import { exportToCSV } from "@/utils/export-cases";
 
 interface UnifiedCaseListProps {
   onViewDetails: (caseId: number, type: "Individual" | "Grouped") => void;
@@ -46,6 +49,7 @@ export function UnifiedCaseList({
 }: UnifiedCaseListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [sessionFilter, setSessionFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [cases, setCases] = useState<Case[]>([]);
   const { user } = useAuth();
@@ -63,7 +67,7 @@ export function UnifiedCaseList({
             full_name,
             matric_number
           )
-        `
+        `,
         )
         .order("created_at", { ascending: false });
 
@@ -104,15 +108,27 @@ export function UnifiedCaseList({
       c.id?.toString().includes(searchTerm) ||
       (c.students &&
         c.students.some((s) =>
-          s.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+          s.full_name?.toLowerCase().includes(searchTerm.toLowerCase()),
         ));
 
     const matchesType = typeFilter
       ? c.case_type?.toLowerCase() === typeFilter.toLowerCase()
       : true;
 
-    return matchesSearch && matchesType;
+    const matchesSession =
+      sessionFilter === "all" || c.academic_session === sessionFilter;
+
+    return matchesSearch && matchesType && matchesSession;
   });
+
+  const handleExport = () => {
+    if (filteredCases.length === 0) {
+      toast.error("No cases to export");
+      return;
+    }
+    exportToCSV(filteredCases as any);
+    toast.success(`Exported ${filteredCases.length} cases to CSV`);
+  };
 
   return (
     <div className="space-y-6">
@@ -146,6 +162,16 @@ export function UnifiedCaseList({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <AcademicSessionSelect
+          value={sessionFilter}
+          onValueChange={setSessionFilter}
+          className="h-11 min-w-[160px]"
+          includeAll={true}
+        />
+        <Button variant="outline" className="h-11 gap-2" onClick={handleExport}>
+          <Download className="h-4 w-4" />
+          Export
+        </Button>
       </div>
 
       <div className="w-full overflow-auto">
@@ -272,7 +298,7 @@ export function UnifiedCaseList({
                         caseItem.priority === "medium" &&
                           "bg-orange-50 text-orange-600",
                         caseItem.priority === "Low" &&
-                          "bg-green-50 text-green-600"
+                          "bg-green-50 text-green-600",
                       )}
                     >
                       {caseItem.priority}
@@ -299,7 +325,7 @@ export function UnifiedCaseList({
                             onClick={() =>
                               onViewDetails(
                                 caseItem.id as number,
-                                caseItem.case_type as "Individual" | "Grouped"
+                                caseItem.case_type as "Individual" | "Grouped",
                               )
                             }
                           >
@@ -334,7 +360,7 @@ export function UnifiedCaseList({
                                       caseItem.id as number,
                                       caseItem.case_type as
                                         | "Individual"
-                                        | "Grouped"
+                                        | "Grouped",
                                     )
                                   }
                                 >
