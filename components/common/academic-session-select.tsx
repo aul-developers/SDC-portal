@@ -18,17 +18,10 @@ interface AcademicSessionSelectProps {
   includeAll?: boolean;
 }
 
-// Generate academic sessions from 2020 to current year + 1
+// Generate academic sessions - currently restricted to 2025/2026 only
 function generateAcademicSessions(): string[] {
-  const currentYear = new Date().getFullYear();
-  const startYear = 2020;
-  const sessions: string[] = [];
-
-  for (let year = currentYear + 1; year >= startYear; year--) {
-    sessions.push(`${year}/${year + 1}`);
-  }
-
-  return sessions;
+  // Only show current academic session: 2025/2026
+  return ["2025/2026"];
 }
 
 export function AcademicSessionSelect({
@@ -76,14 +69,6 @@ export function AcademicSessionSelect({
 
 // Helper function to get the current academic session
 export function getCurrentAcademicSession(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-
-  if (month >= 8) {
-    // September onwards
-    return `${year}/${year + 1}`;
-  } else {
-    return `${year - 1}/${year}`;
-  }
+  // Current academic session is 2025/2026
+  return "2025/2026";
 }

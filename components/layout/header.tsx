@@ -57,9 +57,9 @@ export function Header() {
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-4 md:px-8 py-6 sticky top-0 z-40 transition-all duration-300",
+        "flex items-center justify-between px-4 md:px-8 py-5 sticky top-0 z-40 transition-all duration-300",
         isScrolled
-          ? "bg-white/90 backdrop-blur-md shadow-sm py-4"
+          ? "bg-white/90 backdrop-blur-md shadow-sm"
           : "bg-transparent",
       )}
     >

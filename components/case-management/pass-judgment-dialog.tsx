@@ -32,6 +32,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getRecommendedPunishment } from "@/components/punishment-tracker/punishment-handbook";
 import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/utils/supabase/client";
+import { toast } from "sonner";
 
 // Mock list of standard punishments - in a real app, this might come from the offence directory
 const standardPunishments = [
@@ -58,11 +60,14 @@ export interface JudgmentData {
 interface PassJudgmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  caseId: string;
+  caseId: number; // Changed to number to match database
   studentName: string;
+  matricNumber: string; // Added for punishment record
+  department: string; // Added for punishment record
+  level: string; // Added for punishment record
   currentOffenceType: string; // To provide context
   currentPunishment?: Partial<JudgmentData>; // To pre-fill if editing or re-judging
-  onSaveJudgment: (judgmentData: JudgmentData) => void;
+  onSaveJudgment: (judgmentData: JudgmentData, punishmentId?: number) => void;
 }
 
 export function PassJudgmentDialog({
@@ -70,10 +75,14 @@ export function PassJudgmentDialog({
   onOpenChange,
   caseId,
   studentName,
+  matricNumber,
+  department,
+  level,
   currentOffenceType,
   currentPunishment,
   onSaveJudgment,
 }: PassJudgmentDialogProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [punishmentType, setPunishmentType] = useState(
     currentPunishment?.punishmentType || "",
   );
@@ -110,21 +119,76 @@ export function PassJudgmentDialog({
     }
   }, [currentPunishment, open]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!punishmentType || !startDate || !endDate) {
-      // Basic validation
-      alert("Please fill in Punishment Type, Start Date, and End Date.");
+      toast.error("Please fill in Punishment Type, Start Date, and End Date.");
       return;
     }
-    onSaveJudgment({
-      punishmentType,
-      duration,
-      startDate,
-      endDate,
-      additionalRequirements,
-      judgmentNotes,
-    });
-    onOpenChange(false); // Close dialog on successful save
+
+    setIsSubmitting(true);
+    const supabase = createClient();
+
+    try {
+      // Create punishment record
+      const punishmentData = {
+        matric_no: matricNumber,
+        full_name: studentName,
+        department: department,
+        level: level,
+        punishment_type: punishmentType,
+        punishment_title: `${punishmentType} - ${currentOffenceType}`,
+        severity_level: "medium", // You may want to make this selectable
+        description:
+          judgmentNotes || `Punishment assigned for ${currentOffenceType}`,
+        start_date: format(startDate, "yyyy-MM-dd"),
+        end_date: format(endDate, "yyyy-MM-dd"),
+        duration_type: duration,
+        requirements: additionalRequirements,
+        related_cases: [caseId.toString()],
+        case_id: caseId,
+        status: "Active",
+      };
+
+      const { data: punishment, error: punishmentError } = await supabase
+        .from("punishments")
+        .insert(punishmentData)
+        .select()
+        .single();
+
+      if (punishmentError) throw punishmentError;
+
+      // Update case status to Resolved and link to punishment
+      const { error: caseError } = await supabase
+        .from("cases")
+        .update({
+          status: "Resolved",
+          punishment_id: punishment.id,
+        })
+        .eq("id", caseId);
+
+      if (caseError) throw caseError;
+
+      toast.success("Judgment passed and punishment created successfully");
+
+      onSaveJudgment(
+        {
+          punishmentType,
+          duration,
+          startDate,
+          endDate,
+          additionalRequirements,
+          judgmentNotes,
+        },
+        punishment.id,
+      );
+
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error("Error creating punishment:", error);
+      toast.error(error.message || "Failed to create punishment");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Get recommended punishment from handbook
@@ -316,8 +380,10 @@ export function PassJudgmentDialog({
           <Button
             onClick={handleSubmit}
             className="bg-sdc-blue hover:bg-sdc-blue/90 text-white"
+            disabled={isSubmitting}
           >
-            <AlertTriangle className="mr-2 h-4 w-4" /> Submit Judgment
+            <AlertTriangle className="mr-2 h-4 w-4" />
+            {isSubmitting ? "Submitting Judgment..." : "Submit Judgment"}
           </Button>
         </DialogFooter>
       </DialogContent>

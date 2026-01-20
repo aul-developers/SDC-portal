@@ -128,7 +128,7 @@ export function AddPunishmentDialog({
 
   // AI State
   const [aiPrediction, setAiPrediction] = useState<PunishmentPrediction | null>(
-    null
+    null,
   );
 
   // Function to trigger AI
@@ -199,7 +199,7 @@ export function AddPunishmentDialog({
 
       if (approvalError) {
         toast.error(
-          "Failed to submit approval request: " + approvalError.message
+          "Failed to submit approval request: " + approvalError.message,
         );
       } else {
         toast.success("Punishment request submitted for Super Admin approval.");
@@ -255,14 +255,6 @@ export function AddPunishmentDialog({
             <Scale className="h-5 w-5 text-sdc-blue" />
             Add New Punishment
           </DialogTitle>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-violet-600 gap-1 bg-violet-50 hover:bg-violet-100"
-            onClick={handleGenerateAiSuggestion}
-          >
-            <Sparkles className="h-4 w-4" /> Ask AI
-          </Button>
         </DialogHeader>
 
         {aiPrediction && (
@@ -459,7 +451,7 @@ export function AddPunishmentDialog({
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
+                      !startDate && "text-muted-foreground",
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -477,14 +469,14 @@ export function AddPunishmentDialog({
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
+                      !endDate && "text-muted-foreground",
                     )}
                   >
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !startDate && "text-muted-foreground"
+                        !startDate && "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />

@@ -36,6 +36,7 @@ interface CaseData {
     reporter_mail: string;
     reporters_phone: string;
     status: string;
+    academic_session: string; // e.g., "2025/2026"
 }
 
 export async function createCase(caseData: CaseData, studentData: StudentData) {

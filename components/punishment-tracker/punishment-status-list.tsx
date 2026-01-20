@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,11 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { useState } from "react";
-
-import { Punishment } from "@/app/_types";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +19,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Eye, Edit, CheckCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { createClient } from "@/utils/supabase/client";
+import { Punishment } from "@/app/_types";
+
 interface PunishmentStatusListProps {
   status: "Active" | "Pending" | "Completed";
   searchTerm: string;
@@ -33,19 +33,46 @@ export function PunishmentStatusList({
   searchTerm,
   onViewDetails,
 }: PunishmentStatusListProps) {
+  const [punishments, setPunishments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const isLoading = false; // Mock loading state
+  const itemsPerPage = 10;
 
-  // Local fallback
-  const filteredPunishments: any[] = [];
+  useEffect(() => {
+    fetchPunishments();
+  }, [status]); // Refetch when status tab changes
 
-  const handleMarkActive = async (punishmentId: string) => {
-    toast.success("Punishment marked as Active (Mock)");
+  const fetchPunishments = async () => {
+    setIsLoading(true);
+    const supabase = createClient();
+
+    try {
+      const { data, error } = await supabase
+        .from("punishments")
+        .select("*")
+        .eq("status", status)
+        .order("start_date", { ascending: false });
+
+      if (error) throw error;
+      setPunishments(data || []);
+    } catch (error) {
+      console.error("Error fetching punishments:", error);
+      toast.error("Failed to load punishments");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleMarkComplete = async (punishmentId: string) => {
-    toast.success("Punishment marked as Completed (Mock)");
-  };
+  const currentPunishments = punishments.filter((p) => {
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    return (
+      p.full_name?.toLowerCase().includes(search) ||
+      p.matric_no?.toLowerCase().includes(search) ||
+      p.punishment_title?.toLowerCase().includes(search) ||
+      String(p.id).includes(search)
+    );
+  });
 
   const getStatusTitle = () => {
     switch (status) {
@@ -69,6 +96,40 @@ export function PunishmentStatusList({
     }
   };
 
+  const handleMarkComplete = async (punishmentId: number) => {
+    const supabase = createClient();
+    try {
+      const { error } = await supabase
+        .from("punishments")
+        .update({ status: "Completed" })
+        .eq("id", punishmentId);
+
+      if (error) throw error;
+
+      toast.success("Punishment marked as completed");
+      fetchPunishments();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to update status");
+    }
+  };
+
+  const handleMarkActive = async (punishmentId: number) => {
+    const supabase = createClient();
+    try {
+      const { error } = await supabase
+        .from("punishments")
+        .update({ status: "Active" })
+        .eq("id", punishmentId);
+
+      if (error) throw error;
+
+      toast.success("Punishment activated");
+      fetchPunishments();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to update status");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium text-sdc-navy">{getStatusTitle()}</h3>
@@ -82,9 +143,6 @@ export function PunishmentStatusList({
               </TableHead>
               <TableHead className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                 Matric No
-              </TableHead>
-              <TableHead className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                Full Name
               </TableHead>
               <TableHead className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                 Department
@@ -115,7 +173,7 @@ export function PunishmentStatusList({
                   Loading Punishments...
                 </TableCell>
               </TableRow>
-            ) : filteredPunishments?.length === 0 ? (
+            ) : currentPunishments.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={status === "Completed" ? 8 : 7}
@@ -125,7 +183,7 @@ export function PunishmentStatusList({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredPunishments?.map((punishment) => (
+              currentPunishments.map((punishment) => (
                 <TableRow
                   key={punishment.id}
                   className="border-none hover:bg-white hover:shadow-sm transition-all group cursor-pointer rounded-2xl mb-2"
@@ -135,30 +193,29 @@ export function PunishmentStatusList({
                       <Avatar className="h-9 w-9 border-2 border-white">
                         <AvatarImage
                           src={"/placeholder.svg"}
-                          alt={punishment.student?.matric_number || "Student"}
+                          alt={punishment.matric_no || "Student"}
                         />
                         <AvatarFallback>
-                          {punishment.student?.full_name?.[0] || "?"}
+                          {punishment.full_name
+                            ?.substring(0, 2)
+                            .toUpperCase() || "??"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="ml-4">
                         <p className="font-medium text-gray-900">
-                          {punishment.student?.full_name || "Unknown Student"}
+                          {punishment.full_name || "Unknown Student"}
                         </p>
-                        <div className="text-xs text-gray-400">
-                          {punishment.student?.matric_number}
+                        <div className="text-xs text-gray-400 block sm:hidden">
+                          {punishment.matric_no}
                         </div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="font-medium text-sm text-gray-600">
-                    {punishment.student?.matric_number}
+                    {punishment.matric_no}
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">
-                    {punishment.student?.full_name}
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-600">
-                    {punishment.student?.department}
+                    {punishment.department}
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
@@ -167,7 +224,7 @@ export function PunishmentStatusList({
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
-                      Medium
+                      {punishment.severity_level || "Medium"}
                     </span>
                   </TableCell>
                   {status === "Completed" && (
@@ -207,27 +264,14 @@ export function PunishmentStatusList({
                                 className="flex w-full items-center cursor-pointer"
                                 onClick={() => {
                                   status === "Pending"
-                                    ? handleMarkActive(punishment.id.toString())
-                                    : handleMarkComplete(
-                                        punishment.id.toString()
-                                      );
+                                    ? handleMarkActive(punishment.id)
+                                    : handleMarkComplete(punishment.id);
                                 }}
                               >
                                 <CheckCircle className="mr-2 h-4 w-4" />
                                 {status === "Pending"
                                   ? "Mark as Active"
                                   : "Mark as Completed"}
-                              </button>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <button
-                                className="flex w-full items-center cursor-pointer"
-                                onClick={() =>
-                                  onViewDetails(punishment.id.toString())
-                                }
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Update Progress
                               </button>
                             </DropdownMenuItem>
                           </>
@@ -243,26 +287,7 @@ export function PunishmentStatusList({
       </div>
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <div>
-          Showing {filteredPunishments?.length ?? 0} {status} punishments
-        </div>
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((prev: number) => Math.max(prev - 1, 1))}
-            disabled={page === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-muted-foreground">Page {page}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((prev: number) => prev + 1)}
-            disabled={true} // Mock pagination limit
-          >
-            Next
-          </Button>
+          Showing {currentPunishments.length} {status} punishments
         </div>
       </div>
     </div>

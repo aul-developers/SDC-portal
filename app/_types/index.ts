@@ -34,23 +34,52 @@ export interface Case {
     priority: string;
     incident_date: string;
     academic_session?: string; // e.g., "2024/2025"
+    // Punishment linking
+    punishment_id?: number; // Link to associated punishment if judgment passed
 }
 
 export interface Punishment {
     id: number | string; // Changed to allow string IDs
     studentName?: string; // Made optional as mock data might use 'student' object
     student?: Student; // Added to match mock data
-    case_id?: number; // Added to match mock data
+    case_id?: number; // Link to the source case
+    related_cases?: string[]; // Array of case IDs this punishment relates to
     matricNumber?: string;
+    matric_no?: string; // Added to match database schema
     offenceType?: string;
     punishmentType?: string; // Mismapped? mock uses "punishment_type"
     punishment_type?: string; // Added to match mock data
+    punishment_title?: string; // Title of the punishment
     startDate?: string;
     start_date?: string; // Added to match mock data
     endDate?: string;
     end_date?: string; // Added to match mock data
     description?: string; // Added to match mock data
+    requirements?: string; // Requirements for completion
+    add_conditions?: string; // Additional conditions
     status: "Active" | "Completed" | "Pending";
+}
+
+// Helper interface for displaying linked case information in punishment views
+export interface LinkedCaseInfo {
+    id: number;
+    caseId: string;
+    title: string;
+    offence_type: string;
+    incident_date: string;
+    description?: string;
+}
+
+// Helper interface for displaying linked punishment information in case views
+export interface LinkedPunishmentInfo {
+    id: number | string;
+    punishment_type: string;
+    punishment_title?: string;
+    start_date: string;
+    end_date: string;
+    status: "Active" | "Completed" | "Pending";
+    requirements?: string;
+    duration_type?: string;
 }
 
 export interface DashboardMetrics {

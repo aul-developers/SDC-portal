@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/app/context/auth-context";
 import { createClient } from "@/utils/supabase/client";
 import { createCase } from "@/actions/case-management";
+import { getCurrentAcademicSession } from "@/components/common/academic-session-select";
 
 interface CreateCaseFormProps {
   onSuccess: () => void;
@@ -80,7 +81,7 @@ type formActions =
 
 function updateFieldReducer(
   state: caseFormSchema,
-  action: formActions
+  action: formActions,
 ): caseFormSchema {
   switch (action.type) {
     case "UPDATE_FIELD":
@@ -132,7 +133,7 @@ export function CreateCaseForm({
       reporters_phone: initialData?.reporters_phone || "",
       students: initialData?.students || [],
     }),
-    [initialData]
+    [initialData],
   );
   const [state, dispatch] = useReducer<
     React.Reducer<caseFormSchema, formActions>
@@ -147,10 +148,12 @@ export function CreateCaseForm({
       faculty: "",
       department: "",
       email: "",
-    }
+    },
   );
   const [date, setDate] = useState<Date | undefined>(
-    initialData?.incident_date ? new Date(initialData.incident_date) : undefined
+    initialData?.incident_date
+      ? new Date(initialData.incident_date)
+      : undefined,
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -158,11 +161,11 @@ export function CreateCaseForm({
     (field: keyof caseFormSchema, value: string) => {
       dispatch({ type: "UPDATE_FIELD", field, value });
     },
-    []
+    [],
   );
   const handleStudentInputChange = (
     field: keyof involvedStudentSchema,
-    value: string
+    value: string,
   ) => {
     setStudentInvolved((prevValues) => {
       return {
@@ -231,7 +234,7 @@ export function CreateCaseForm({
         toast.error(error.message);
       } else {
         toast.success(
-          "Case creation request sent to Super Admin for approval."
+          "Case creation request sent to Super Admin for approval.",
         );
         onSuccess();
       }
@@ -263,6 +266,7 @@ export function CreateCaseForm({
         reporter_mail: state.reporter_mail,
         reporters_phone: state.reporters_phone,
         status: "Reported",
+        academic_session: getCurrentAcademicSession(), // Automatically set to current session
       };
 
       const response = await createCase(newCaseData, studentData);
@@ -410,7 +414,7 @@ export function CreateCaseForm({
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal h-11",
-                      !date && "text-muted-foreground"
+                      !date && "text-muted-foreground",
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -800,13 +804,13 @@ export function CreateCaseForm({
               ? initialData
                 ? "Updating Case..."
                 : user?.role === "board_member"
-                ? "Sending Request..."
-                : "Creating Case..."
+                  ? "Sending Request..."
+                  : "Creating Case..."
               : initialData
-              ? "Update Individual Case"
-              : user?.role === "board_member"
-              ? "Send Request for Approval"
-              : "Create Individual Case"}
+                ? "Update Individual Case"
+                : user?.role === "board_member"
+                  ? "Send Request for Approval"
+                  : "Create Individual Case"}
           </Button>
         </div>
       </form>

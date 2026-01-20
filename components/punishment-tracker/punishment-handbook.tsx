@@ -581,3 +581,31 @@ export function getRecommendedPunishment(
   }
   return null;
 }
+
+export function getOffenceDetails(offenceType: string) {
+  for (const category of punishmentHandbook.categories) {
+    const offence = category.offences.find(
+      (o) => o.type.toLowerCase() === offenceType.toLowerCase(),
+    );
+    if (offence) {
+      return offence;
+    }
+  }
+  return null;
+}
+
+export function getCategoryForOffence(offenceType: string) {
+  for (const category of punishmentHandbook.categories) {
+    const offence = category.offences.find(
+      (o) => o.type.toLowerCase() === offenceType.toLowerCase(),
+    );
+    if (offence) {
+      return category;
+    }
+  }
+  return null; // or "Uncategorized"
+}
+
+export function getAllCategories() {
+  return punishmentHandbook.categories;
+}

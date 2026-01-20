@@ -2,6 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import { Suspense, useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
+import type { LinkedPunishmentInfo } from "@/app/_types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -37,19 +40,23 @@ interface CaseDetailsProps {
 }
 
 export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
+  const router = useRouter();
   const [data, setData] = useState<caseFormSchema | caseFormSchema[] | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(true);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isError, setIsError] = useState(false);
+  const [punishmentData, setPunishmentData] =
+    useState<LinkedPunishmentInfo | null>(null);
+  const [loadingPunishment, setLoadingPunishment] = useState(false);
 
   useEffect(() => {
     const fetchCaseDetails = async () => {
       setIsLoading(true);
       try {
         const response = await DataApiClient.get<caseFormSchema>(
-          `/get/specific/case/${propCaseId}/`
+          `/get/specific/case/${propCaseId}/`,
         );
         setData(response.data);
         setIsError(false);
@@ -64,10 +71,73 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
       fetchCaseDetails();
     }
   }, [propCaseId]);
+
+  // Fetch punishment data if case has been judged
+  useEffect(() => {
+    const fetchPunishment = async () => {
+      if (!propCaseId) return;
+
+      setLoadingPunishment(true);
+      const supabase = createClient();
+
+      try {
+        const { data: punishment, error } = await supabase
+          .from("punishments")
+          .select(
+            "id, punishment_type, punishment_title, start_date, end_date, status, requirements, duration_type",
+          )
+          .eq("case_id", propCaseId)
+          .maybeSingle();
+
+        if (!error && punishment) {
+          setPunishmentData(punishment as LinkedPunishmentInfo);
+        }
+      } catch (error) {
+        console.error("Error fetching punishment:", error);
+      } finally {
+        setLoadingPunishment(false);
+      }
+    };
+
+    fetchPunishment();
+  }, [propCaseId]);
+
   const caseDetails: caseFormSchema | null = Array.isArray(data)
     ? data[0]
     : data;
   const [showPassJudgmentDialog, setShowPassJudgmentDialog] = useState(false);
+
+  const handleSaveJudgment = (
+    judgmentData: JudgmentData,
+    punishmentId?: number,
+  ) => {
+    // Refresh the page data after judgment
+    if (punishmentId) {
+      // Refetch punishment data
+      const fetchPunishment = async () => {
+        const supabase = createClient();
+        const { data: punishment } = await supabase
+          .from("punishments")
+          .select(
+            "id, punishment_type, punishment_title, start_date, end_date, status, requirements, duration_type",
+          )
+          .eq("id", punishmentId)
+          .single();
+
+        if (punishment) {
+          setPunishmentData(punishment as LinkedPunishmentInfo);
+        }
+      };
+      fetchPunishment();
+    }
+    setShowPassJudgmentDialog(false);
+  };
+
+  const navigateToPunishment = () => {
+    if (punishmentData) {
+      router.push(`/dashboard/punishments?id=${punishmentData.id}`);
+    }
+  };
 
   // const handleSaveJudgment = (judgmentData: JudgmentData) => {
   //     const today = new Date();
@@ -242,7 +312,7 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                       <p className="font-medium text-sdc-navy">
                         {caseDetails?.incident_date
                           ? new Date(
-                              caseDetails.incident_date as string
+                              caseDetails.incident_date as string,
                             ).toLocaleDateString()
                           : "N/A"}
                       </p>
@@ -257,6 +327,81 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                       </p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">
+                    Disciplinary Action
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {loadingPunishment ? (
+                    <p className="text-sm text-sdc-gray">
+                      Loading punishment data...
+                    </p>
+                  ) : punishmentData ? (
+                    <>
+                      <div className="flex items-start space-x-3">
+                        <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-500" />
+                        <div>
+                          <p className="font-medium text-sdc-navy">
+                            {punishmentData.punishment_type}
+                          </p>
+                          {punishmentData.punishment_title && (
+                            <p className="text-sm text-sdc-gray">
+                              {punishmentData.punishment_title}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {punishmentData.start_date && punishmentData.end_date && (
+                        <div className="flex items-center space-x-3">
+                          <Calendar className="h-5 w-5 text-sdc-gray" />
+                          <div>
+                            <p className="text-sm text-sdc-gray">
+                              Effective Period
+                            </p>
+                            <p className="font-medium text-sdc-navy">
+                              {new Date(
+                                punishmentData.start_date,
+                              ).toLocaleDateString()}{" "}
+                              -{" "}
+                              {new Date(
+                                punishmentData.end_date,
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      {punishmentData.requirements && (
+                        <div className="flex items-start space-x-3">
+                          <FileText className="mt-0.5 h-5 w-5 text-sdc-gray" />
+                          <div>
+                            <p className="text-sm text-sdc-gray">
+                              Requirements
+                            </p>
+                            <p className="font-medium text-sdc-navy">
+                              {punishmentData.requirements}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={navigateToPunishment}
+                        className="w-full mt-2"
+                      >
+                        View Full Punishment Details
+                      </Button>
+                    </>
+                  ) : (
+                    <p className="text-sm text-sdc-gray">
+                      No disciplinary action assigned yet.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -672,32 +817,42 @@ export function CaseDetails({ caseId: propCaseId }: CaseDetailsProps) {
                 </TabsContent> */}
         </Tabs>
 
-        {/* <div className="flex justify-end space-x-2 pt-4">
-                {" "}
-                 Added pt-4 for spacing
-                <Button variant="outline">Edit Case</Button>
-                {caseDetails.status !== "Resolved" && (
-                    <Button
-                        onClick={() => setShowPassJudgmentDialog(true)}
-                        className="bg-green-500 hover:bg-green-600 text-white"
-                    >
-                        <Gavel className="mr-2 h-4 w-4" /> Pass Judgment
-                    </Button>
-                )}
-                <Button className="bg-sdc-blue hover:bg-sdc-blue/90 text-white">
-                    Update Status
-                </Button>
-            </div> */}
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button variant="outline">Edit Case</Button>
+          {caseDetails && !punishmentData && (
+            <Button
+              onClick={() => setShowPassJudgmentDialog(true)}
+              className="bg-green-500 hover:bg-green-600 text-white"
+            >
+              <Gavel className="mr-2 h-4 w-4" /> Pass Judgment
+            </Button>
+          )}
+        </div>
 
-        {/* <PassJudgmentDialog
-                open={showPassJudgmentDialog}
-                onOpenChange={setShowPassJudgmentDialog}
-                caseId={caseDetails.id}
-                studentName={caseDetails.student.name}
-                currentOffenceType={caseDetails.offence.type}
-                // currentPunishment={caseDetails.punishment}
-                onSaveJudgment={handleSaveJudgment}
-            /> */}
+        {caseDetails && (
+          <PassJudgmentDialog
+            open={showPassJudgmentDialog}
+            onOpenChange={setShowPassJudgmentDialog}
+            caseId={propCaseId}
+            studentName={
+              (caseDetails.students?.[0] as involvedStudentSchema)?.full_name ||
+              ""
+            }
+            matricNumber={
+              (caseDetails.students?.[0] as involvedStudentSchema)
+                ?.matric_number || ""
+            }
+            department={
+              (caseDetails.students?.[0] as involvedStudentSchema)
+                ?.department || ""
+            }
+            level={
+              (caseDetails.students?.[0] as involvedStudentSchema)?.level || ""
+            }
+            currentOffenceType={caseDetails.offence_type}
+            onSaveJudgment={handleSaveJudgment}
+          />
+        )}
       </div>
     </Suspense>
   );

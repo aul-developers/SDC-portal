@@ -6,8 +6,9 @@ import { PunishmentMetrics } from "./punishment-metrics";
 import { UpdatePunishmentForm } from "./update-punishment-form";
 import { AddPunishmentDialog } from "./add-punishment-dialog";
 import { PunishmentHandbook } from "./punishment-handbook";
+import { CasesForPunishment } from "./cases-for-punishment";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Scale, BookOpen } from "lucide-react";
+import { X, Plus, Scale, BookOpen, Gavel } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PunishmentStatusTabs } from "./punishment-status-tabs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -115,32 +116,22 @@ export function PunishmentTracker() {
                     Punishment Tracker
                   </h1>
                   <p className="text-gray-600">
-                    Monitor and manage disciplinary actions
+                    Assign and monitor disciplinary actions
                   </p>
                 </div>
               </div>
-              {/* Add Button - Hide for Viewers */}
-              {/* Board Members can Request, Super Admin can Add */}
-              {(user?.role === "super_admin" ||
-                user?.role === "board_member") && (
-                <Button
-                  onClick={() => setShowAddDialog(true)}
-                  className="bg-sdc-blue hover:bg-sdc-blue/90 text-white gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  {user?.role === "board_member"
-                    ? "Request Punishment"
-                    : "Add Punishment"}
-                </Button>
-              )}
             </div>
 
             {/* Metrics */}
             <PunishmentMetrics />
 
             {/* Main Content Tabs */}
-            <Tabs defaultValue="status" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+            <Tabs defaultValue="assign" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsTrigger value="assign" className="gap-2">
+                  <Gavel className="h-4 w-4" />
+                  Assign Punishments
+                </TabsTrigger>
                 <TabsTrigger value="status" className="gap-2">
                   <Scale className="h-4 w-4" />
                   Punishment Status
@@ -150,6 +141,16 @@ export function PunishmentTracker() {
                   Punishment Handbook
                 </TabsTrigger>
               </TabsList>
+              <TabsContent value="assign">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cases Pending Punishment Assignment</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CasesForPunishment />
+                  </CardContent>
+                </Card>
+              </TabsContent>
               <TabsContent value="status">
                 <Card>
                   <CardHeader>
