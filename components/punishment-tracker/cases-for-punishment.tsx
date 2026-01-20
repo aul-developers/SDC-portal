@@ -143,7 +143,7 @@ export function CasesForPunishment() {
 
       let groups: StudentGroup[] = [];
 
-      let finalCases = pendingCases;
+      let finalCases: any[] = pendingCases;
 
       if (studentIds.length > 0) {
         const { data: studentsData } = await supabase

@@ -203,7 +203,7 @@ export function SmartAssignDialog({
               <p className="text-sm text-gray-700 italic border-l-2 border-amber-300 pl-2 mb-2">
                 "{offenceDetails.description}"
               </p>
-              <div className="flex items-center gap-2 text-xs text-amber-800 font-medium bg-amber-100/50 p-1 rounded inline-flex">
+              <div className="items-center gap-2 text-xs text-amber-800 font-medium bg-amber-100/50 p-1 rounded inline-flex">
                 <FileText className="h-3 w-3" />
                 Policy Reference: {offenceDetails.policyReference}
               </div>
