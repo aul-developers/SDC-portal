@@ -5,6 +5,7 @@ import "./globals.css";
 import ToasterClient from "@/components/providers/toaster-client";
 import { AuthProvider } from "./context/auth-context";
 import { createClient } from "@/utils/supabase/server";
+import QueryProvider from "@/components/providers/query-provider";
 
 const jost = Jost({ subsets: ["latin"] });
 
@@ -60,8 +61,10 @@ export default async function RootLayout({
     <html lang="en">
       <body className={jost.className}>
         <AuthProvider initialUser={initialUser}>
-          {children}
-          <ToasterClient />
+          <QueryProvider>
+            {children}
+            <ToasterClient />
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>

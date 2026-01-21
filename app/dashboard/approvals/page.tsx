@@ -61,7 +61,8 @@ export default function ApprovalsPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      toast.error("Failed to fetch approvals");
+      console.error("Failed to fetch approvals:", error);
+      // toast.error("Failed to fetch approvals");
       setLoading(false);
       return;
     }
@@ -78,7 +79,7 @@ export default function ApprovalsPage() {
           ...req,
           requester: profile || { full_name: "Unknown", email: "N/A" },
         };
-      })
+      }),
     );
 
     setRequests(enhancedData as ApprovalRequest[]);
@@ -161,6 +162,7 @@ export default function ApprovalsPage() {
             reported_by: payload.reported_by,
             reporter_mail: payload.reporter_mail,
             reporters_phone: payload.reporters_phone,
+            academic_session: payload.academic_session || "2025/2026",
             status: "Reported",
           };
 

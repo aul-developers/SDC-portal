@@ -564,46 +564,60 @@ export function PunishmentHandbook({ offenceType }: PunishmentHandbookProps) {
 }
 
 // Export helper function to get recommended punishment for an offence type
+
+// Helper function for consistent normalization/alias matching
+function findMatchingOffenceInCategories(offenceType: string) {
+  const normalizedType = offenceType.toLowerCase().trim();
+
+  for (const category of punishmentHandbook.categories) {
+    const offence = category.offences.find((o) => {
+      const exactMatch = o.type.toLowerCase() === normalizedType;
+      if (exactMatch) return true;
+
+      if (
+        normalizedType === "substance violation" &&
+        (o.type === "Hard Drug Use/Possession" ||
+          o.type === "Alcohol Consumption")
+      )
+        return true;
+      if (
+        normalizedType === "drug abuse" &&
+        o.type === "Hard Drug Use/Possession"
+      )
+        return true;
+
+      return false;
+    });
+
+    if (offence) return { category, offence };
+  }
+  return null;
+}
+
 export function getRecommendedPunishment(
   offenceType: string,
   isRepeatOffender: boolean = false,
 ) {
-  for (const category of punishmentHandbook.categories) {
-    const offence = category.offences.find(
-      (o) => o.type.toLowerCase() === offenceType.toLowerCase(),
+  const match = findMatchingOffenceInCategories(offenceType);
+
+  if (match) {
+    const { offence } = match;
+    const punishment = offence.recommendedPunishments.find(
+      (p) => p.firstOffence === !isRepeatOffender,
     );
-    if (offence) {
-      const punishment = offence.recommendedPunishments.find(
-        (p) => p.firstOffence === !isRepeatOffender,
-      );
-      return punishment?.type || offence.recommendedPunishments[0]?.type;
-    }
+    return punishment?.type || offence.recommendedPunishments[0]?.type;
   }
   return null;
 }
 
 export function getOffenceDetails(offenceType: string) {
-  for (const category of punishmentHandbook.categories) {
-    const offence = category.offences.find(
-      (o) => o.type.toLowerCase() === offenceType.toLowerCase(),
-    );
-    if (offence) {
-      return offence;
-    }
-  }
-  return null;
+  const match = findMatchingOffenceInCategories(offenceType);
+  return match?.offence || null;
 }
 
 export function getCategoryForOffence(offenceType: string) {
-  for (const category of punishmentHandbook.categories) {
-    const offence = category.offences.find(
-      (o) => o.type.toLowerCase() === offenceType.toLowerCase(),
-    );
-    if (offence) {
-      return category;
-    }
-  }
-  return null; // or "Uncategorized"
+  const match = findMatchingOffenceInCategories(offenceType);
+  return match?.category || null;
 }
 
 export function getAllCategories() {

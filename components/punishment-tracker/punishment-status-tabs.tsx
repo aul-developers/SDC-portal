@@ -24,7 +24,7 @@ export function PunishmentStatusTabs({
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search by ID, student name, or matric number..."
+              placeholder="Search by Case ID, Punishment ID, Name..."
               className="pl-9 h-10 bg-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

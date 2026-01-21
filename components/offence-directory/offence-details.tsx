@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -35,6 +34,7 @@ import { cn } from "@/lib/utils";
 // Import DataApiClient
 import { DataApiClient } from "@/service/apiClient";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 // Extended interface for details
 interface OffenceDetailsType {
@@ -98,37 +98,20 @@ interface OffenceDetailsProps {
 }
 
 export function OffenceDetails({ offenceId }: OffenceDetailsProps) {
-  const [offence, setOffence] = useState<OffenceDetailsType | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // Fetch specific offence details
-        // Assuming the endpoint is /offences/:id
-        const response = await DataApiClient.get<OffenceDetailsType>(
-          `/offences/${offenceId}/`,
-        );
-
-        // Use response data
-        // If some fields are missing, we might want to fill them with defaults if crucial for UI
-        setOffence(response.data);
-      } catch (err: any) {
-        console.error("Error fetching offence details:", err);
-        setError("Failed to load offence details. Please try again.");
-        toast.error("Could not fetch offence details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (offenceId) {
-      fetchDetails();
-    }
-  }, [offenceId]);
+  const {
+    data: offence,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ["offence", offenceId],
+    queryFn: async () => {
+      const response = await DataApiClient.get<OffenceDetailsType>(
+        `/offences/${offenceId}/`,
+      );
+      return response.data;
+    },
+    enabled: !!offenceId,
+  });
 
   if (loading) {
     return (
@@ -142,7 +125,7 @@ export function OffenceDetails({ offenceId }: OffenceDetailsProps) {
     return (
       <div className="p-8 text-center bg-red-50 rounded-lg text-red-600">
         <AlertTriangle className="h-10 w-10 mx-auto mb-2 opacity-50" />
-        <p>{error || "Offence not found"}</p>
+        <p>{error ? "Failed to load offence details" : "Offence not found"}</p>
       </div>
     );
   }
@@ -249,24 +232,26 @@ export function OffenceDetails({ offenceId }: OffenceDetailsProps) {
             </CardHeader>
             <CardContent className="px-2">
               <div className="space-y-4">
-                {offence.statistics.byOutcome.map((item, index) => (
-                  <div key={index} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="font-medium text-muted-foreground">
-                        {item.outcome}
+                {offence.statistics.byOutcome.map(
+                  (item: { outcome: string; count: number }, index: number) => (
+                    <div key={index} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="font-medium text-muted-foreground">
+                          {item.outcome}
+                        </div>
+                        <div className="font-medium">{item.count}</div>
                       </div>
-                      <div className="font-medium">{item.count}</div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                        <div
+                          className="h-full bg-blue-600"
+                          style={{
+                            width: `${(item.count / (offence.statistics?.totalCases || 1)) * 100}%`,
+                          }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
-                      <div
-                        className="h-full bg-blue-600"
-                        style={{
-                          width: `${(item.count / offence.statistics.totalCases) * 100}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
               <div className="mt-6 text-center text-sm text-muted-foreground">
                 {offence.statistics.totalCases} total cases
@@ -306,21 +291,23 @@ export function OffenceDetails({ offenceId }: OffenceDetailsProps) {
             <CardContent>
               {offence.guidelines && offence.guidelines.length > 0 ? (
                 <ul className="space-y-4">
-                  {offence.guidelines.map((guideline, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <div
-                        className={cn(
-                          "mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-white",
-                          index === 0 && "bg-blue-500",
-                          index === 1 && "bg-yellow-500",
-                          index === 2 && "bg-red-500",
-                        )}
-                      >
-                        {index + 1}
-                      </div>
-                      <span className="flex-1">{guideline}</span>
-                    </li>
-                  ))}
+                  {offence.guidelines.map(
+                    (guideline: string, index: number) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <div
+                          className={cn(
+                            "mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-white",
+                            index === 0 && "bg-blue-500",
+                            index === 1 && "bg-yellow-500",
+                            index === 2 && "bg-red-500",
+                          )}
+                        >
+                          {index + 1}
+                        </div>
+                        <span className="flex-1">{guideline}</span>
+                      </li>
+                    ),
+                  )}
                 </ul>
               ) : (
                 <p className="text-muted-foreground italic">
@@ -351,15 +338,22 @@ export function OffenceDetails({ offenceId }: OffenceDetailsProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {offence.recentCases.map((caseItem) => (
-                      <TableRow key={caseItem.id}>
-                        <TableCell className="font-medium">
-                          {caseItem.date}
-                        </TableCell>
-                        <TableCell>{caseItem.details}</TableCell>
-                        <TableCell>{caseItem.outcome}</TableCell>
-                      </TableRow>
-                    ))}
+                    {offence.recentCases.map(
+                      (caseItem: {
+                        id: string;
+                        date: string;
+                        details: string;
+                        outcome: string;
+                      }) => (
+                        <TableRow key={caseItem.id}>
+                          <TableCell className="font-medium">
+                            {caseItem.date}
+                          </TableCell>
+                          <TableCell>{caseItem.details}</TableCell>
+                          <TableCell>{caseItem.outcome}</TableCell>
+                        </TableRow>
+                      ),
+                    )}
                   </TableBody>
                 </Table>
               ) : (
@@ -383,7 +377,7 @@ export function OffenceDetails({ offenceId }: OffenceDetailsProps) {
             <CardContent>
               {offence.factors && offence.factors.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2">
-                  {offence.factors.map((factor, index) => (
+                  {offence.factors.map((factor: string, index: number) => (
                     <Card key={index} className="border-dashed bg-gray-50">
                       <CardContent className="p-4 flex items-start gap-3">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-blue-200 bg-blue-100 text-blue-600">
@@ -414,22 +408,24 @@ export function OffenceDetails({ offenceId }: OffenceDetailsProps) {
             <CardContent>
               {offence.relatedPolicies && offence.relatedPolicies.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-3">
-                  {offence.relatedPolicies.map((policy, index) => (
-                    <Card key={index} className="overflow-hidden">
-                      <CardContent className="p-0">
-                        <a
-                          href={policy.link}
-                          className="flex items-center justify-between gap-2 p-4 hover:bg-muted/30 transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            <FileText className="h-5 w-5 text-blue-600" />
-                            <span className="font-medium">{policy.name}</span>
-                          </div>
-                          <LinkIcon className="h-4 w-4 text-muted-foreground" />
-                        </a>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {offence.relatedPolicies.map(
+                    (policy: { link: string; name: string }, index: number) => (
+                      <Card key={index} className="overflow-hidden">
+                        <CardContent className="p-0">
+                          <a
+                            href={policy.link}
+                            className="flex items-center justify-between gap-2 p-4 hover:bg-muted/30 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <FileText className="h-5 w-5 text-blue-600" />
+                              <span className="font-medium">{policy.name}</span>
+                            </div>
+                            <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                          </a>
+                        </CardContent>
+                      </Card>
+                    ),
+                  )}
                 </div>
               ) : (
                 <p className="text-muted-foreground italic">

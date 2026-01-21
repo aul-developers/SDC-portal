@@ -35,6 +35,7 @@ export interface offenceFormProps {
   offenceName: string;
   offenceSeverity: "Low" | "Medium" | "High" | string;
   offencePunishment: string;
+  offenceSection: string;
 }
 export type offenceSeverity = "Low" | "Medium" | "High" | string;
 
@@ -52,6 +53,7 @@ export function AddOffenceDialog({
     offenceName: "",
     offenceSeverity: "",
     offencePunishment: "",
+    offenceSection: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -73,6 +75,7 @@ export function AddOffenceDialog({
       offence: offenceForm.offenceName,
       severity: offenceForm.offenceSeverity,
       punishment: offenceForm.offencePunishment,
+      handbook_section: offenceForm.offenceSection,
     };
 
     try {
@@ -88,6 +91,7 @@ export function AddOffenceDialog({
         offenceName: "",
         offencePunishment: "",
         offenceSeverity: "",
+        offenceSection: "",
       });
       onOpenChange(false);
     } catch (error: any) {
@@ -156,6 +160,20 @@ export function AddOffenceDialog({
               placeholder="Enter standard punishment"
               required
               rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="offence-section">Handbook Section</Label>
+            <Input
+              id="offence-section"
+              value={offenceForm.offenceSection}
+              onChange={(e) =>
+                handleUpdateOffenceFormField({
+                  offenceSection: e.target.value,
+                })
+              }
+              placeholder="e.g. Section 5.0, Page 12"
             />
           </div>
 

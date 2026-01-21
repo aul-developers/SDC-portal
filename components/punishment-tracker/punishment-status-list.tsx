@@ -70,7 +70,8 @@ export function PunishmentStatusList({
       p.full_name?.toLowerCase().includes(search) ||
       p.matric_no?.toLowerCase().includes(search) ||
       p.punishment_title?.toLowerCase().includes(search) ||
-      String(p.id).includes(search)
+      String(p.id).includes(search) ||
+      String(p.case_id).includes(search)
     );
   });
 

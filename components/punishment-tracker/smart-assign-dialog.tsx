@@ -71,14 +71,27 @@ export function SmartAssignDialog({
 
   // Helper to calculate duration
   const calculateDuration = (punishmentString: string) => {
+    const pLower = punishmentString.toLowerCase();
+
+    // Check for permanent punishments
+    const isPermanent =
+      pLower.includes("expulsion") || pLower.includes("dismissal");
+
     const now = new Date();
     let end = addMonths(now, 6); // Default
     let text = "6 months (Default)";
     let type = "months"; // duration_type for DB
 
-    const pLower = punishmentString.toLowerCase();
-
-    if (pLower.includes("1 academic year") || pLower.includes("1 year")) {
+    if (isPermanent) {
+      // For permanent punishments, dates might be irrelevant or set to a far future/null logic depending on backend
+      // We will keep them valid dates for DB constraints but UI will hide them
+      end = addMonths(now, 1200); // 100 years? or just same as start?
+      text = "Permanent";
+      type = "permanent";
+    } else if (
+      pLower.includes("1 academic year") ||
+      pLower.includes("1 year")
+    ) {
       end = addMonths(now, 12);
       text = "1 Academic Year";
     } else if (pLower.includes("1 semester") || pLower.includes("semester")) {
@@ -97,7 +110,7 @@ export function SmartAssignDialog({
       type = "weeks";
     }
 
-    return { start: now, end, text, type };
+    return { start: now, end, text, type, isPermanent };
   };
 
   // 3. Effects unconditionally
@@ -303,20 +316,22 @@ export function SmartAssignDialog({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 rounded-lg border">
-            <div>
-              <Label className="text-sm text-gray-700">Start Date</Label>
-              <p className="font-medium">{format(startDate, "PPP")}</p>
+          {!durationText.includes("Permanent") && (
+            <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 rounded-lg border">
+              <div>
+                <Label className="text-sm text-gray-700">Start Date</Label>
+                <p className="font-medium">{format(startDate, "PPP")}</p>
+              </div>
+              <div>
+                <Label className="text-sm text-gray-700">End Date</Label>
+                <p className="font-medium">{format(endDate, "PPP")}</p>
+              </div>
+              <div>
+                <Label className="text-sm text-gray-700">Duration</Label>
+                <p className="font-medium">{durationText}</p>
+              </div>
             </div>
-            <div>
-              <Label className="text-sm text-gray-700">End Date</Label>
-              <p className="font-medium">{format(endDate, "PPP")}</p>
-            </div>
-            <div>
-              <Label className="text-sm text-gray-700">Duration</Label>
-              <p className="font-medium">{durationText}</p>
-            </div>
-          </div>
+          )}
 
           <div>
             <Label htmlFor="requirements">Requirements</Label>

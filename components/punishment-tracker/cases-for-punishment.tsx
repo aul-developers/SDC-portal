@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { SmartAssignDialog } from "./smart-assign-dialog";
 import {
   getOffenceDetails,
@@ -54,6 +55,7 @@ export function CasesForPunishment() {
   const [selectedCases, setSelectedCases] = useState<CaseForPunishment[]>([]);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const categories = getAllCategories();
 
@@ -201,6 +203,18 @@ export function CasesForPunishment() {
       });
     }
 
+    // Filter by search term
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (c) =>
+          c.title.toLowerCase().includes(lowerSearch) ||
+          c.id.toString().includes(lowerSearch) ||
+          c.students[0]?.full_name.toLowerCase().includes(lowerSearch) ||
+          c.students[0]?.matric_number.toLowerCase().includes(lowerSearch),
+      );
+    }
+
     // Group by student
     const groupMap = new Map<string, StudentGroup>();
 
@@ -220,7 +234,7 @@ export function CasesForPunishment() {
     });
 
     setGroupedCases(Array.from(groupMap.values()));
-  }, [allCases, selectedCategory, loading]);
+  }, [allCases, selectedCategory, searchTerm, loading]);
 
   const handleAssignClick = (cases: CaseForPunishment[]) => {
     setSelectedCases(cases);
@@ -298,6 +312,17 @@ export function CasesForPunishment() {
               {groupedCases.length} student
               {groupedCases.length !== 1 ? "s" : ""} waiting for judgment
             </p>
+          </div>
+
+          <div className="flex items-center gap-2 flex-1 max-w-sm">
+            <Input
+              placeholder="Search by Case ID, Name..."
+              value={searchTerm}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
+              className="h-10 bg-white"
+            />
           </div>
 
           <div className="flex items-center gap-2">

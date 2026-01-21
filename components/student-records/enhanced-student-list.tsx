@@ -64,12 +64,12 @@ export function EnhancedStudentList({
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await DataApiClient.get(`/get/students/?page=${page}`);
+        const response = await DataApiClient.get(`/get/student/?page=${page}`);
         const pageSize = 20; // Adjust if your backend uses a different size
 
         const transformed = response.data.results.map(
           (
-            item: any
+            item: any,
           ): Student & {
             caseCount: number;
             image: string;
@@ -89,19 +89,26 @@ export function EnhancedStudentList({
             caseCount: item.no_cases,
             image: "/monogram-mb.png",
             status: item.status || "active", // ensure status is present
-          })
+          }),
         );
 
         setMockStudents(transformed);
         setTotalPages(Math.ceil(response.data.count / pageSize));
-      } catch (error) {}
+      } catch (error) {
+        console.error("Failed to fetch students, using mock data:", error);
+        // Fallback mock data
+        // Show empty state or error message instead of mock data
+        setMockStudents([]);
+        setTotalPages(1);
+        // Optional: you could add a specialized error state here to show a specific "Failed to load" message in the UI
+      }
     };
 
     fetchStudents();
   }, [page]);
   // Get unique departments for filter
   const departments = Array.from(
-    new Set(mockStudents.map((student) => student.department))
+    new Set(mockStudents.map((student) => student.department)),
   );
 
   // Filter students based on search term and filters
@@ -343,7 +350,7 @@ export function EnhancedStudentList({
                           "rounded-full px-2.5 py-0.5 font-bold border-0",
                           student.caseCount > 0
                             ? "bg-amber-50 text-amber-600"
-                            : "bg-green-50 text-green-600"
+                            : "bg-green-50 text-green-600",
                         )}
                       >
                         {student.caseCount}
