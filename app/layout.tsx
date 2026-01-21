@@ -1,5 +1,6 @@
 import type React from "react";
 import type { Metadata } from "next";
+import StoreProvider from "@/components/providers/store-provider";
 import { Jost } from "next/font/google";
 import "./globals.css";
 import ToasterClient from "@/components/providers/toaster-client";
@@ -62,8 +63,10 @@ export default async function RootLayout({
       <body className={jost.className}>
         <AuthProvider initialUser={initialUser}>
           <QueryProvider>
-            {children}
-            <ToasterClient />
+            <StoreProvider>
+              {children}
+              <ToasterClient />
+            </StoreProvider>
           </QueryProvider>
         </AuthProvider>
       </body>

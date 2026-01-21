@@ -19,7 +19,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { createClient } from "@/utils/supabase/client";
+// import { createClient } from "@/utils/supabase/client"; // Removed in favor of Redux
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import {
+  fetchStudents,
+  setPage,
+} from "@/lib/redux/features/students/studentSlice";
 import {
   Search,
   Filter,
@@ -49,99 +54,34 @@ export function EnhancedStudentList({
   const [departmentFilter, setDepartmentFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
-  // type Student removed to use imported type extended with component-specific props
-  const [mockStudents, setMockStudents] = useState<
-    (Student & {
-      caseCount: number;
-      image: string;
-      name: string;
-      faculty: string;
-    })[]
-  >([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+
+  const dispatch = useAppDispatch();
+  const {
+    items: students,
+    status,
+    page,
+    totalPages,
+  } = useAppSelector((state) => state.students);
+
+  // Use local state for filtered results since filter is client-side for now
+  // OR rely on the `students` from store if pagination is server-side and search is local.
+  // Ideally search should be server-side too, but for now let's keep the filter logic client-side on the current page's data
+  // or refactor search to be server-side. Given the prompt, let's stick to what we have but use store data.
+
+  // Actually, wait, the `searchTerm` logic in the component filters the *fetched* data.
+  // If we paginate on server, client-side filtering only filters the current page.
+  // For now, I will use `students` from store as source.
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      const supabase = createClient();
-      try {
-        const pageSize = 20;
-        const from = (page - 1) * pageSize;
-        const to = from + pageSize - 1;
-
-        // Fetch students from DB
-        const {
-          data: studentsData,
-          error: studentsError,
-          count,
-        } = await supabase
-          .from("students")
-          .select("*", { count: "exact" })
-          .range(from, to)
-          .order("full_name", { ascending: true });
-
-        if (studentsError) throw studentsError;
-
-        if (!studentsData || studentsData.length === 0) {
-          setMockStudents([]);
-          setTotalPages(1);
-          return;
-        }
-
-        // Fetch case counts for these students
-        const studentIds = studentsData.map((s) => s.id);
-        const { data: casesData } = await supabase
-          .from("cases")
-          .select("student_id")
-          .in("student_id", studentIds);
-
-        // Map case counts
-        const caseCounts: Record<string, number> = {};
-        if (casesData) {
-          casesData.forEach((c: any) => {
-            caseCounts[c.student_id] = (caseCounts[c.student_id] || 0) + 1;
-          });
-        }
-
-        const transformed = studentsData.map((item: any) => ({
-          id: item.id,
-          name:
-            item.full_name ||
-            `${item.first_name || ""} ${item.last_name || ""}`.trim(),
-          firstName: item.first_name || item.full_name?.split(" ")[0] || "",
-          lastName:
-            item.last_name ||
-            item.full_name?.split(" ").slice(1).join(" ") ||
-            "",
-          full_name: item.full_name,
-          matricNumber: item.matric_number,
-          matric_number: item.matric_number,
-          department: item.department,
-          faculty: item.faculty || "Science and Technology",
-          level: item.level || "N/A",
-          caseCount: caseCounts[item.id] || 0,
-          image: item.image_url || "/placeholder.svg",
-          status: item.status || "active",
-        }));
-
-        setMockStudents(transformed);
-        setTotalPages(Math.ceil((count || 0) / pageSize));
-      } catch (error) {
-        console.error("Failed to fetch students from DB:", error);
-        setMockStudents([]);
-        setTotalPages(1);
-      }
-    };
-
-    fetchStudents();
-  }, [page]);
+    dispatch(fetchStudents(page));
+  }, [page, dispatch]);
   // Get unique departments for filter
   const departments = Array.from(
-    new Set(mockStudents.map((student) => student.department)),
+    new Set(students.map((student) => student.department)),
   );
 
   // Filter students based on search term and filters
-  const filteredStudents = mockStudents.filter((student) => {
+  const filteredStudents = students.filter((student) => {
     const matchesSearch =
       searchTerm === "" ||
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -534,7 +474,7 @@ export function EnhancedStudentList({
             variant="outline"
             size="sm"
             disabled={page === 1}
-            onClick={() => setPage(page - 1)}
+            onClick={() => dispatch(setPage(page - 1))}
           >
             Previous
           </Button>
@@ -546,7 +486,7 @@ export function EnhancedStudentList({
                 key={pageNum}
                 variant={page === pageNum ? "default" : "outline"}
                 size="sm"
-                onClick={() => setPage(pageNum)}
+                onClick={() => dispatch(setPage(pageNum))}
               >
                 {pageNum}
               </Button>
@@ -557,7 +497,7 @@ export function EnhancedStudentList({
             variant="outline"
             size="sm"
             disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
+            onClick={() => dispatch(setPage(page + 1))}
           >
             Next
           </Button>
