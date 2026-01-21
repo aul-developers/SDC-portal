@@ -321,7 +321,7 @@ export function CasesForPunishment() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchTerm(e.target.value)
               }
-              className="h-10 bg-white"
+              className="h-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
             />
           </div>
 

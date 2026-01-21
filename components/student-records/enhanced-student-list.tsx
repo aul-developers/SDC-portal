@@ -19,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataApiClient } from "@/service/apiClient";
+import { createClient } from "@/utils/supabase/client";
 import {
   Search,
   Filter,
@@ -63,44 +63,73 @@ export function EnhancedStudentList({
 
   useEffect(() => {
     const fetchStudents = async () => {
+      const supabase = createClient();
       try {
-        const response = await DataApiClient.get(`/get/student/?page=${page}`);
-        const pageSize = 20; // Adjust if your backend uses a different size
+        const pageSize = 20;
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
 
-        const transformed = response.data.results.map(
-          (
-            item: any,
-          ): Student & {
-            caseCount: number;
-            image: string;
-            name: string;
-            faculty: string;
-          } => ({
-            id: item.id || Date.now().toString(),
-            name: item.name,
-            firstName: item.name.split(" ")[0] || "",
-            lastName: item.name.split(" ").slice(1).join(" ") || "",
-            full_name: item.name,
-            matricNumber: item.matric_no,
-            matric_number: item.matric_no,
-            department: item.department,
-            faculty: "Science and Technology",
-            level: `${item.level} Level`,
-            caseCount: item.no_cases,
-            image: "/monogram-mb.png",
-            status: item.status || "active", // ensure status is present
-          }),
-        );
+        // Fetch students from DB
+        const {
+          data: studentsData,
+          error: studentsError,
+          count,
+        } = await supabase
+          .from("students")
+          .select("*", { count: "exact" })
+          .range(from, to)
+          .order("full_name", { ascending: true });
+
+        if (studentsError) throw studentsError;
+
+        if (!studentsData || studentsData.length === 0) {
+          setMockStudents([]);
+          setTotalPages(1);
+          return;
+        }
+
+        // Fetch case counts for these students
+        const studentIds = studentsData.map((s) => s.id);
+        const { data: casesData } = await supabase
+          .from("cases")
+          .select("student_id")
+          .in("student_id", studentIds);
+
+        // Map case counts
+        const caseCounts: Record<string, number> = {};
+        if (casesData) {
+          casesData.forEach((c: any) => {
+            caseCounts[c.student_id] = (caseCounts[c.student_id] || 0) + 1;
+          });
+        }
+
+        const transformed = studentsData.map((item: any) => ({
+          id: item.id,
+          name:
+            item.full_name ||
+            `${item.first_name || ""} ${item.last_name || ""}`.trim(),
+          firstName: item.first_name || item.full_name?.split(" ")[0] || "",
+          lastName:
+            item.last_name ||
+            item.full_name?.split(" ").slice(1).join(" ") ||
+            "",
+          full_name: item.full_name,
+          matricNumber: item.matric_number,
+          matric_number: item.matric_number,
+          department: item.department,
+          faculty: item.faculty || "Science and Technology",
+          level: item.level || "N/A",
+          caseCount: caseCounts[item.id] || 0,
+          image: item.image_url || "/placeholder.svg",
+          status: item.status || "active",
+        }));
 
         setMockStudents(transformed);
-        setTotalPages(Math.ceil(response.data.count / pageSize));
+        setTotalPages(Math.ceil((count || 0) / pageSize));
       } catch (error) {
-        console.error("Failed to fetch students, using mock data:", error);
-        // Fallback mock data
-        // Show empty state or error message instead of mock data
+        console.error("Failed to fetch students from DB:", error);
         setMockStudents([]);
         setTotalPages(1);
-        // Optional: you could add a specialized error state here to show a specific "Failed to load" message in the UI
       }
     };
 
