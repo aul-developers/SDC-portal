@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, CheckCircle, BookOpen, FileText, Gavel } from "lucide-react";
-import { format, addMonths } from "date-fns";
+import { format, addMonths, addWeeks } from "date-fns";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import {
@@ -53,6 +53,9 @@ export function SmartAssignDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requirements, setRequirements] = useState("");
   const [selectedPunishmentType, setSelectedPunishmentType] = useState("");
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(addMonths(new Date(), 6));
+  const [durationText, setDurationText] = useState("6 months (Default)");
 
   // 2. Safe Derived State
   const primaryCase = cases?.[0];
@@ -65,6 +68,37 @@ export function SmartAssignDialog({
   const recommendations = offenceDetails?.recommendedPunishments || [];
   const defaultPunishment =
     getRecommendedPunishment(offenceType) || "Academic Probation";
+
+  // Helper to calculate duration
+  const calculateDuration = (punishmentString: string) => {
+    const now = new Date();
+    let end = addMonths(now, 6); // Default
+    let text = "6 months (Default)";
+    let type = "months"; // duration_type for DB
+
+    const pLower = punishmentString.toLowerCase();
+
+    if (pLower.includes("1 academic year") || pLower.includes("1 year")) {
+      end = addMonths(now, 12);
+      text = "1 Academic Year";
+    } else if (pLower.includes("1 semester") || pLower.includes("semester")) {
+      end = addMonths(now, 4); // Assuming 4 months per semester
+      text = "1 Semester (4 months)";
+    } else if (pLower.includes("1 month")) {
+      end = addMonths(now, 1);
+      text = "1 Month";
+    } else if (pLower.includes("2 weeks")) {
+      end = addWeeks(now, 2);
+      text = "2 Weeks";
+      type = "weeks";
+    } else if (pLower.includes("1 week")) {
+      end = addWeeks(now, 1);
+      text = "1 Week";
+      type = "weeks";
+    }
+
+    return { start: now, end, text, type };
+  };
 
   // 3. Effects unconditionally
   useEffect(() => {
@@ -81,6 +115,16 @@ export function SmartAssignDialog({
     }
   }, [defaultPunishment, open]);
 
+  // Update dates when punishment type changes
+  useEffect(() => {
+    if (selectedPunishmentType) {
+      const { start, end, text } = calculateDuration(selectedPunishmentType);
+      setStartDate(start);
+      setEndDate(end);
+      setDurationText(text);
+    }
+  }, [selectedPunishmentType]);
+
   // 4. Conditional Rendering (Render Nothing if invalid)
   if (!cases || cases.length === 0 || !primaryCase) {
     return null;
@@ -90,9 +134,6 @@ export function SmartAssignDialog({
   // but since we already called hooks, it's safe.
 
   const mainOffenceCase = primaryCase; // Alias for clarity if needed
-
-  const startDate = new Date();
-  const endDate = addMonths(startDate, 6);
 
   const handleSubmit = async () => {
     if (!selectedPunishmentType) {
@@ -107,6 +148,8 @@ export function SmartAssignDialog({
       const allCaseIds = cases.map((c) => c.id.toString());
       const offenceSummary = cases.map((c) => c.offence_type).join(", ");
 
+      const { type: durationType } = calculateDuration(selectedPunishmentType);
+
       const punishmentData = {
         matric_no: student?.matric_number,
         full_name: student?.full_name,
@@ -115,7 +158,7 @@ export function SmartAssignDialog({
         description: `Punishment assigned for multiple offences: ${offenceSummary}.\n\nPrimary Offence: ${mainOffenceCase.offence_type} (${offenceDetails?.severity || "Standard"}). \n\nRelated Cases:\n${cases.map((c) => `- ${c.offence_type}: ${c.description}`).join("\n")}`,
         start_date: format(startDate, "yyyy-MM-dd"),
         end_date: format(endDate, "yyyy-MM-dd"),
-        duration_type: "months",
+        duration_type: durationType,
         requirements: requirements,
         related_cases: allCaseIds,
         case_id: mainOffenceCase.id,
@@ -271,7 +314,7 @@ export function SmartAssignDialog({
             </div>
             <div>
               <Label className="text-sm text-gray-700">Duration</Label>
-              <p className="font-medium">6 months (Default)</p>
+              <p className="font-medium">{durationText}</p>
             </div>
           </div>
 
